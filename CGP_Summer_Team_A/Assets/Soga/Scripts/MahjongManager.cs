@@ -78,10 +78,11 @@ public class MahjongManager : MonoBehaviour
             Destroy(child.gameObject);
         }
 
-        foreach (Tile tile in playerHand)
+        for (int i = 0; i < playerHand.Count; i++)
         {
             GameObject newTileObj = Instantiate(tilePrefab, handPanel);
 
+            Tile tile = playerHand[i];
             string spriteName = tile.suit == Suit.Honor ? $"Honor_{tile.rank}" : $"{tile.suit}_{tile.rank}";
 
             if (tileSprites.ContainsKey(spriteName))
@@ -92,9 +93,35 @@ public class MahjongManager : MonoBehaviour
             {
                 Debug.LogError($"スプライトが見つかりません:{spriteName}");
             }
+
+            Button tileButton = newTileObj.GetComponent<Button>();
+            if (tileButton != null)
+            {
+                int index = i;
+                tileButton.onClick.AddListener(() => DiscardTile(index));
+            }
         }
     }
 
+    /// <summary>
+    /// 指定されたインデックスの牌を手牌から捨てる
+    /// </summary>
+    /// <param name="handIndex">手牌リスト内の牌のインデックス</param>
+    public void DiscardTile(int handIndex)
+    {
+        if (handIndex < 0 || handIndex >= playerHand.Count)
+        {
+            Debug.Log($"無効なインデックスを捨てようとしました:{handIndex}");
+            return;
+        }
+
+        Tile discardedTile = playerHand[handIndex];
+        Debug.Log($"牌を捨てました:{discardedTile.ToString()}");
+
+        playerHand.RemoveAt(handIndex);
+
+        UpdateHandUI();
+    }
     void CreateMountain()
     {
         mountain = new List<Tile>();
