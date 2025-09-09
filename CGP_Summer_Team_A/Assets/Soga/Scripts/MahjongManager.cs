@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 public enum Suit
 {
@@ -36,6 +37,25 @@ public class Tile
 
 public class MahjongManager : MonoBehaviour
 {
+    public event Action OnPlayerHitItem;
+
+    public void PlayerHitItem()
+    {
+        OnPlayerHitItem?.Invoke();
+    }
+    public static MahjongManager instance;
+    private void Awake()
+    {
+        if (instance == null)
+        {
+            instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+
     [Header("UI関連")]
     public GameObject tilePrefab;
     public Transform handPanel;
@@ -57,6 +77,24 @@ public class MahjongManager : MonoBehaviour
 
         SortHand();
 
+        UpdateHandUI();
+
+        OnPlayerHitItem += OnItemGetDrawnAndWaitDiscard;
+    }
+
+    void OnItemGetDrawnAndWaitDiscard()
+    {
+        if (mountain.Count == 0)
+        {
+            Debug.Log("流局です。");
+            return;
+        }
+
+        Tile drawnTile = DrawTile();
+        if (drawnTile == null) return;
+
+        playerHand.Add(drawnTile);
+        SortHand();
         UpdateHandUI();
     }
 
@@ -103,10 +141,23 @@ public class MahjongManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 指定されたインデックスの牌を手牌から捨てる
-    /// </summary>
-    /// <param name="handIndex">手牌リスト内の牌のインデックス</param>
+    public void PlayerDraw()
+    {
+        if (mountain.Count == 0)
+        {
+            Debug.Log("流局です。");
+            return;
+        }
+
+        Tile drawnTile = DrawTile();
+        if (drawnTile != null)
+        {
+            playerHand.Add(drawnTile);
+            drawnTile.ToString();
+            SortHand();
+            UpdateHandUI();
+        }
+    }
     public void DiscardTile(int handIndex)
     {
         if (handIndex < 0 || handIndex >= playerHand.Count)
@@ -154,7 +205,7 @@ public class MahjongManager : MonoBehaviour
 
         for (int i = 0; i < mountain.Count; i++)
         {
-            int randomIndex = Random.Range(i, mountain.Count);
+            int randomIndex = UnityEngine.Random.Range(i, mountain.Count);
             Tile temp = mountain[i];
             mountain[i] = mountain[randomIndex];
             mountain[randomIndex] = temp;
