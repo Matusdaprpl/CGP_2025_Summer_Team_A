@@ -4,17 +4,21 @@ public class ItemSpawner : MonoBehaviour
 {
     [SerializeField]
     private GameObject itemPrefab;
+
     [SerializeField]
     private int itemCount = 10;
+
     [SerializeField]
-    private float minX = -10f;
+    private float minX = -10f; 
+
     [SerializeField]
-    private float maxX = 10f;
+    private float maxX = 10f; 
+
     [SerializeField]
     private float minY = -2f;
-    [SerializeField]
-    private float maxY = -2f;
 
+    [SerializeField]
+    private float maxY = 2f; 
     void Start()
     {
         for (int i = 0; i < itemCount; i++)
@@ -26,5 +30,4 @@ public class ItemSpawner : MonoBehaviour
             Instantiate(itemPrefab, spawnPosition, Quaternion.identity);
         }
     }
-
 }
