@@ -2,27 +2,15 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class NPCplayer : MonoBehaviour
+public class NPCplayer : Player
 {
-    public List<Tile> hand = new List<Tile>();
+    public NPCplayer(string name) : base(name) { }
 
-    public void Draw(Tile tile)
-    {
-        hand.Add(tile);
-        SortHand();
-    }
-
-    public Tile Discard()
+    public override Tile Discard()
     {
         Tile discarded = hand[hand.Count - 1];
         hand.RemoveAt(hand.Count - 1);
+        Debug.Log($"{playerName}の捨て牌:{discarded}");
         return discarded;
-    }
-
-    void SortHand()
-    {
-        hand = hand.OrderBy(tile => tile.suit)
-                   .ThenBy(tile => tile.rank)
-                   .ToList();
     }
 }
