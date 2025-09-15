@@ -167,7 +167,7 @@ public class MahjongManager : MonoBehaviour
         }
 
         Tile discardedTile = playerHand[handIndex];
-        Debug.Log($"牌を捨てました:{discardedTile.ToString()}");
+        Debug.Log($"捨て牌:{discardedTile.ToString()}");
 
         playerHand.RemoveAt(handIndex);
 
@@ -177,7 +177,7 @@ public class MahjongManager : MonoBehaviour
     {
         mountain = new List<Tile>();
 
-        foreach (Suit s in new Suit[] { Suit.Manzu,Suit.Pinzu, Suit.Souzu })
+        foreach (Suit s in new Suit[] { Suit.Manzu, Suit.Pinzu, Suit.Souzu })
         {
             for (int rank = 1; rank <= 9; rank++)
             {
@@ -224,6 +224,8 @@ public class MahjongManager : MonoBehaviour
         Tile drawTile = mountain[0];
         mountain.RemoveAt(0);
 
+        UpdateMountainCountUI();
+
         return drawTile;
     }
 
@@ -243,5 +245,17 @@ public class MahjongManager : MonoBehaviour
             handString += tile.ToString() + "|";
         }
         Debug.Log(handString);
+    }
+
+    [Header("UI")]
+    public Text mountainCountText;
+    public Text playerHandCountText;
+
+    private void UpdateMountainCountUI()
+    {
+        if (mountainCountText != null)
+        {
+            mountainCountText.text = $"残りの牌:{mountain.Count}枚";
+        }
     }
 }
