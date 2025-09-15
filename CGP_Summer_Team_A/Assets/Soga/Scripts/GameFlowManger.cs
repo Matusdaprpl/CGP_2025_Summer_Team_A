@@ -44,7 +44,12 @@ public class GameManger : MonoBehaviour
 
     private void NextTurn()
     {
-        currentTurn = (currentTurn + 1) % players.Count;   
+        currentTurn = (currentTurn + 1) % players.Count;
         StartTurn();
+    }
+
+    private void OnPlayerPickedItem()
+    {
+        NextTurn();
     }
 }

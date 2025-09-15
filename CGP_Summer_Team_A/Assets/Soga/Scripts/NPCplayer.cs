@@ -8,8 +8,9 @@ public class NPCplayer : Player
 
     public override Tile Discard()
     {
-        Tile discarded = hand[hand.Count - 1];
-        hand.RemoveAt(hand.Count - 1);
+        int index = UnityEngine.Random.Range(0, hand.Count);
+        Tile discarded = hand[index];
+        hand.RemoveAt(index);
         Debug.Log($"{playerName}の捨て牌:{discarded}");
         return discarded;
     }
