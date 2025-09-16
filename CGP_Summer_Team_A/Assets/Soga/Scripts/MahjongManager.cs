@@ -90,6 +90,12 @@ public class MahjongManager : MonoBehaviour
             return;
         }
 
+        if(playerHand.Count >= 13)
+        {
+            Debug.Log("手牌がいっぱいです。捨て牌をしてください。");
+            return;
+        }
+
         Tile drawnTile = DrawTile();
         if (drawnTile == null) return;
 
