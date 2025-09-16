@@ -567,11 +567,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 501568485}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f5d27e7bca06d1e44a0b5951fd4acc51, type: 3}
+  m_Script: {fileID: 11500000, guid: c1cf664e622e71f4aa8acc85370e05be, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   handPanel: {fileID: 20608484}
-  tilePrefab: {fileID: 5819008876698465524, guid: db45c348efc0a79418d78d5de2905f60, type: 3}
+  tilePrefab: {fileID: 1528957390677762772, guid: d208a91757663b84392f32bf0b48aec0, type: 3}
   agariButton: {fileID: 1062140333}
   swapButton: {fileID: 394371943}
   yama: 
