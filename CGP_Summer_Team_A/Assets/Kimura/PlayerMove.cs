@@ -35,7 +35,7 @@ public class PlayerMove : MonoBehaviour
 
         // --- 補間で滑らかに変化 ---
         currentSpeed = Mathf.Lerp(currentSpeed, targetSpeed, Time.deltaTime * smooth);
-
+        
         // --- 実際の移動（Transformで直接動かす） ---
         transform.Translate(Vector2.right * currentSpeed * Time.deltaTime);
     }

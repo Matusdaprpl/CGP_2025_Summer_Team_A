@@ -6,13 +6,12 @@ using System;
 
 public enum Suit
 {
-    Manzu,
+    Manzu, 
     Pinzu,
     Souzu,
     Honor
 }
 
-[System.Serializable]
 public class Tile
 {
     public Suit suit;
@@ -24,13 +23,20 @@ public class Tile
         rank = r;
     }
 
-    public override string ToString()
+    public string GetSpriteName()
     {
         if (suit == Suit.Honor)
         {
-            string[] honorNames = { "東", "南", "西", "北", "白", "發", "中" };
-            return honorNames[rank - 1];
+            return $"Honor_{rank}";
         }
+        else
+        {
+            return $"{suit}_{rank}";
+        }
+    }
+
+    public override string ToString()
+    {
         return $"{suit}_{rank}";
     }
 }
@@ -70,7 +76,7 @@ public class MahjongManager : MonoBehaviour
         SuffleMountain();
         playerHand = new List<Tile>();
 
-        for (int i = 0; i < 13; i++)
+        for (int i = 0; i < 14; i++)
         {
             playerHand.Add(DrawTile());
         }
@@ -80,6 +86,8 @@ public class MahjongManager : MonoBehaviour
         UpdateHandUI();
 
         OnPlayerHitItem += OnItemGetDrawnAndWaitDiscard;
+
+          Debug.Log("MahjongManager側の確認: 山の準備完了。牌の総数: " + mountain.Count);
     }
 
     void OnItemGetDrawnAndWaitDiscard()
@@ -90,7 +98,7 @@ public class MahjongManager : MonoBehaviour
             return;
         }
 
-        if(playerHand.Count >= 13)
+        if(playerHand.Count >= 15)
         {
             Debug.Log("手牌がいっぱいです。捨て牌をしてください。");
             return;
@@ -166,6 +174,10 @@ public class MahjongManager : MonoBehaviour
     }
     public void DiscardTile(int handIndex)
     {
+        if(playerHand.Count ==14)
+        {
+            return;
+        }
         if (handIndex < 0 || handIndex >= playerHand.Count)
         {
             Debug.Log($"無効なインデックスを捨てようとしました:{handIndex}");
