@@ -21,13 +21,19 @@ public class ItemSpawner : MonoBehaviour
     private float maxY = 2f; 
     void Start()
     {
+        if(MahjongManager.instance == null)
+        {
+            Debug.LogError("MahjongManagerのインスタンスが見つかりません。");
+            return;
+        }
+        
         for (int i = 0; i < itemCount; i++)
         {
             float randomX = Random.Range(minX, maxX);
             float randomY = Random.Range(minY, maxY);
             Vector2 spawnPosition = new Vector2(randomX, randomY);
 
-            Instantiate(itemPrefab, spawnPosition, Quaternion.identity);
+            MahjongManager.instance.SpawnItemFromMountain(spawnPosition);
         }
     }
 }
