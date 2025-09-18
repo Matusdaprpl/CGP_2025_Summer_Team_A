@@ -46,7 +46,7 @@ public class ItemController : MonoBehaviour
 
         // 任意: 取得イベント（名前は表示用）
         OnItemPickedUp?.Invoke(tile.GetDisplayName(), 1);
-        Debug.Log($"取得: {tile.GetDisplayName()}");
+        Debug.Log($"拾った牌: {tile.GetDisplayName()}");
 
         Destroy(gameObject);
     }
