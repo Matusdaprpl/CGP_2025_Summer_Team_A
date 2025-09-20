@@ -1,48 +1,48 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-[RequireComponent(typeof(Button))]
 public class TileUI : MonoBehaviour
 {
-    public int handIndex;
     public TileType tileType;
-
-    private Button button;
+    public int handIndex; 
     private Image image;
-    private GameManager gameManager;
+    private Button button;
     private bool isSelected = false;
+    private GameManager gm;
 
     void Awake()
     {
-        button = GetComponent<Button>();
         image = GetComponent<Image>();
-    }
+        button = GetComponent<Button>();
 
-    public void Initialize(GameManager gm, int index, TileType tile, Sprite sprite)
-    {
-        gameManager = gm;
-        handIndex = index;
-        tileType = tile;
-
-        if (image != null)
+        if (button != null)
         {
-            image.sprite = sprite;
-            image.preserveAspect = true;
+            button.transition = Selectable.Transition.None;
+            button.onClick.AddListener(OnClick);
         }
-
-        button.onClick.RemoveAllListeners();
-        button.onClick.AddListener(OnClick);
     }
 
-    void OnClick()
+    public void Initialize(GameManager manager, int index, TileType type, Sprite sprite)
     {
-        gameManager.OnTileClicked(this);
+        gm = manager;
+        handIndex = index;
+        tileType = type;
+        image.sprite = sprite;
+        image.color = Color.white;
+    }
+
+    private void OnClick()
+    {
+        if (gm != null)
+        {
+            gm.OnTileClicked(this);
+        }
     }
 
     public void SetSelected(bool selected)
     {
         isSelected = selected;
-        transform.localScale = selected ? Vector3.one * 1.1f : Vector3.one;
+        image.color = selected ? Color.yellow : Color.white;
     }
 
     public bool IsSelected()
