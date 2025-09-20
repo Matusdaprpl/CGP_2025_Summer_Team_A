@@ -688,6 +688,8 @@ MonoBehaviour:
   accel: 10
   decel: 10
   smooth: 3
+  idleSpeed: 10
+  minSpeed: 0
 --- !u!114 &423721865
 MonoBehaviour:
   m_ObjectHideFlags: 0
