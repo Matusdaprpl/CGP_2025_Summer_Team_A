@@ -96,7 +96,7 @@ MonoBehaviour:
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
-  m_Transition: 1
+  m_Transition: 0
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
     m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
@@ -130,8 +130,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 5819008876698465524}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4c32be1f81f5d974cb25687d58a6d67d, type: 3}
+  m_Script: {fileID: 11500000, guid: b4d08f589f349184183fad33b3808657, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   handIndex: 0
   tileType: 0
+  image: {fileID: 0}
