@@ -8,4 +8,6 @@ public enum TileType
     Sou1, Sou2, Sou3, Sou4, Sou5, Sou6, Sou7, Sou8, Sou9, RedSou5,
     // 字牌
     East, South, West, North, White, Green, Red
+
+    
 }

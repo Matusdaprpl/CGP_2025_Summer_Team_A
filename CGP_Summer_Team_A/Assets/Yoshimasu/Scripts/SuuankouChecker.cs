@@ -7,13 +7,13 @@ using System.Linq;
 /// </summary>
 public static class SuuankouChecker
 {
-    public static bool IsSuuankou(List<TileType> hand)
+    public static bool IsSuuankou(List<Tile> hand)
     {
         // 四暗刻は14枚で成立
         if (hand == null || hand.Count != 14) return false;
 
         // 1. 牌の種類と枚数をカウント
-        var counts = hand.GroupBy(t => t)
+        var counts = hand.GroupBy(t => new { t.suit, t.rank })
                           .ToDictionary(g => g.Key, g => g.Count());
 
         int tripletsAndQuads = 0; // 3枚組と4枚組の数
