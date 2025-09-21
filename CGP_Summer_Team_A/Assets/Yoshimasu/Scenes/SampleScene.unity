@@ -352,8 +352,8 @@ RectTransform:
   m_Children:
   - {fileID: 397500698}
   - {fileID: 1344495562}
-  - {fileID: 1062140332}
   - {fileID: 394371946}
+  - {fileID: 1062140332}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -469,7 +469,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 394371942}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -479,7 +479,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -39.385315, y: 56.496063}
+  m_AnchoredPosition: {x: -39.385258, y: 56.496098}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &397500697
@@ -577,9 +577,12 @@ MonoBehaviour:
   tsumoPanel: {fileID: 1344495562}
   tilePrefab: {fileID: 1528957390677762772, guid: d208a91757663b84392f32bf0b48aec0, type: 3}
   tsumoTilePrefab: {fileID: 6620756855911783354, guid: af69d116d4d768244924abe6ad802067, type: 3}
-  agariButton: {fileID: 1062140333}
-  swapButton: {fileID: 394371943}
+  agariButton: {fileID: 0}
+  swapButton: {fileID: 0}
   yama: 
+  forceDaisangenHand: 1
+  forceSuuankouHand: 0
+  forceKokushiHand: 0
 --- !u!4 &501568487
 Transform:
   m_ObjectHideFlags: 0
@@ -836,7 +839,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1062140331}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -846,7 +849,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 170, y: 60}
+  m_AnchoredPosition: {x: 169.99994, y: 59.999996}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1062140333
@@ -893,7 +896,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 501568486}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
         m_MethodName: set_name
         m_Mode: 5
