@@ -47,9 +47,13 @@ public class GameManager2 : MonoBehaviour
         {
             Debug.Log("🎉 大三元です！");
         }
-        else
+        else if (NinegateChecker.IsNineGates(myHand))
         {
-            Debug.Log("役満ではありません。（他の役の判定は未実装です）");
+            Debug.Log("🎉 九蓮宝燈です！");
         }
+        else
+                {
+                    Debug.Log("役満ではありません。（他の役の判定は未実装です）");
+                }
     }
 }
