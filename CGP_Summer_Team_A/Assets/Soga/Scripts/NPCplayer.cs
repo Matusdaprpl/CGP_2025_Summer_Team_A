@@ -1,5 +1,6 @@
 using Unity.VisualScripting;
 using UnityEngine;
+using TMPro;
 
 public class NPCplayer : MonoBehaviour
 {
@@ -14,9 +15,18 @@ public class NPCplayer : MonoBehaviour
     [Tooltip("速度を変更する間隔（秒）")]
     public float speedChangeInterval = 3f;
 
+    [Header("カウントダウン設定")]
+    [Tooltip("カウントダウンの時間（秒）")]
+    public float countdownTime = 3f;
+
+    [Tooltip("カウントダウンのUIテキスト")]
+    public TMP_Text countdownText;
+
     private Rigidbody2D rb;
     private float currentSpeed;
     private float timeSinceLastChange;
+    private float remainingCountdownTime;
+    private bool isCountdownActive = true;
 
     void Awake()
     {
@@ -31,11 +41,40 @@ public class NPCplayer : MonoBehaviour
     {
         UpdateSpeed();
         timeSinceLastChange = 0f;
+        remainingCountdownTime = countdownTime;
+        if (countdownText != null)
+        {
+            countdownText.text = Mathf.Ceil(remainingCountdownTime).ToString();
+
+        }
+    }
+
+    void Update()
+    {
+        if (isCountdownActive)
+        {
+            remainingCountdownTime -= Time.deltaTime;
+
+            if (countdownText != null)
+            {
+                countdownText.text = Mathf.Ceil(remainingCountdownTime).ToString();
+            }
+
+            if (remainingCountdownTime <= 0)
+            {
+                isCountdownActive = false;
+                if (countdownText != null)
+                {
+                    countdownText.text = "Go!";
+                    Invoke("HideCountdownText", 1f);
+                }
+            }
+        }
     }
 
     void FixedUpdate()
     {
-        if (rb != null)
+        if (!isCountdownActive && rb != null)
         {
             rb.linearVelocity = new Vector2(currentSpeed, 0);
         }
@@ -53,4 +92,13 @@ public class NPCplayer : MonoBehaviour
     {
         currentSpeed = Random.Range(minSpeed, maxSpeed);
     }
+
+    void HideCountdownText()
+    {
+        if (countdownText != null)
+        {
+            countdownText.gameObject.SetActive(false);
+        }
+    }
 }
+
