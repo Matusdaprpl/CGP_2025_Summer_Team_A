@@ -162,9 +162,6 @@ public class GameManager2 : MonoBehaviour // ← 'public'はここで使用
         {
             Debug.Log("🎉 四暗刻です！");
         }
-        
-        else
-          
         else if (NinegateChecker.IsNineGates(myHand))
         {
             Debug.Log("🎉 九蓮宝燈です！");
