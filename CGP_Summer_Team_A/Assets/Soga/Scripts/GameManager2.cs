@@ -164,8 +164,14 @@ public class GameManager2 : MonoBehaviour // ← 'public'はここで使用
         }
         
         else
+          
+        else if (NinegateChecker.IsNineGates(myHand))
         {
-            Debug.Log("役満ではありません。（他の役の判定は未実装です）");
+            Debug.Log("🎉 九蓮宝燈です！");
         }
+        else
+                {
+                    Debug.Log("役満ではありません。（他の役の判定は未実装です）");
+                }
     }
 }

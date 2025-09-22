@@ -1,4 +1,5 @@
 using UnityEngine;
+using TMPro;
 
 public class PlayerMove : MonoBehaviour
 {
@@ -9,17 +10,54 @@ public class PlayerMove : MonoBehaviour
     public float decel = 10f;        // 減速の強さ
     public float smooth = 3f;        // 滑らかさ
 
+    [Header("カウントダウン設定")]
+    [Tooltip("カウントダウンの時間（秒）")]
+    public float countdownTime = 3f;
+
+    [Tooltip("カウントダウンのUIテキスト")]
+    public TMP_Text countdownText;
+
     private float targetSpeed;       // 入力による目標速度
     private float currentSpeed;      // 実際の速度
+    private float remainingCountdownTime;
+    private bool isCountdownActive = true;
 
     void Start()
     {
         currentSpeed = startSpeed;
         targetSpeed = startSpeed;
+
+        remainingCountdownTime = countdownTime;
+        if (countdownText != null)
+        {
+            countdownText.text = Mathf.Ceil(remainingCountdownTime).ToString();
+        }
     }
 
     void Update()
     {
+        if (isCountdownActive)
+        {
+            remainingCountdownTime -= Time.deltaTime;
+
+            if (countdownText != null)
+            {
+                countdownText.text = Mathf.Ceil(remainingCountdownTime).ToString();
+            }
+
+            if (remainingCountdownTime <= 0)
+            {
+                isCountdownActive = false;
+                if (countdownText != null)
+                {
+                    countdownText.text = "Go!";
+                    Invoke("HideCountdownText", 1f);
+                }
+                Debug.Log("レース開始！！");
+            }
+            return; 
+        }
+
         // --- 入力処理 ---
         if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
         {
@@ -40,6 +78,13 @@ public class PlayerMove : MonoBehaviour
         transform.Translate(Vector2.right * currentSpeed * Time.deltaTime);
     }
 
+     void HideCountdownText()
+    {
+        if (countdownText != null)
+        {
+            countdownText.gameObject.SetActive(false);
+        }
+    }
 
     // 現在の速度を取得するメソッド
     public float GetCurrentSpeed()
