@@ -833,6 +833,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   agariButton: {fileID: 190110715}
+  forceDaisangenHand: 1
+  forceSuuankouHand: 0
+  forceKokushiHand: 0
+  forceSuukantsuHand: 0
 --- !u!1 &744697809
 GameObject:
   m_ObjectHideFlags: 0
