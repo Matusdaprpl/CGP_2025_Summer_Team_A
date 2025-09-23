@@ -674,6 +674,7 @@ MonoBehaviour:
   accel: 10
   decel: 10
   smooth: 3
+  baseSpeed: 10
   countdownTime: 3
   countdownText: {fileID: 191965976}
 --- !u!114 &423721865
@@ -1514,8 +1515,8 @@ MonoBehaviour:
   player: {fileID: 423721863}
   playerMove: {fileID: 423721864}
   smoothSpeed: 10
-  offsetAtZero: 3
-  offsetAtMax: 9
+  baseOffset: 2
+  extraOffsetAtMax: 5
 --- !u!1 &1262357936
 GameObject:
   m_ObjectHideFlags: 0
@@ -1948,8 +1949,7 @@ MonoBehaviour:
   itemCount: 10
   minX: -10
   maxX: 700
-  minY: -2
-  maxY: 2
+  minSpacing: 3
 --- !u!4 &2118395339
 Transform:
   m_ObjectHideFlags: 0
