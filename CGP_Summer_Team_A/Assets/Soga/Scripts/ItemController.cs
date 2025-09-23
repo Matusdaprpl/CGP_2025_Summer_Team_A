@@ -30,6 +30,11 @@ public class ItemController : MonoBehaviour
         // Debug.Log($"生成: {tile.GetDisplayName()}");
     }
 
+    public Tile GetTile()
+    {
+        return tile;
+    }
+
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (!other.CompareTag("Player")) return;
