@@ -15,6 +15,21 @@ public class NPCplayer : MonoBehaviour
     [Tooltip("速度を変更する間隔（秒）")]
     public float speedChangeInterval = 3f;
 
+    [Header("レーンの移動設定")]
+    [Tooltip("レーンの移動速度")]
+    public float laneMoveSpeed = 5f;
+
+    [Tooltip("レーンのY軸範囲")]
+    public float minLaneY = -2f;
+
+    [Tooltip("レーンのY軸範囲")]
+    public float maxLaneY = 2f;
+
+    [Tooltip("レーンの変更間隔（秒）")]
+    public float laneChangeInterval = 2f; // ← 追加
+
+    private float timeSinceLastLaneChange;
+
     [Header("カウントダウン設定")]
     [Tooltip("カウントダウンの時間（秒）")]
     public float countdownTime = 3f;
@@ -41,6 +56,7 @@ public class NPCplayer : MonoBehaviour
     {
         UpdateSpeed();
         timeSinceLastChange = 0f;
+        timeSinceLastLaneChange = 0f;
         remainingCountdownTime = countdownTime;
         if (countdownText != null)
         {
@@ -69,6 +85,17 @@ public class NPCplayer : MonoBehaviour
                     Invoke("HideCountdownText", 1f);
                 }
             }
+            return;
+        }
+
+        timeSinceLastLaneChange += Time.deltaTime;
+        if (timeSinceLastLaneChange >= laneChangeInterval)
+        {
+            float moveY = Random.Range(-laneMoveSpeed, laneMoveSpeed) * Time.deltaTime;
+            Vector3 newPosition = transform.position + new Vector3(0, moveY, 0);
+            newPosition.y = Mathf.Clamp(newPosition.y, minLaneY, maxLaneY);
+            transform.position = newPosition;
+            timeSinceLastLaneChange = 0f;
         }
     }
 
@@ -100,5 +127,6 @@ public class NPCplayer : MonoBehaviour
             countdownText.gameObject.SetActive(false);
         }
     }
+    
 }
 
