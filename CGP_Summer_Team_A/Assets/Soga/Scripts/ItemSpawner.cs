@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class ItemSpawner : MonoBehaviour
@@ -9,31 +10,73 @@ public class ItemSpawner : MonoBehaviour
     private int itemCount = 10;
 
     [SerializeField]
-    private float minX = -10f; 
+    private float minX = -10f;
 
     [SerializeField]
-    private float maxX = 10f; 
+    private float maxX = 10f;
 
+    [Header("Y座標と間隔の設定")]
     [SerializeField]
-    private float minY = -2f;
+    [Tooltip("アイテムが生成されるY座標の固定値（4つ設定）")]
+    private float[] fixedYValues = new float[] { -4.5f, -4f, -2f, 0f };
+ 
+    [SerializeField]
+    [Tooltip("アイテム同士が最低でもこれだけ離れる距離")]
+    private float minDistance = 1.0f;
 
-    [SerializeField]
-    private float maxY = 2f; 
     void Start()
     {
-        if(MahjongManager.instance == null)
+        if (MahjongManager.instance == null)
         {
             Debug.LogError("MahjongManagerのインスタンスが見つかりません。");
             return;
         }
-        
+
+        if (fixedYValues == null || fixedYValues.Length == 0)
+        {
+            Debug.LogError("固定位置が設定されていません。");
+            return;
+        }
+
+        List<Vector2> spawnPositions = new List<Vector2>();
+
         for (int i = 0; i < itemCount; i++)
         {
-            float randomX = Random.Range(minX, maxX);
-            float randomY = Random.Range(minY, maxY);
-            Vector2 spawnPosition = new Vector2(randomX, randomY);
+            Vector2 spawnPosition;
+            int attempts = 0;
+            const int maxAttempts = 100;
+
+            do
+            {
+                float randomX = Random.Range(minX, maxX);
+                float randomY = fixedYValues[Random.Range(0, fixedYValues.Length)];
+                spawnPosition = new Vector2(randomX, randomY);
+                attempts++;
+
+                if (attempts > maxAttempts)
+                {
+                    Debug.LogWarning("適切なスポーン位置が見つかりません。スポーンを中止します。");
+                    return;
+                }
+            }
+            while (IsTooClose(spawnPosition, spawnPositions));
 
             MahjongManager.instance.SpawnItemFromMountain(spawnPosition);
+            spawnPositions.Add(spawnPosition);
         }
+    }
+    
+    private bool IsTooClose(Vector2 position, List<Vector2> existingPositions)
+    {
+        foreach (Vector2 existingPos in existingPositions)
+        {
+            // 2点間の距離が、設定した最低距離より近い場合は true を返す
+            if (Vector2.Distance(position, existingPos) < minDistance)
+            {
+                return true;
+            }
+        }
+        // どのアイテムにも近くない場合は false を返す
+        return false;
     }
 }

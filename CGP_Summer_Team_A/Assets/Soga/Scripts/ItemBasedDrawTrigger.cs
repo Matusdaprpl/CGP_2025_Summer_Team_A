@@ -24,17 +24,4 @@ public class ItemBasedDrawTrigger : DrawTrigger
             //例: Destroy(other.gameObject);
         }
     }
-
-    /*
-    // --- 3Dゲームの場合はこちらを使用します ---
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.CompareTag(itemTag))
-        {
-            Debug.Log(other.name + " に接触しました。牌を引きます。");
-            RequestDraw();
-            //例: Destroy(other.gameObject);
-        }
-    }
-    */
 }
