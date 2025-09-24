@@ -15,8 +15,15 @@ public class PlayerMove : MonoBehaviour
     public float countdownTime = 3f;
     public TMP_Text countdownText;
 
-    private float targetSpeed;
-    private float currentSpeed;
+    [Header("サウンド設定")]
+    public AudioSource raceBGM; // BGM
+    public AudioClip itemGetSE;
+    private AudioSource audioSource;
+
+    private float targetSpeed;       // 入力による目標速度
+    private float currentSpeed;      // 実際の速度
+
+
     private float remainingCountdownTime;
     private bool isCountdownActive = true;
     public bool IsCountdownActive => isCountdownActive;
@@ -29,6 +36,10 @@ public class PlayerMove : MonoBehaviour
 
         if (countdownText != null)
             countdownText.text = Mathf.Ceil(remainingCountdownTime).ToString();
+        }
+
+        audioSource = GetComponent<AudioSource>();
+
     }
 
     void Update()
@@ -49,6 +60,11 @@ public class PlayerMove : MonoBehaviour
                     Invoke("HideCountdownText", 1f);
                 }
                 Debug.Log("レース開始！！");
+
+                if (raceBGM != null)
+                {
+                    raceBGM.Play();
+                }
             }
             return;
         }
@@ -80,6 +96,7 @@ public class PlayerMove : MonoBehaviour
         currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, smooth * Time.deltaTime);
 
         // --- 移動 ---
+
         transform.Translate(Vector2.right * currentSpeed * Time.deltaTime);
     }
 
@@ -89,5 +106,26 @@ public class PlayerMove : MonoBehaviour
             countdownText.gameObject.SetActive(false);
     }
 
-    public float GetCurrentSpeed() => currentSpeed;
+    // 現在の速度を取得するメソッド
+    public float GetCurrentSpeed()
+    {
+        return currentSpeed;
+    }
+    
+     private void OnTriggerEnter2D(Collider2D other)
+    {
+        // 接触した相手のタグが "Item" だったら
+        if (other.gameObject.CompareTag("Item"))
+        {
+            // アイテム取得音を再生する
+            if (audioSource != null && itemGetSE != null)
+            {
+                // PlayOneShotを使うと、連続でアイテムを取っても音が途切れず鳴らせる
+                audioSource.PlayOneShot(itemGetSE);
+            }
+
+            // 接触したアイテムのオブジェクトを消す
+            Destroy(other.gameObject);
+        }
+    }
 }
