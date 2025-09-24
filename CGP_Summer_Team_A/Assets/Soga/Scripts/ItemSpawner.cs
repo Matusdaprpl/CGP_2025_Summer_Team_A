@@ -11,13 +11,11 @@ public class ItemSpawner : MonoBehaviour
     [SerializeField] private float minX = -10f;
     [SerializeField] private float maxX = 10f;
     [SerializeField]
-    private float minX = -10f;
 
-    [SerializeField]
-    private float maxX = 10f;
+
+
 
     [Header("Y座標と間隔の設定")]
-    [SerializeField]
     [Tooltip("アイテムが生成されるY座標の固定値（4つ設定）")]
     private float[] fixedYValues = new float[] { -4.5f, -4f, -2f, 0f };
  
