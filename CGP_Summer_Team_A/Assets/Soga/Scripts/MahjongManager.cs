@@ -123,7 +123,6 @@ public class MahjongManager : MonoBehaviour
         if (drawnTile == null) return;
 
         playerHand.Add(drawnTile);
-        SortHand();
         UpdateHandUI();
     }
 
@@ -199,7 +198,6 @@ public class MahjongManager : MonoBehaviour
         {
             playerHand.Add(drawnTile);
             drawnTile.ToString();
-            SortHand();
             UpdateHandUI();
         }
     }
@@ -222,7 +220,7 @@ public class MahjongManager : MonoBehaviour
         mountain.Add(discardedTile);
 
         playerHand.RemoveAt(handIndex);
-
+        SortHand();
         UpdateHandUI();
         UpdateMountainCountUI();
     }
@@ -367,7 +365,6 @@ public class MahjongManager : MonoBehaviour
             return;
         }
         playerHand.Add(tile);
-        SortHand();
         UpdateHandUI();
     }
 }
