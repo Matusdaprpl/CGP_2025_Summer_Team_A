@@ -9,6 +9,12 @@ public class LaneMove : MonoBehaviour
 
     private int currentLane = 0;     // 現在のレーン番号（0〜laneCount-1）
     private float[] lanePositions;   // レーンごとのY座標
+    private PlayerMove playerMove; // PlayerMove スクリプト参照
+
+    void Awake()
+    {
+        playerMove = GetComponent<PlayerMove>();
+    }
 
     void Start()
     {
@@ -22,7 +28,7 @@ public class LaneMove : MonoBehaviour
         }
 
         // 初期位置を中央レーンにセット
-        currentLane = laneCount / 2;
+        currentLane = laneCount - 1; ;
         transform.position = new Vector3(
             transform.position.x,
             lanePositions[currentLane],
@@ -32,6 +38,8 @@ public class LaneMove : MonoBehaviour
 
     void Update()
     {
+        if(playerMove !=null&&playerMove.IsCountdownActive) return;
+        
         // 上キー or W → 上のレーンへ
         if ((Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.W)) && currentLane < laneCount - 1)
         {

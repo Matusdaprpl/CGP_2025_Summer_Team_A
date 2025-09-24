@@ -19,6 +19,7 @@ public class PlayerMove : MonoBehaviour
     private float currentSpeed;
     private float remainingCountdownTime;
     private bool isCountdownActive = true;
+    public bool IsCountdownActive => isCountdownActive;
 
     void Start()
     {

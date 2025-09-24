@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using System.Collections;
 
@@ -9,12 +10,20 @@ public class ItemSpawner : MonoBehaviour
     [Header("X座標範囲")]
     [SerializeField] private float minX = -10f;
     [SerializeField] private float maxX = 10f;
+    [SerializeField]
+    private float minX = -10f;
 
-    [Header("X座標最小間隔")]
-    [SerializeField] private float minSpacing = 3f; // アイテム同士の最低距離
+    [SerializeField]
+    private float maxX = 10f;
 
-    // Y座標の固定ライン（0.25 ~ -4.25 を4分割）
-    private float[] laneY = { 0.25f, -1.25f, -2.75f, -4.25f };
+    [Header("Y座標と間隔の設定")]
+    [SerializeField]
+    [Tooltip("アイテムが生成されるY座標の固定値（4つ設定）")]
+    private float[] fixedYValues = new float[] { -4.5f, -4f, -2f, 0f };
+ 
+    [SerializeField]
+    [Tooltip("アイテム同士が最低でもこれだけ離れる距離")]
+    private float minDistance = 1.0f;
 
     void Start()
     {
@@ -24,35 +33,55 @@ public class ItemSpawner : MonoBehaviour
             return;
         }
 
-        SpawnItems();
-    }
+        if (fixedYValues == null || fixedYValues.Length == 0)
+        {
+            Debug.LogError("固定位置が設定されていません。");
+            return;
+        }
 
-    private void SpawnItems()
-    {
-        float lastX = Mathf.Infinity;
+        List<Vector2> spawnPositions = new List<Vector2>();
 
         for (int i = 0; i < itemCount; i++)
         {
-            // ランダムXを生成（最低距離を考慮）
-            float randomX;
-            int attempt = 0;
+            Vector2 spawnPosition;
+            int attempts = 0;
+            const int maxAttempts = 100;
+
             do
             {
-                randomX = Random.Range(minX, maxX);
-                attempt++;
-                if (attempt > 20) break; // 試行回数制限
-            } while (Mathf.Abs(randomX - lastX) < minSpacing);
+                float randomX = Random.Range(minX, maxX);
+                float randomY = fixedYValues[Random.Range(0, fixedYValues.Length)];
+                spawnPosition = new Vector2(randomX, randomY);
+                attempts++;
 
-            lastX = randomX;
-
-            // Y座標は4ラインからランダムに選択
-            float chosenY = laneY[Random.Range(0, laneY.Length)];
+                if (attempts > maxAttempts)
+                {
+                    Debug.LogWarning("適切なスポーン位置が見つかりません。スポーンを中止します。");
+                    return;
+                }
+            }
+            while (IsTooClose(spawnPosition, spawnPositions));
 
             Vector2 spawnPosition = new Vector2(randomX, chosenY);
 
             // MahjongManagerに生成を依頼
             MahjongManager.instance.SpawnItemFromMountain(spawnPosition);
+            spawnPositions.Add(spawnPosition);
         }
+    }
+    
+    private bool IsTooClose(Vector2 position, List<Vector2> existingPositions)
+    {
+        foreach (Vector2 existingPos in existingPositions)
+        {
+            // 2点間の距離が、設定した最低距離より近い場合は true を返す
+            if (Vector2.Distance(position, existingPos) < minDistance)
+            {
+                return true;
+            }
+        }
+        // どのアイテムにも近くない場合は false を返す
+        return false;
     }
 }
 

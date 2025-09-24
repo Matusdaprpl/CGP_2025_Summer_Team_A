@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine; // Debug.Logを使用するために必要に応じて
+using UnityEngine;
+// 【重要】MahjongManagerのTile, Suitクラスが別の名前空間にある場合、
+// ここに using Soga; のように追記が必要です。
 
 /// <summary>
 /// 四槓子（スーカンツ）の判定ユーティリティ
@@ -17,23 +19,26 @@ public static class SuukantsuChecker
     public static bool IsSuukantsu(List<Tile> hand)
     {
         // 14枚でなければ不成立
-        if (hand == null || hand.Count != 14) return false;
+        if (hand == null || hand.Count != 14)
+        {
+            Debug.Log("[SuukantsuChecker DEBUG] Hand count is not 14. Failed.");
+            return false;
+        }
 
         // 1. 牌の種類と枚数をカウント
-        // Tileオブジェクトは参照型であるため、suitとrankの複合キーでグループ化します。
         var counts = hand.GroupBy(t => new { t.suit, t.rank })
                          .ToDictionary(g => g.Key, g => g.Count());
+        
+        // ★★★ デバッグログを追加 ★★★
+        Debug.Log("[SuukantsuChecker DEBUG] Counted tiles:");
+        foreach (var pair in counts)
+        {
+            Debug.Log($"  - {pair.Key.suit} {pair.Key.rank}: {pair.Value}枚");
+        }
 
         int countQuads = 0;   // 4枚組の数 (槓子)
         int countPairs = 0;   // 2枚組の数 (雀頭)
         int otherCount = 0;   // 1枚組や3枚組の数 (四槓子では不可)
-
-        // 【★デバッグログ★】牌の構成を出力
-        // Debug.Log("[SuukantsuChecker DEBUG] 牌の構成:");
-        // foreach (var item in counts)
-        // {
-        //     Debug.Log($"  {item.Key.suit}_{item.Key.rank}: {item.Value}枚");
-        // }
         
         // 2. 構成をチェック
         foreach (var count in counts.Values)
@@ -54,21 +59,19 @@ public static class SuukantsuChecker
         }
 
         // 3. 判定ロジック
-        // 条件: 4枚組がちょうど4つ AND 2枚組がちょうど1つ AND 他の組がない
-        // 4 x 4枚 + 1 x 2枚 = 18枚ではありません。14枚手牌内で4x4と1x2が完結している必要があります。
-        // 例：{A,A,A,A}, {B,B,B,B}, {C,C,C,C}, {D,D,D,D}, {E,E} -> 計18枚
-        // 正しくは：{A,A,A,A}, {B,B,B,B}, {C,C,C,C}, {D,D} + ツモ牌X (計14枚)
-        // ★このチェッカーは、和了時点の14枚の手牌のみを判定します。
+        // ★★★ デバッグログを追加 ★★★
+        Debug.Log($"[SuukantsuChecker DEBUG] Final Counts: Quads={countQuads}, Pairs={countPairs}, Others={otherCount}");
 
-        // 牌の構成が 4枚組x4 + 2枚組x1 の形に完全に合致すること
+        // 条件: 4枚組がちょうど4つ AND 2枚組がちょうど1つ AND 他の組がない
         if (countQuads == 4 && countPairs == 1 && otherCount == 0)
         {
-            Debug.Log("[SuukantsuChecker DEBUG] Matched Suukantsu pattern: 4x4 + 1x2.");
-            // ※ 厳密には暗槓/明槓の区別や、和了牌が雀頭になった場合のチェックが必要ですが、
-            //    牌の構成としてはこの形を四槓子と見なします。
+            Debug.Log("[SuukantsuChecker DEBUG] Passed all conditions.");
             return true;
         }
-
-        return false;
+        else
+        {
+            Debug.Log("[SuukantsuChecker DEBUG] Failed to meet all conditions.");
+            return false;
+        }
     }
 }

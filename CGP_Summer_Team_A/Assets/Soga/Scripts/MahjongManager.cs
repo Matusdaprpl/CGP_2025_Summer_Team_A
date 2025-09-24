@@ -50,8 +50,8 @@ public class MahjongManager : MonoBehaviour
     }
 
     [Header("プレハブ設定")]
-    public GameObject worldItemPrefab; // ワールドに生成するアイテムのプレハブ
-    public GameObject handTilePrefab; // 手牌に生成するアイテムのプレハブ
+    public GameObject worldItemPrefab; 
+    public GameObject handTilePrefab; 
     public Transform handPanel;
     public List<Tile> mountain;
     public List<Tile> playerHand;
@@ -60,42 +60,25 @@ public class MahjongManager : MonoBehaviour
     void Start()
     {
         LoadTileSprites();
-        
-        // GameManager2がテスト配牌を行う場合があるため、Start()時の自動配牌は削除するか、
-        // テストフラグの状況を確認してスキップする必要があります。
-        // ここでは、デフォルトの牌山作成ロジックは残し、手牌の初期化を行います。
         CreateMountain();
         SuffleMountain();
         playerHand = new List<Tile>();
 
-        // MahjongManagerのデフォルトの配牌ロジックは一旦コメントアウト、
-        // または、GameManager2のStart()が実行された後に手牌が上書きされることを前提とします。
-        // GameManager2のStart()でテスト配牌が設定されない場合は、このロジックを実行してください。
-        /*
+        // 【★修正箇所★】GameManager2のテスト配牌フラグがオフの場合、通常の配牌を行う
         for (int i = 0; i < 14; i++)
         {
             playerHand.Add(DrawTile());
         }
         SortHand();
         UpdateHandUI();
-        */
         
         OnPlayerHitItem += OnItemGetDrawnAndWaitDiscard;
 
         Debug.Log("MahjongManager側の確認: 山の準備完了。牌の総数: " + mountain.Count);
     }
 
-    // ----------------------------------------------------------------------
-    // 【★★追加メソッド: テスト配牌機能★★】
-    // GameManager2から呼ばれて手牌を強制的に設定します。
-    // ----------------------------------------------------------------------
-    /// <summary>
-    /// 【テスト用】指定された牌のリストでプレイヤーの手牌を上書きする
-    /// </summary>
-    /// <param name="tilesData">テストしたい牌の Suit と Rank のリスト</param>
     public void SetTestHand(List<(Suit suit, int rank)> tilesData)
     {
-        // 既存の手牌をクリア
         if (playerHand == null) playerHand = new List<Tile>();
         playerHand.Clear();
         
@@ -113,7 +96,6 @@ public class MahjongManager : MonoBehaviour
                 Debug.LogError($"テスト配牌用スプライトが見つかりません: {spriteName}");
             }
             
-            // 新しい Tile オブジェクトを生成して手牌に追加
             playerHand.Add(new Tile(data.suit, data.rank, sprite));
         }
         
@@ -122,7 +104,6 @@ public class MahjongManager : MonoBehaviour
         
         Debug.Log($"【テスト配牌完了】手牌が {playerHand.Count} 枚に設定されました。");
     }
-    // ----------------------------------------------------------------------
     
     void OnItemGetDrawnAndWaitDiscard()
     {
@@ -256,6 +237,7 @@ public class MahjongManager : MonoBehaviour
             {
                 Sprite sprite = tileSprites[spriteName];
                 for (int i = 0; i < 4; i++)
+                    
                 {
                     mountain.Add(new Tile(Suit.Honor, rank, sprite));
                 }
@@ -351,7 +333,6 @@ public class MahjongManager : MonoBehaviour
         var ic = go.GetComponent<ItemController>();
         if (ic != null)
         {
-            // GetDisplayName()がスプライトキーと一致しないため、ここではキー生成ロジックを使用
             var key = (tile.suit == Suit.Honor) ? $"Honor_{tile.rank}" : $"{tile.suit}_{tile.rank}";
             if (tileSprites.ContainsKey(key))
             {
@@ -365,7 +346,6 @@ public class MahjongManager : MonoBehaviour
     {
         if (tile == null) return;
         if (playerHand == null) playerHand = new List<Tile>();
-        // 上限制御: 16枚以上にしない
         if (playerHand.Count >= 16)
         {
             return;
