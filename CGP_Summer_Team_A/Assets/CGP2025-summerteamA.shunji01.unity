@@ -725,7 +725,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   startSpeed: 5
-  maxSpeed: 20
+  maxSpeed: 15
   accel: 10
   decel: 10
   smooth: 3
@@ -1723,8 +1723,8 @@ MonoBehaviour:
   player: {fileID: 423721863}
   playerMove: {fileID: 423721864}
   smoothSpeed: 10
-  baseOffset: 3
-  extraOffsetAtMax: 6
+  baseOffset: 2
+  extraOffsetAtMax: 2
 --- !u!1 &1262357936
 GameObject:
   m_ObjectHideFlags: 0
