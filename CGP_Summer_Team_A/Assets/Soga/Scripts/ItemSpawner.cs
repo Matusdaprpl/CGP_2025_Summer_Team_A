@@ -1,22 +1,21 @@
 using System.Collections.Generic;
 using UnityEngine;
+using System.Collections;
 
 public class ItemSpawner : MonoBehaviour
 {
-    [SerializeField]
-    private GameObject itemPrefab;
+    [SerializeField] private GameObject itemPrefab;
+    [SerializeField] private int itemCount = 10;
 
+    [Header("X座標範囲")]
+    [SerializeField] private float minX = -10f;
+    [SerializeField] private float maxX = 10f;
     [SerializeField]
-    private int itemCount = 10;
 
-    [SerializeField]
-    private float minX = -10f;
 
-    [SerializeField]
-    private float maxX = 10f;
+
 
     [Header("Y座標と間隔の設定")]
-    [SerializeField]
     [Tooltip("アイテムが生成されるY座標の固定値（4つ設定）")]
     private float[] fixedYValues = new float[] { -4.5f, -4f, -2f, 0f };
  
@@ -61,6 +60,9 @@ public class ItemSpawner : MonoBehaviour
             }
             while (IsTooClose(spawnPosition, spawnPositions));
 
+            Vector2 spawnPosition = new Vector2(randomX, chosenY);
+
+            // MahjongManagerに生成を依頼
             MahjongManager.instance.SpawnItemFromMountain(spawnPosition);
             spawnPositions.Add(spawnPosition);
         }
@@ -80,3 +82,4 @@ public class ItemSpawner : MonoBehaviour
         return false;
     }
 }
+
