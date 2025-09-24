@@ -35,6 +35,7 @@ public class PlayerMove : MonoBehaviour
         remainingCountdownTime = countdownTime;
 
         if (countdownText != null)
+        {
             countdownText.text = Mathf.Ceil(remainingCountdownTime).ToString();
         }
 
