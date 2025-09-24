@@ -37,28 +37,31 @@ public class ItemController : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Player"))
+        var root = other.transform.root;
+        
+        if (root.CompareTag("Player"))
         {
-            if (manager == null || tile == null) return;
+           if (manager == null || tile == null) return;
 
-            // 上限: 15枚のときは拾わない（消さない）→16枚以上にしない
-            if (manager.playerHand != null && manager.playerHand.Count >= 15)
+            // 成功時のみ削除
+            if (manager.AddTileToPlayerHand(tile))
             {
-                return;
+                Debug.Log($"プレイヤーが拾った牌: {tile.GetDisplayName()}");
+                OnItemPickedUp?.Invoke(tile.suit.ToString(), tile.rank);
+                Destroy(gameObject);
             }
-
-            // 同じTileをそのまま手牌へ
-            manager.AddTileToPlayerHand(tile);
-            Debug.Log($"拾った牌: {tile.GetDisplayName()}");
-            OnItemPickedUp?.Invoke(tile.suit.ToString(), tile.rank);
-            Destroy(gameObject);
+            else
+            {
+                // 上限などで追加不可 → 何もしない（アイテムは残す）
+                Debug.Log("手牌上限のため拾えません。アイテムは残します。");
+            }
         }
-        else if (other.CompareTag("NPC"))
+        else if (root.CompareTag("NPC"))
         {
             NPCmahjong npc = other.GetComponent<NPCmahjong>();
             if (npc != null && tile != null)
             {
-                if(npc.hand.Count<15)
+                if (npc.hand.Count < 15)
                 {
                     npc.hand.Add(tile);
                     Debug.Log($"NPCが牌を拾った: {tile.GetDisplayName()}");
