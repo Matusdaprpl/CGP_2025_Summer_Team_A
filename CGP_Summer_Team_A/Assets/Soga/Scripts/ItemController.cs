@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class ItemController : MonoBehaviour
 {
-// このアイテムが表す確定済みの牌（生成時にセット）
+    // このアイテムが表す確定済みの牌（生成時にセット）
     private Tile tile;
     private MahjongManager manager;
     private SpriteRenderer spriteRenderer;
@@ -37,22 +37,35 @@ public class ItemController : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (!other.CompareTag("Player")) return;
-        if (manager == null || tile == null) return;
-
-        // 上限: 15枚のときは拾わない（消さない）→16枚以上にしない
-        if (manager.playerHand != null && manager.playerHand.Count >= 15)
+        if (other.CompareTag("Player"))
         {
-            return;
+            if (manager == null || tile == null) return;
+
+            // 上限: 15枚のときは拾わない（消さない）→16枚以上にしない
+            if (manager.playerHand != null && manager.playerHand.Count >= 15)
+            {
+                return;
+            }
+
+            // 同じTileをそのまま手牌へ
+            manager.AddTileToPlayerHand(tile);
+            Debug.Log($"拾った牌: {tile.GetDisplayName()}");
+            OnItemPickedUp?.Invoke(tile.suit.ToString(), tile.rank);
+            Destroy(gameObject);
         }
-
-        // 同じTileをそのまま手牌へ
-        manager.AddTileToPlayerHand(tile);
-
-        // 任意: 取得イベント（名前は表示用）
-        OnItemPickedUp?.Invoke(tile.GetDisplayName(), 1);
-        Debug.Log($"拾った牌: {tile.GetDisplayName()}");
-
-        Destroy(gameObject);
+        else if (other.CompareTag("NPC"))
+        {
+            NPCmahjong npc = other.GetComponent<NPCmahjong>();
+            if (npc != null && tile != null)
+            {
+                if(npc.hand.Count<15)
+                {
+                    npc.hand.Add(tile);
+                    Debug.Log($"NPCが牌を拾った: {tile.GetDisplayName()}");
+                    Destroy(gameObject);
+                }
+            }
+        }
     }
+    
 }

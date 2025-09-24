@@ -145,8 +145,24 @@ public class MahjongManager : MonoBehaviour
             Destroy(child.gameObject);
         }
 
+        bool isDrawingPhase = playerHand.Count == 15;
+
         for (int i = 0; i < playerHand.Count; i++)
         {
+            // ツモ牌（最後の牌）の直前にスペーサーを挿入する
+            if (isDrawingPhase && i == playerHand.Count - 1)
+            {
+                // スペーサー用の空のGameObjectを作成
+                GameObject spacer = new GameObject("Spacer");
+                spacer.transform.SetParent(handPanel, false);
+
+                // Layout Elementコンポーネントを追加して、幅を指定
+                LayoutElement le = spacer.AddComponent<LayoutElement>();
+                
+                // この数値を変更すると間隔を調整できます
+                le.preferredWidth = 30f; 
+            }
+
             GameObject newTileObj = Instantiate(handTilePrefab, handPanel);
 
             Tile tile = playerHand[i];

@@ -17,6 +17,11 @@ public class PlayerMove : MonoBehaviour
     [Tooltip("カウントダウンのUIテキスト")]
     public TMP_Text countdownText;
 
+    [Header("サウンド設定")]
+    public AudioSource raceBGM; // BGM
+    public AudioClip itemGetSE;
+    private AudioSource audioSource;
+
     private float targetSpeed;       // 入力による目標速度
     private float currentSpeed;      // 実際の速度
     private float remainingCountdownTime;
@@ -33,6 +38,8 @@ public class PlayerMove : MonoBehaviour
         {
             countdownText.text = Mathf.Ceil(remainingCountdownTime).ToString();
         }
+
+        audioSource = GetComponent<AudioSource>();
     }
 
     void Update()
@@ -55,8 +62,13 @@ public class PlayerMove : MonoBehaviour
                     Invoke("HideCountdownText", 1f);
                 }
                 Debug.Log("レース開始！！");
+
+                if (raceBGM != null)
+                {
+                    raceBGM.Play();
+                }
             }
-            return; 
+            return;
         }
 
         // --- 入力処理 ---
@@ -74,12 +86,12 @@ public class PlayerMove : MonoBehaviour
 
         // --- 補間で滑らかに変化 ---
         currentSpeed = Mathf.Lerp(currentSpeed, targetSpeed, Time.deltaTime * smooth);
-        
+
         // --- 実際の移動（Transformで直接動かす） ---
         transform.Translate(Vector2.right * currentSpeed * Time.deltaTime);
     }
 
-     void HideCountdownText()
+    void HideCountdownText()
     {
         if (countdownText != null)
         {
@@ -91,5 +103,22 @@ public class PlayerMove : MonoBehaviour
     public float GetCurrentSpeed()
     {
         return currentSpeed;
+    }
+    
+     private void OnTriggerEnter2D(Collider2D other)
+    {
+        // 接触した相手のタグが "Item" だったら
+        if (other.gameObject.CompareTag("Item"))
+        {
+            // アイテム取得音を再生する
+            if (audioSource != null && itemGetSE != null)
+            {
+                // PlayOneShotを使うと、連続でアイテムを取っても音が途切れず鳴らせる
+                audioSource.PlayOneShot(itemGetSE);
+            }
+
+            // 接触したアイテムのオブジェクトを消す
+            Destroy(other.gameObject);
+        }
     }
 }
