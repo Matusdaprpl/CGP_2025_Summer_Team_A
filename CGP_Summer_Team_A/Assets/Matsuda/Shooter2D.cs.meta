@@ -4,9 +4,9 @@ MonoImporter:
   externalObjects: {}
   serializedVersion: 2
   defaultReferences:
-  - scoreText: {fileID: 6681890361638023620, guid: 6874374f2d3b64b4c8b6bbcd218c8aae, type: 3}
+  - scoreText: {fileID: 2345431845176625960, guid: 6874374f2d3b64b4c8b6bbcd218c8aae, type: 3}
   - bulletPrefab: {fileID: 2182294668605727778, guid: 8fa5903cf4623c640b8465e46e7c592a, type: 3}
-  - firePoint: {fileID: 7172118336004703855, guid: 83878104a25fd69408b83ab6997b876e, type: 3}
+  - firePoint: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
