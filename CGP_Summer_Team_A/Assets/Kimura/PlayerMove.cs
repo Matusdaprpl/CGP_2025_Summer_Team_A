@@ -4,21 +4,19 @@ using TMPro;
 public class PlayerMove : MonoBehaviour
 {
     [Header("速度設定")]
-    public float startSpeed = 5f;    // 初期速度
+    public float startSpeed = 10f;  // 初期速度
     public float maxSpeed = 20f;     // 最大速度
     public float accel = 10f;        // 加速の強さ
     public float decel = 10f;        // 減速の強さ
-    public float smooth = 3f;        // 滑らかさ
+    public float smooth = 5f;        // currentSpeed の滑らかさ
+    public float baseSpeed = 10f;    // キーを離したとき戻る速度
 
     [Header("カウントダウン設定")]
-    [Tooltip("カウントダウンの時間（秒）")]
     public float countdownTime = 3f;
-
-    [Tooltip("カウントダウンのUIテキスト")]
     public TMP_Text countdownText;
 
-    private float targetSpeed;       // 入力による目標速度
-    private float currentSpeed;      // 実際の速度
+    private float targetSpeed;
+    private float currentSpeed;
     private float remainingCountdownTime;
     private bool isCountdownActive = true;
     public bool IsCountdownActive => isCountdownActive;
@@ -27,24 +25,20 @@ public class PlayerMove : MonoBehaviour
     {
         currentSpeed = startSpeed;
         targetSpeed = startSpeed;
-
         remainingCountdownTime = countdownTime;
+
         if (countdownText != null)
-        {
             countdownText.text = Mathf.Ceil(remainingCountdownTime).ToString();
-        }
     }
 
     void Update()
     {
+        // --- カウントダウン処理 ---
         if (isCountdownActive)
         {
             remainingCountdownTime -= Time.deltaTime;
-
             if (countdownText != null)
-            {
                 countdownText.text = Mathf.Ceil(remainingCountdownTime).ToString();
-            }
 
             if (remainingCountdownTime <= 0)
             {
@@ -56,40 +50,44 @@ public class PlayerMove : MonoBehaviour
                 }
                 Debug.Log("レース開始！！");
             }
-            return; 
+            return;
         }
 
         // --- 入力処理 ---
+        bool isKeyPressed = false;
+
         if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
         {
             targetSpeed += accel * Time.deltaTime;
+            isKeyPressed = true;
         }
         else if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
         {
             targetSpeed -= decel * Time.deltaTime;
+            isKeyPressed = true;
         }
 
-        // 速度制限（0 ～ maxSpeed）
+        // 入力なし → baseSpeed に滑らかに戻す
+        if (!isKeyPressed)
+        {
+            targetSpeed = Mathf.MoveTowards(targetSpeed, baseSpeed, smooth * Time.deltaTime);
+        }
+
+        // 速度制限
         targetSpeed = Mathf.Clamp(targetSpeed, 0f, maxSpeed);
 
-        // --- 補間で滑らかに変化 ---
-        currentSpeed = Mathf.Lerp(currentSpeed, targetSpeed, Time.deltaTime * smooth);
-        
-        // --- 実際の移動（Transformで直接動かす） ---
+        // currentSpeed を滑らかに追従
+        currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, smooth * Time.deltaTime);
+
+        // --- 移動 ---
         transform.Translate(Vector2.right * currentSpeed * Time.deltaTime);
     }
 
-     void HideCountdownText()
+    void HideCountdownText()
     {
         if (countdownText != null)
-        {
             countdownText.gameObject.SetActive(false);
-        }
     }
 
-    // 現在の速度を取得するメソッド
-    public float GetCurrentSpeed()
-    {
-        return currentSpeed;
-    }
+    public float GetCurrentSpeed() => currentSpeed;
 }

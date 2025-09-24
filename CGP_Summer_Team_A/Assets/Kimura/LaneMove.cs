@@ -2,8 +2,8 @@ using UnityEngine;
 
 public class LaneMove : MonoBehaviour
 {
-    public float topY = 0.7f;       // 上端のY座標
-    public float bottomY = -3.8f;   // 下端のY座標
+    public float topY = 0.25f;       // 上端のY座標
+    public float bottomY = -4.25f;   // 下端のY座標
     public int laneCount = 4;     // レーン数（4等分）
     public float moveSpeed = 5f;  // スムーズ移動の速度
 

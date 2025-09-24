@@ -1,14 +1,15 @@
 using System.Collections.Generic;
 using UnityEngine;
+using System.Collections;
 
 public class ItemSpawner : MonoBehaviour
 {
-    [SerializeField]
-    private GameObject itemPrefab;
+    [SerializeField] private GameObject itemPrefab;
+    [SerializeField] private int itemCount = 10;
 
-    [SerializeField]
-    private int itemCount = 10;
-
+    [Header("X座標範囲")]
+    [SerializeField] private float minX = -10f;
+    [SerializeField] private float maxX = 10f;
     [SerializeField]
     private float minX = -10f;
 
@@ -61,6 +62,9 @@ public class ItemSpawner : MonoBehaviour
             }
             while (IsTooClose(spawnPosition, spawnPositions));
 
+            Vector2 spawnPosition = new Vector2(randomX, chosenY);
+
+            // MahjongManagerに生成を依頼
             MahjongManager.instance.SpawnItemFromMountain(spawnPosition);
             spawnPositions.Add(spawnPosition);
         }
@@ -80,3 +84,4 @@ public class ItemSpawner : MonoBehaviour
         return false;
     }
 }
+
