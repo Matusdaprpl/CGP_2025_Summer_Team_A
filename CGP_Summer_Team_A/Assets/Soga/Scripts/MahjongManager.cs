@@ -356,15 +356,25 @@ public class MahjongManager : MonoBehaviour
         }
         return ic;
     }
-    public void AddTileToPlayerHand(Tile tile)
+    public bool AddTileToPlayerHand(Tile tile)
     {
-        if (tile == null) return;
-        if (playerHand == null) playerHand = new List<Tile>();
-        if (playerHand.Count >= 16)
+        if (tile == null)
         {
-            return;
+            return false;
         }
+
+        if (playerHand == null)
+        {
+            playerHand = new List<Tile>();
+        }
+
+        if (playerHand.Count >= 15)
+        {
+            return false;
+        }
+        
         playerHand.Add(tile);
         UpdateHandUI();
+        return true;
     }
 }

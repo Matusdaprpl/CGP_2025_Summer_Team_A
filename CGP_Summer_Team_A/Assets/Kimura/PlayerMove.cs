@@ -112,21 +112,4 @@ public class PlayerMove : MonoBehaviour
     {
         return currentSpeed;
     }
-    
-     private void OnTriggerEnter2D(Collider2D other)
-    {
-        // 接触した相手のタグが "Item" だったら
-        if (other.gameObject.CompareTag("Item"))
-        {
-            // アイテム取得音を再生する
-            if (audioSource != null && itemGetSE != null)
-            {
-                // PlayOneShotを使うと、連続でアイテムを取っても音が途切れず鳴らせる
-                audioSource.PlayOneShot(itemGetSE);
-            }
-
-            // 接触したアイテムのオブジェクトを消す
-            Destroy(other.gameObject);
-        }
-    }
 }
