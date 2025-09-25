@@ -61,6 +61,84 @@ public class ItemSpawner : MonoBehaviour
             MahjongManager.instance.SpawnItemFromMountain(spawnPosition);
             spawnPositions.Add(spawnPosition);
         }
+
+        AdjustItemBasedOnPlayerAndNPCs(spawnPositions);
+    }
+
+    private void AdjustItemBasedOnPlayerAndNPCs(List<Vector2> spawnPositions)
+    {
+        float leftmostX = GetLeftmostPlayerOrNPCX();
+
+        List<GameObject> itemsToRemove = new List<GameObject>();
+        GameObject[] allItems = GameObject.FindGameObjectsWithTag("Item");
+        float rightmostX = float.MinValue;
+        GameObject rightmostItem = null;
+
+        foreach (GameObject item in allItems)
+        {
+            float itemX = item.transform.position.x;
+            if (itemX < leftmostX)
+            {
+                itemsToRemove.Add(item);
+            }
+            else if (itemX > rightmostX)
+            {
+                rightmostX = itemX;
+                rightmostItem = item;
+            }
+        }
+
+        int removedCount = itemsToRemove.Count;
+        foreach (GameObject item in itemsToRemove)
+        {
+            Destroy(item);
+        }
+
+        for (int i = 0; i < removedCount; i++)
+        {
+            Vector2 newPosition;
+            int attempts = 0;
+            const int maxAttempts = 100;
+
+            do
+            {
+                float randomX = Random.Range(minX, maxX);
+                float randomY = fixedYValues[Random.Range(0, fixedYValues.Length)];
+                newPosition = new Vector2(randomX, randomY);
+                attempts++;
+
+                if (attempts > maxAttempts)
+                {
+                    Debug.LogWarning("適切なスポーン位置が見つかりません。スポーンを中止します。");
+                    return;
+                }
+            }
+            while (IsTooClose(newPosition, spawnPositions));
+
+            MahjongManager.instance.SpawnItemFromMountain(newPosition);
+            spawnPositions.Add(newPosition);
+        }
+    }
+
+    private float GetLeftmostPlayerOrNPCX()
+    {
+        // プレイヤーとNPCのX座標を取得
+        GameObject player = GameObject.FindWithTag("Player");
+        GameObject[] npcs = GameObject.FindGameObjectsWithTag("NPC");
+
+        float leftmostX = float.MaxValue;
+
+        if (player != null)
+        {
+            leftmostX = Mathf.Min(leftmostX, player.transform.position.x);
+        }
+
+        foreach (GameObject npc in npcs)
+        {
+            leftmostX = Mathf.Min(leftmostX, npc.transform.position.x);
+        }
+
+        return leftmostX;
     }
     
     private bool IsTooClose(Vector2 position, List<Vector2> existingPositions)

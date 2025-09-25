@@ -57,6 +57,7 @@ public class MahjongManager : MonoBehaviour
     public List<Tile> playerHand;
     private Dictionary<string, Sprite> tileSprites;
 
+
     void Start()
     {
         LoadTileSprites();
@@ -157,9 +158,9 @@ public class MahjongManager : MonoBehaviour
 
                 // Layout Elementコンポーネントを追加して、幅を指定
                 LayoutElement le = spacer.AddComponent<LayoutElement>();
-                
+
                 // この数値を変更すると間隔を調整できます
-                le.preferredWidth = 30f; 
+                le.preferredWidth = 30f;
             }
 
             GameObject newTileObj = Instantiate(handTilePrefab, handPanel);
