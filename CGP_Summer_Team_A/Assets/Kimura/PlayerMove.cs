@@ -1,7 +1,5 @@
 using UnityEngine;
 using TMPro;
-using System.Collections;
-using UnityEngine.Rendering;
 
 public class PlayerMove : MonoBehaviour
 {
@@ -20,15 +18,10 @@ public class PlayerMove : MonoBehaviour
     [Header("サウンド設定")]
     public AudioSource raceBGM; // BGM
     public AudioClip itemGetSE;
-    public AudioClip countdownSE;
     private AudioSource audioSource;
 
     private float targetSpeed;       // 入力による目標速度
     private float currentSpeed;      // 実際の速度
-
-    [Range(0f, 1f)]
-    public float bgmVolume = 0.5f; // BGMの音量
-    public float bgmFadeInSeconds = 1f;
 
 
     private float remainingCountdownTime;
@@ -37,83 +30,47 @@ public class PlayerMove : MonoBehaviour
 
     void Start()
     {
-        // 初期化
-        isCountdownActive = true; // カウントダウン中フラグを立てる
-        currentSpeed = 0f;
-        targetSpeed = baseSpeed;
-        audioSource = GetComponent<AudioSource>();
-        ItemController.OnItemPickedUp += PlayItemGetSound;
-
-        // テキストを初期化
-        if (countdownText != null) countdownText.text = "";
-
-        // カウントダウンシーケンスを開始
-        StartCoroutine(CountdownCoroutine());
-    }
-
-    void OnDestroy()
-    {
-        ItemController.OnItemPickedUp -= PlayItemGetSound;
-    }
-
-    private IEnumerator CountdownCoroutine()
-    {
-        yield return new WaitForEndOfFrame();
-
-        if (audioSource != null && countdownSE != null)
-        {
-            audioSource.PlayOneShot(countdownSE);
-        }
-
-        float timer = countdownTime;
-        while (timer > 0)
-        {
-            if (countdownText != null)
-            {
-                // テキストを更新 (3, 2, 1)
-                countdownText.text = Mathf.Ceil(timer).ToString();
-            }
-            timer -= Time.deltaTime;
-            yield return null; // 次のフレームまで待つ
-        }
-
-        // カウントダウン終了処理
-        isCountdownActive = false; // 移動を許可
-        Debug.Log("レース開始！！");
+        currentSpeed = startSpeed;
+        targetSpeed = startSpeed;
+        remainingCountdownTime = countdownTime;
 
         if (countdownText != null)
         {
-            countdownText.text = "Go!";
-            Invoke("HideCountdownText", 1f); // 1秒後に "Go!" を隠す
+            countdownText.text = Mathf.Ceil(remainingCountdownTime).ToString();
         }
 
-        // BGMをフェードインで再生
-        if (raceBGM != null)
-        {
-            StartCoroutine(PlayBGMWithFadeIn());
-        }
-        else
-        {
-            Debug.LogWarning("raceBGM が未割り当てです。AudioSource を割り当ててください。");
-        }
-    }
+        audioSource = GetComponent<AudioSource>();
 
-    private void PlayItemGetSound(string suit, int rank)
-    {
-        if (audioSource != null && itemGetSE != null)
-        {
-            audioSource.PlayOneShot(itemGetSE);
-        }
     }
 
     void Update()
-    { // 修正: カウントダウン中は以降の処理をすべてスキップ
+    {
+        // --- カウントダウン処理 ---
         if (isCountdownActive)
         {
+            remainingCountdownTime -= Time.deltaTime;
+            if (countdownText != null)
+                countdownText.text = Mathf.Ceil(remainingCountdownTime).ToString();
+
+            if (remainingCountdownTime <= 0)
+            {
+                isCountdownActive = false;
+                if (countdownText != null)
+                {
+                    countdownText.text = "Go!";
+                    Invoke("HideCountdownText", 1f);
+                }
+                Debug.Log("レース開始！！");
+
+                if (raceBGM != null)
+                {
+                    raceBGM.Play();
+                }
+            }
             return;
         }
 
-        // --- ここから下は、既存の入力処理と移動処理 (変更なし) ---
+        // --- 入力処理 ---
         bool isKeyPressed = false;
 
         if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
@@ -127,13 +84,20 @@ public class PlayerMove : MonoBehaviour
             isKeyPressed = true;
         }
 
+        // 入力なし → baseSpeed に滑らかに戻す
         if (!isKeyPressed)
         {
             targetSpeed = Mathf.MoveTowards(targetSpeed, baseSpeed, smooth * Time.deltaTime);
         }
 
+        // 速度制限
         targetSpeed = Mathf.Clamp(targetSpeed, 0f, maxSpeed);
+
+        // currentSpeed を滑らかに追従
         currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, smooth * Time.deltaTime);
+
+        // --- 移動 ---
+
         transform.Translate(Vector2.right * currentSpeed * Time.deltaTime);
     }
 
@@ -148,29 +112,4 @@ public class PlayerMove : MonoBehaviour
     {
         return currentSpeed;
     }
-
-    private IEnumerator PlayBGMWithFadeIn()
-    {
-        if (raceBGM.clip == null)
-        {
-            Debug.LogWarning("raceBGM に AudioClip が未設定です。");
-            yield break;
-        }
-
-        raceBGM.loop = true;
-        float target = Mathf.Clamp01(bgmVolume);
-        raceBGM.volume = 0f;
-        raceBGM.Play();
-
-        float timer = 0f;
-        while (timer < bgmFadeInSeconds)
-        {
-            timer += Time.deltaTime;
-            float progress = Mathf.Clamp01(timer / bgmFadeInSeconds);
-            raceBGM.volume = Mathf.Lerp(0f, target, progress);
-            yield return null;
-        }
-        raceBGM.volume = target;
-     
-    } 
 }
