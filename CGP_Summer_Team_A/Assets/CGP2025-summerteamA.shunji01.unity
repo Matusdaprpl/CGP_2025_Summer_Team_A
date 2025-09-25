@@ -1136,11 +1136,11 @@ MonoBehaviour:
     m_Top: 0
     m_Bottom: 0
   m_ChildAlignment: 0
-  m_Spacing: 0.1
-  m_ChildForceExpandWidth: 1
-  m_ChildForceExpandHeight: 1
-  m_ChildControlWidth: 0
-  m_ChildControlHeight: 0
+  m_Spacing: 0
+  m_ChildForceExpandWidth: 0
+  m_ChildForceExpandHeight: 0
+  m_ChildControlWidth: 1
+  m_ChildControlHeight: 1
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
@@ -1984,7 +1984,7 @@ GameObject:
   - component: {fileID: 1403280672}
   - component: {fileID: 1403280673}
   m_Layer: 0
-  m_Name: SoundManager
+  m_Name: CountdownSE
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2700,8 +2700,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemPrefab: {fileID: 8261760855208729183, guid: a1fce91b982b52540a44167b6dd43cb6, type: 3}
   itemCount: 80
-  minX: -10
-  maxX: 700
+  minX: 0
+  maxX: 1000
   fixedYValues:
   - -4
   - -2.5
