@@ -809,7 +809,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 3122400048715114303, guid: c76771ed3cad08e4ba7355c90461ddc7, type: 3}
+  m_Sprite: {fileID: 4414811085585333610, guid: 83d326e48834a3e47bcb62925dac9341, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -829,8 +829,8 @@ Transform:
   m_GameObject: {fileID: 423721860}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -7, y: 0.18, z: 0}
-  m_LocalScale: {x: 0.6031867, y: 0.4627529, z: 0.64055}
+  m_LocalPosition: {x: -6.99, y: 0.1, z: 0}
+  m_LocalScale: {x: 2.5, y: 2.5, z: 0.64055}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2093245684}
@@ -911,13 +911,13 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 2.81, y: 2.65}
+    oldSize: {x: 0.96, y: 0.61}
     newSize: {x: 2.81, y: 2.65}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 2.81, y: 2.65}
+  m_Size: {x: 1, y: 0.6}
   m_EdgeRadius: 0
 --- !u!50 &423721867
 Rigidbody2D:
@@ -1158,6 +1158,28 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!95 &423721870
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 423721860}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: -6738777871663451902, guid: 83d326e48834a3e47bcb62925dac9341, type: 3}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &442571248
 GameObject:
   m_ObjectHideFlags: 0
