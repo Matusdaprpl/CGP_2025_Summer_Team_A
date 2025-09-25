@@ -129,8 +129,8 @@ ScriptedImporter:
   animatedSpriteImportData:
   - name: ma-jan road2
     originalName: 
-    pivot: {x: 0.5, y: -0.8294573}
-    alignment: 9
+    pivot: {x: 0.5, y: 0}
+    alignment: 7
     border: {x: 0, y: 0, z: 0, w: 0}
     customData: 
     rect:
