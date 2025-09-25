@@ -7,6 +7,10 @@ public class GameManager2 : MonoBehaviour
 {
     public Button agariButton; 
     
+    // ★★★ 追加・修正箇所: Shooter2Dへの参照 ★★★
+    [Header("スコア管理")]
+    public Shooter2D scoreManager; // Shooter2Dスクリプトへの参照
+    
     [Header("Debug Hand Selection (Set only ONE to true)")]
     public bool forceDaisangenHand = false; 
     public bool forceSuuankouHand = false; 
@@ -210,64 +214,82 @@ public class GameManager2 : MonoBehaviour
             Debug.LogError("MahjongManager.instance が null です。");
             return;
         }
+        
+        // ★★★ 役満の点数定義 ★★★
+        const int YAKUMAN_SCORE = 32000; 
 
         var myHand = new List<Tile>(MahjongManager.instance.playerHand);
 
         Debug.Log($"和了ボタン押下: 手牌 ={string.Join(", ", myHand.Select(t => t.GetDisplayName()))}") ;
         
-        // 役満の判定を順番に行う
-        
         Debug.Log("[Yakuman Check] Starting check...");
+        
+        // --- 役満判定とスコア加算 ---
         
         if (ShosushiChecker.IsShosushi(myHand))
         {
             Debug.Log("[Yakuman Check] Passed ShosushiChecker.");
             Debug.Log("🎉 小四喜です！");
+            scoreManager?.AddScore(YAKUMAN_SCORE); // ★★★ スコア加算
         }
         else if (TsuisoChecker.IsTsuiso(myHand))
         {
             Debug.Log("[Yakuman Check] Passed TsuisoChecker.");
             Debug.Log("🎉 字一色です！");
+            scoreManager?.AddScore(YAKUMAN_SCORE); // ★★★ スコア加算
         }
         else if (RyuuisoChecker.IsRyuuiso(myHand))
         {
             Debug.Log("[Yakuman Check] Passed RyuuisoChecker.");
             Debug.Log("🎉 緑一色です！");
+            scoreManager?.AddScore(YAKUMAN_SCORE); // ★★★ スコア加算
         }
         else if (DaisushiChecker.IsDaisushi(myHand))
         {
             Debug.Log("[Yakuman Check] Passed DaisushiChecker.");
             Debug.Log("🎉 大四喜です！");
+            scoreManager?.AddScore(YAKUMAN_SCORE * 2); // 大四喜はダブル役満とする
         }
         else if (ChinroutouChecker.IsChinroutou(myHand))
         {
             Debug.Log("[Yakuman Check] Passed ChinroutouChecker.");
             Debug.Log("🎉 清老頭です！");
+            scoreManager?.AddScore(YAKUMAN_SCORE); // ★★★ スコア加算
         }
         else if (KokushiChecker.IsKokushi(myHand))
         {
             Debug.Log("[Yakuman Check] Passed KokushiChecker.");
             Debug.Log("🎉 国士無双です！");
+            scoreManager?.AddScore(YAKUMAN_SCORE); // ★★★ スコア加算
         }
         else if (SuukantsuChecker.IsSuukantsu(myHand))
         {
             Debug.Log("[Yakuman Check] Passed SuukantsuChecker.");
             Debug.Log("🎉 四槓子です！");
+            scoreManager?.AddScore(YAKUMAN_SCORE); // ★★★ スコア加算
         }
         else if (DaisangenChecker.IsDaisangen(myHand))
         {
             Debug.Log("[Yakuman Check] Passed DaisangenChecker.");
             Debug.Log("🎉 大三元です！");
+            scoreManager?.AddScore(YAKUMAN_SCORE); // ★★★ スコア加算
         }
         else if (SuuankouChecker.IsSuuankou(myHand))
         {
             Debug.Log("[Yakuman Check] Passed SuuankouChecker.");
             Debug.Log("🎉 四暗刻です！");
+            scoreManager?.AddScore(YAKUMAN_SCORE); // ★★★ スコア加算
         }
         else
         {
             Debug.Log("[Yakuman Check] No Yakuman found.");
             Debug.Log("役満ではありません。（他の役の判定は未実装です）");
+        }
+        
+        // スコアマネージャーが未設定の場合は警告を出す
+        if (scoreManager == null)
+        {
+            Debug.LogError("Score Manager (Shooter2D) が設定されていません。Inspectorを確認してください！");
         }
     }
 }

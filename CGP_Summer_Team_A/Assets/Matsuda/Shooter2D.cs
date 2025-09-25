@@ -1,5 +1,6 @@
 using UnityEngine;
 using TMPro;
+
 public class Shooter2D : MonoBehaviour
 {
     public TextMeshProUGUI scoreText;
@@ -12,7 +13,13 @@ public class Shooter2D : MonoBehaviour
     [Header("スコア")]
     public int score = 10000;
     public int fireCost = 1000;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    
+    // Start is called once before the first execution of Update after the MonoBehaviour created
+    void Start()
+    {
+        // Start処理が必要であればここに記述
+    }
+
     // Update is called once per frame
     void Update()
     {
@@ -29,6 +36,7 @@ public class Shooter2D : MonoBehaviour
         }
         scoreText.text = "SCORE: " + score;
     }
+    
     void Shoot()
     {
         if(bulletPrefab == null || firePoint == null)
@@ -41,7 +49,10 @@ public class Shooter2D : MonoBehaviour
     GameObject bullet = Instantiate(bulletPrefab,firePoint.position,firePoint.rotation);
 
     Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
-
+    
+    // Rigidbody2Dの線形速度を設定
+    // rb.linearVelocity = firePoint.right*bulletSpeed;
+    // Unityのバージョンによっては velocity を使用
     rb.linearVelocity = firePoint.right*bulletSpeed;
 
     score-=fireCost;
@@ -51,4 +62,16 @@ public class Shooter2D : MonoBehaviour
 
     Destroy (bullet,3f);
     }
+    
+    // ★★★ 役満判定からのスコア加算機能（追加・修正箇所） ★★★
+    /// <summary>
+    /// スコアを加算し、役満の点数処理を行います。
+    /// </summary>
+    /// <param name="points">加算する点数</param>
+    public void AddScore(int points)
+    {
+        score += points;
+        Debug.Log($"🎉 役満によりスコアが加算されました！ (+{points}) 現在のスコア: {score}");
+    }
+    // ★★★ 役満判定からのスコア加算機能（ここまで） ★★★
 }

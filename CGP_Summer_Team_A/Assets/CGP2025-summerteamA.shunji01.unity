@@ -1402,7 +1402,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   agariButton: {fileID: 190110715}
-  forceDaisangenHand: 0
+  scoreManager: {fileID: 423721869}
+  forceDaisangenHand: 1
   forceSuuankouHand: 0
   forceKokushiHand: 0
   forceSuukantsuHand: 0
