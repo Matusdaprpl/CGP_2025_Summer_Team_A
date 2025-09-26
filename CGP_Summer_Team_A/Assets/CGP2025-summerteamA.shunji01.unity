@@ -1426,7 +1426,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee38ae503e6ca5140b5846ce6905a7f4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  itemPrefab: {fileID: 8261760855208729183, guid: a1fce91b982b52540a44167b6dd43cb6, type: 3}
+  worldItemPrefab: {fileID: 8261760855208729183, guid: a1fce91b982b52540a44167b6dd43cb6, type: 3}
+  handTilePrefab: {fileID: 4424791888641847973, guid: 57854b3c437b19c46bdf736ab8cca402, type: 3}
+  handPanel: {fileID: 442571249}
+  mountainCountText: {fileID: 0}
+  playerHandCountText: {fileID: 0}
+  drawnTileSpacing: 20
+  totalSlots: 15
 --- !u!4 &668795117
 Transform:
   m_ObjectHideFlags: 0
@@ -1456,7 +1462,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   agariButton: {fileID: 190110715}
   scoreManager: {fileID: 423721869}
-  forceDaisangenHand: 0
+  forceDaisangenHand: 1
   forceSuuankouHand: 0
   forceKokushiHand: 0
   forceSuukantsuHand: 0

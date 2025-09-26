@@ -28,185 +28,315 @@ public class Tile
     public string GetDisplayName() =>
         (suit == Suit.Honor) ? $"Honor_{rank}" : $"{suit}_{rank}";
 }
+
 public class MahjongManager : MonoBehaviour
 {
+    public event Action OnPlayerHitItem;
     public static MahjongManager instance;
 
+    private void Awake()
+    {
+        if (instance == null) instance = this;
+        else Destroy(gameObject);
+    }
+
+    public void PlayerHitItem()
+    {
+        OnPlayerHitItem?.Invoke();
+    }
+
+    [Header("プレハブ設定")]
+    public GameObject worldItemPrefab;
+    public GameObject handTilePrefab;
+    public Transform handPanel;
     public List<Tile> mountain;
     public List<Tile> playerHand;
-    public Tile lastDrawnTile;
+    private Dictionary<string, Sprite> tileSprites;
 
-    void Awake()
-    {
-        if (instance == null)
-        {
-            instance = this;
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-    }
+    [Header("UI")]
+    public Text mountainCountText;
+    public Text playerHandCountText;
+
+    [Header("ツモスロット間隔")]
+    public float tsumoSpacerWidth = 30f;
 
     void Start()
     {
+        LoadTileSprites();
         CreateMountain();
-        ShuffleMountain();
+        SuffleMountain();
         playerHand = new List<Tile>();
 
+        // 初期配牌
         for (int i = 0; i < 14; i++)
         {
             playerHand.Add(DrawTile());
         }
         SortHand();
-        MahjongUIManager.instance.UpdateHandUI(playerHand);
+        UpdateHandUI();
 
-        Debug.Log("MahjongManager側の確認: 山の準備完了。牌の総数: " + mountain.Count);
+        OnPlayerHitItem += OnItemGetDrawnAndWaitDiscard;
+
+        Debug.Log("MahjongManager側: 山の準備完了。牌の総数: " + mountain.Count);
     }
 
-    public void DiscardTile(int index)
+    public void SetTestHand(List<(Suit suit, int rank)> tilesData)
     {
-        if (index < 0 || index >= playerHand.Count) return;
+        if (playerHand == null) playerHand = new List<Tile>();
+        playerHand.Clear();
 
-        Tile discardedTile = playerHand[index];
-        playerHand.RemoveAt(index);
+        foreach (var data in tilesData)
+        {
+            string spriteName = (data.suit == Suit.Honor)
+                ? $"Honor_{data.rank}"
+                : $"{data.suit}_{data.rank}";
+            Sprite sprite = tileSprites.ContainsKey(spriteName)
+                ? tileSprites[spriteName]
+                : null;
 
-        // 捨て牌を地面にドロップ
-        Vector3 dropPosition = transform.position; // プレイヤーの位置（必要に応じて調整）
-        ItemManager.instance.DropDiscardedTile(discardedTile, dropPosition);
+            if (sprite == null)
+                Debug.LogError($"テスト配牌用スプライトが見つかりません: {spriteName}");
+
+            playerHand.Add(new Tile(data.suit, data.rank, sprite));
+        }
 
         SortHand();
-        MahjongUIManager.instance.UpdateHandUI(playerHand);
+        UpdateHandUI();
+        Debug.Log($"【テスト配牌完了】手牌が {playerHand.Count} 枚に設定されました。");
     }
 
-    public bool AddTileToPlayerHand(Tile tile)
+    void OnItemGetDrawnAndWaitDiscard()
     {
-        if (tile == null || playerHand.Count >= 15) return false;
+        if (mountain.Count == 0)
+        {
+            Debug.Log("流局です。");
+            return;
+        }
+        if (playerHand.Count >= 15)
+        {
+            Debug.Log("手牌がいっぱいです。捨て牌をしてください。");
+            return;
+        }
 
-        playerHand.Add(tile);
+        Tile drawnTile = DrawTile();
+        if (drawnTile == null) return;
+
+        playerHand.Add(drawnTile);
+        UpdateHandUI();
+    }
+
+    void LoadTileSprites()
+    {
+        tileSprites = new Dictionary<string, Sprite>();
+        Sprite[] sprites = Resources.LoadAll<Sprite>("Tiles");
+        foreach (Sprite sprite in sprites)
+        {
+            tileSprites[sprite.name] = sprite;
+        }
+    }
+
+    void UpdateHandUI()
+    {
+        // 既存のUIをクリア
+        foreach (Transform child in handPanel)
+            Destroy(child.gameObject);
+
+        // 基本の14枚を並べる
+        int baseCount = Mathf.Min(playerHand.Count, 14);
+        for (int i = 0; i < baseCount; i++)
+        {
+            CreateTileUI(playerHand[i], i);
+        }
+
+        // Spacerを追加
+        GameObject spacer = new GameObject("TsumoSpacer");
+        spacer.transform.SetParent(handPanel, false);
+        LayoutElement le = spacer.AddComponent<LayoutElement>();
+        le.preferredWidth = tsumoSpacerWidth;
+        le.preferredHeight = handTilePrefab.GetComponent<LayoutElement>().preferredHeight;
+
+        // ツモスロット（15枚目 or 空白）
+        if (playerHand.Count == 15)
+        {
+            CreateTileUI(playerHand[14], 14);
+        }
+        else
+        {
+            GameObject emptySlot = new GameObject("TsumoSlot");
+            emptySlot.transform.SetParent(handPanel, false);
+            LayoutElement le2 = emptySlot.AddComponent<LayoutElement>();
+            le2.preferredWidth = handTilePrefab.GetComponent<LayoutElement>().preferredWidth;
+            le2.preferredHeight = handTilePrefab.GetComponent<LayoutElement>().preferredHeight;
+        }
+    }
+
+    void CreateTileUI(Tile tile, int index)
+    {
+        GameObject newTileObj = Instantiate(handTilePrefab, handPanel);
+        string spriteName = (tile.suit == Suit.Honor)
+            ? $"Honor_{tile.rank}"
+            : $"{tile.suit}_{tile.rank}";
+        if (tileSprites.ContainsKey(spriteName))
+        {
+            newTileObj.GetComponent<Image>().sprite = tileSprites[spriteName];
+        }
+
+        Button tileButton = newTileObj.GetComponent<Button>();
+        if (tileButton != null)
+        {
+            tileButton.onClick.AddListener(() => DiscardTile(index));
+        }
+    }
+
+    public void PlayerDraw()
+    {
+        if (mountain.Count == 0)
+        {
+            Debug.Log("流局です。");
+            return;
+        }
+        Tile drawnTile = DrawTile();
+        if (drawnTile != null)
+        {
+            playerHand.Add(drawnTile);
+            UpdateHandUI();
+        }
+    }
+
+    public void DiscardTile(int handIndex)
+    {
+        if (playerHand.Count <= 14)
+        {
+            Debug.Log("ツモってください。");
+            return;
+        }
+        if (handIndex < 0 || handIndex >= playerHand.Count)
+        {
+            Debug.Log($"無効なインデックスを捨てようとしました:{handIndex}");
+            return;
+        }
+
+        Tile discardedTile = playerHand[handIndex];
+        Debug.Log($"捨て牌:{discardedTile.GetDisplayName()}");
+
+        mountain.Add(discardedTile);
+        playerHand.RemoveAt(handIndex);
         SortHand();
-        MahjongUIManager.instance.UpdateHandUI(playerHand);
-        return true;
+        UpdateHandUI();
+        UpdateMountainCountUI();
+    }
+
+    void CreateMountain()
+    {
+        mountain = new List<Tile>();
+        foreach (Suit s in new Suit[] { Suit.Manzu, Suit.Pinzu, Suit.Souzu })
+        {
+            for (int rank = 1; rank <= 9; rank++)
+            {
+                string spriteName = $"{s}_{rank}";
+                if (tileSprites.ContainsKey(spriteName))
+                {
+                    Sprite sprite = tileSprites[spriteName];
+                    for (int i = 0; i < 4; i++)
+                        mountain.Add(new Tile(s, rank, sprite));
+                }
+            }
+        }
+
+        for (int rank = 1; rank <= 7; rank++)
+        {
+            string spriteName = $"Honor_{rank}";
+            if (tileSprites.ContainsKey(spriteName))
+            {
+                Sprite sprite = tileSprites[spriteName];
+                for (int i = 0; i < 4; i++)
+                    mountain.Add(new Tile(Suit.Honor, rank, sprite));
+            }
+        }
+
+        Debug.Log($"牌の山を作成しました。合計：{mountain.Count}枚");
+    }
+
+    void SuffleMountain()
+    {
+        if (mountain == null) return;
+        for (int i = 0; i < mountain.Count; i++)
+        {
+            int randomIndex = UnityEngine.Random.Range(i, mountain.Count);
+            Tile temp = mountain[i];
+            mountain[i] = mountain[randomIndex];
+            mountain[randomIndex] = temp;
+        }
+        Debug.Log("山をシャッフルしました。");
     }
 
     public Tile DrawTile()
     {
-        if (mountain == null || mountain.Count == 0) return null;
-
+        if (mountain == null || mountain.Count == 0)
+        {
+            Debug.Log("山に牌がありません！");
+            return null;
+        }
         Tile drawTile = mountain[0];
         mountain.RemoveAt(0);
-        MahjongUIManager.instance.UpdateMountainCountUI(mountain.Count);
+        UpdateMountainCountUI();
         return drawTile;
     }
 
     public void SortHand()
     {
         if (playerHand == null) return;
-
-        if (lastDrawnTile != null && playerHand.Contains(lastDrawnTile))
-        {
-            playerHand.Remove(lastDrawnTile);
-            playerHand = playerHand.OrderBy(tile => tile.suit).ThenBy(tile => tile.rank).ToList();
-            playerHand.Add(lastDrawnTile);
-        }
-        else
-        {
-            playerHand = playerHand.OrderBy(tile => tile.suit).ThenBy(tile => tile.rank).ToList();
-        }
+        playerHand = playerHand.OrderBy(tile => tile.suit)
+                               .ThenBy(tile => tile.rank)
+                               .ToList();
     }
 
-    void CreateMountain()
+    private void UpdateMountainCountUI()
     {
-        mountain = new List<Tile>();
-        var suits = new[] { Suit.Manzu, Suit.Pinzu, Suit.Souzu };
-
-        // 萬子、筒子、索子を生成
-        foreach (var suit in suits)
-        {
-            for (int rank = 1; rank <= 9; rank++)
-            {
-                // 各牌を4枚ずつ追加
-                for (int i = 0; i < 4; i++)
-                {
-                    // スプライトの取得はSetTestHandと同様の方法で行う必要があります
-                    // ここでは一旦nullで仮置きしますが、実際にはスプライトを読み込む処理が必要です
-                    mountain.Add(new Tile(suit, rank, null)); 
-                }
-            }
-        }
-
-        // 字牌を生成
-        for (int rank = 1; rank <= 7; rank++)
-        {
-            // 各牌を4枚ずつ追加
-            for (int i = 0; i < 4; i++)
-            {
-                mountain.Add(new Tile(Suit.Honor, rank, null));
-            }
-        }
-        
-        Debug.Log($"牌の山を作成しました。合計：{mountain.Count}枚");
+        if (mountainCountText != null)
+            mountainCountText.text = $"残りの牌:{mountain.Count}枚";
     }
 
-    void ShuffleMountain()
+    public Tile PeekNextTileInMountain()
     {
-        if (mountain == null) return;
-
-        // Fisher-Yatesアルゴリズムでシャッフル
-        System.Random rng = new System.Random();
-        int n = mountain.Count;
-        while (n > 1)
-        {
-            n--;
-            int k = rng.Next(n + 1);
-            Tile value = mountain[k];
-            mountain[k] = mountain[n];
-            mountain[n] = value;
-        }
-        Debug.Log("山をシャッフルしました。");
+        if (mountain != null && mountain.Count > 0)
+            return mountain[0];
+        return null;
     }
 
-    public void SetTestHand(List<(Suit suit, int rank)> handData)
+    public ItemController SpawnItemFromMountain(Vector3 pos)
     {
-        playerHand = new List<Tile>();
-        foreach (var (suit, rank) in handData)
+        Tile tile = DrawTile();
+        if (tile == null) return null;
+
+        Sprite sp = null;
+        if (tileSprites != null)
         {
-            // スプライトを取得（Resources/Tiles から）
-            Sprite sprite = Resources.Load<Sprite>($"{suit}_{rank}");
-            if (sprite == null && suit == Suit.Honor)
-            {
-                sprite = Resources.Load<Sprite>($"Honor_{rank}");
-            }
-            Tile tile = new Tile(suit, rank, sprite);
-            playerHand.Add(tile);
+            var key = (tile.suit == Suit.Honor) ? $"Honor_{tile.rank}" : $"{tile.suit}_{tile.rank}";
+            tileSprites.TryGetValue(key, out sp);
         }
-        SortHand();
-        MahjongUIManager.instance.UpdateHandUI(playerHand);
+        tile.sprite = sp;
+
+        var go = Instantiate(worldItemPrefab, pos, Quaternion.identity);
+        var ic = go.GetComponent<ItemController>();
+        if (ic != null)
+        {
+            var key = (tile.suit == Suit.Honor) ? $"Honor_{tile.rank}" : $"{tile.suit}_{tile.rank}";
+            if (tileSprites.ContainsKey(key))
+                tile.sprite = tileSprites[key];
+            ic.SetTile(this, tile);
+        }
+        return ic;
     }
 
-    [Header("プレハブ設定")]
-    public GameObject itemPrefab; // ← 追加: インスペクターから設定
-
-    // ...existing code...
-    public void SpawnItemFromMountain(Vector2 position)
+    public bool AddTileToPlayerHand(Tile tile)
     {
-        if (itemPrefab != null)
-        {
-            Instantiate(itemPrefab, new Vector3(position.x, position.y, 0), Quaternion.identity);
-        }
-        else
-        {
-            Debug.LogError("itemPrefab が設定されていません。インスペクターで割り当ててください。");
-        }
-    }
-     
-    public Text mountainCountText; // 山の牌の残り枚数を表示するUIテキスト
-    // Existing fields and methods
+        if (tile == null) return false;
+        if (playerHand == null) playerHand = new List<Tile>();
+        if (playerHand.Count >= 15) return false;
 
-    // Add this method to fix the error
-    public void PlayerHitItem()
-    {
-        Debug.Log("PlayerHitItem called from MahjongManager.");
-        // Implement your logic here
+        playerHand.Add(tile);
+        UpdateHandUI();
+        return true;
     }
 }
