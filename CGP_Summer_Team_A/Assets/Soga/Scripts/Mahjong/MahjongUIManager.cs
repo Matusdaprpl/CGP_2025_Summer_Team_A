@@ -44,6 +44,11 @@ public class MahjongUIManager : MonoBehaviour
         }
     }
 
+    public Dictionary<string, Sprite> GetTileSprites()
+    {
+        return tileSprites;
+    }
+
     public void UpdateHandUI(List<Tile> playerHand)
     {
         // 既存のUIをクリア
@@ -103,8 +108,4 @@ public class MahjongUIManager : MonoBehaviour
             mountainCountText.text = $"残りの牌:{count}枚";
     }
 
-    public Dictionary<string, Sprite> GetTileSprites()
-    {
-        return tileSprites;
-    }
 }

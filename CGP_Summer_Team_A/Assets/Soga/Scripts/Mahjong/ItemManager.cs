@@ -43,7 +43,26 @@ public class ItemManager : MonoBehaviour
         return ic;
     }
 
-    
+    public void DropDiscardedTile(Tile discardedTile, Vector3 dropPosition)
+    {
+        if (discardedTile == null || worldItemPrefab == null)
+        {
+            Debug.LogError("DropDiscardedTile: discardedTile または worldItemPrefab が null です。");
+            return;
+        }
 
-    // 必要に応じて追加メソッド
+        Debug.Log($"DropDiscardedTile: 牌 {discardedTile.GetDisplayName()} を位置 {dropPosition} にドロップします。");
+
+        var go = Instantiate(worldItemPrefab, dropPosition, Quaternion.identity);
+        var ic = go.GetComponent<ItemController>();
+        if (ic != null)
+        {
+            ic.SetTile(MahjongManager.instance, discardedTile);
+            Debug.Log("DropDiscardedTile: アイテムを生成しました。");
+        }
+        else
+        {
+            Debug.LogError("DropDiscardedTile: ItemController コンポーネントが見つかりません。");
+        }
+    }
 }
