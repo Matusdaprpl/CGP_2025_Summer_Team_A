@@ -56,7 +56,6 @@ public class ItemController : MonoBehaviour
         else if (other.CompareTag("NPC"))
         {
             OnItemPickedUp?.Invoke(tile.suit.ToString(), tile.rank);
-            UnityEngine.Debug.Log($"NPCの拾った牌:{tile.GetDisplayName()}");
         }
     }
     
