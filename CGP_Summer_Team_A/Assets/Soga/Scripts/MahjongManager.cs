@@ -3,7 +3,6 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Linq;
 using System;
-
 public enum Suit
 {
     Manzu,
@@ -95,7 +94,6 @@ public class MahjongManager : MonoBehaviour
 
         Tile drawTile = mountain[0];
         mountain.RemoveAt(0);
-        MahjongUIManager.instance.UpdateMountainCountUI(mountain.Count);
         return drawTile;
     }
 
@@ -200,7 +198,6 @@ public class MahjongManager : MonoBehaviour
         }
     }
      
-    public Text mountainCountText; // 山の牌の残り枚数を表示するUIテキスト
     // Existing fields and methods
 
     // Add this method to fix the error
