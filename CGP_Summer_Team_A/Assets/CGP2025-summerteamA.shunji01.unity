@@ -1426,13 +1426,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee38ae503e6ca5140b5846ce6905a7f4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  worldItemPrefab: {fileID: 8261760855208729183, guid: a1fce91b982b52540a44167b6dd43cb6, type: 3}
-  handTilePrefab: {fileID: 4424791888641847973, guid: 57854b3c437b19c46bdf736ab8cca402, type: 3}
-  handPanel: {fileID: 442571249}
-  mountainCountText: {fileID: 0}
-  playerHandCountText: {fileID: 0}
-  drawnTileSpacing: 20
-  totalSlots: 15
 --- !u!4 &668795117
 Transform:
   m_ObjectHideFlags: 0
@@ -1462,7 +1455,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   agariButton: {fileID: 190110715}
   scoreManager: {fileID: 423721869}
-  forceDaisangenHand: 1
+  forceDaisangenHand: 0
   forceSuuankouHand: 0
   forceKokushiHand: 0
   forceSuukantsuHand: 0
@@ -2272,6 +2265,55 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!1 &1553428485
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1553428487}
+  - component: {fileID: 1553428486}
+  m_Layer: 0
+  m_Name: MahjongUI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1553428486
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1553428485}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4510dcb1090e5f47bebaafcc1935cd0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  handTilePrefab: {fileID: 4424791888641847973, guid: 57854b3c437b19c46bdf736ab8cca402, type: 3}
+  handPanel: {fileID: 442571249}
+  mountainCountText: {fileID: 0}
+  playerHandCountText: {fileID: 0}
+  tsumoSpacerWidth: 30
+--- !u!4 &1553428487
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1553428485}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.39192, y: -5.97701, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1759939679
 GameObject:
   m_ObjectHideFlags: 0
@@ -2355,6 +2397,51 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 17.24, y: -5, z: 0}
   m_LocalScale: {x: 6.242829, y: 4.648165, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1797670371
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1797670373}
+  - component: {fileID: 1797670372}
+  m_Layer: 0
+  m_Name: ItemManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1797670372
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1797670371}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fa381569036bc5c4fa1260b116afa897, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  worldItemPrefab: {fileID: 8261760855208729183, guid: a1fce91b982b52540a44167b6dd43cb6, type: 3}
+--- !u!4 &1797670373
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1797670371}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.39192, y: -5.97701, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -2912,3 +2999,5 @@ SceneRoots:
   - {fileID: 2079826517}
   - {fileID: 1403280672}
   - {fileID: 36713899}
+  - {fileID: 1553428487}
+  - {fileID: 1797670373}

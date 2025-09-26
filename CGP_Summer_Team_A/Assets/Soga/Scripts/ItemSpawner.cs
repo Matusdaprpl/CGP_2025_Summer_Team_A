@@ -57,8 +57,7 @@ public class ItemSpawner : MonoBehaviour
             }
             while (IsTooClose(spawnPosition, spawnPositions));
 
-            // MahjongManagerに生成を依頼
-            MahjongManager.instance.SpawnItemFromMountain(spawnPosition);
+            ItemManager.instance.SpawnItemFromMountain(new Vector3(spawnPosition.x, spawnPosition.y, 0));
             spawnPositions.Add(spawnPosition);
         }
 
@@ -114,8 +113,7 @@ public class ItemSpawner : MonoBehaviour
                 }
             }
             while (IsTooClose(newPosition, spawnPositions));
-
-            MahjongManager.instance.SpawnItemFromMountain(newPosition);
+            ItemManager.instance.SpawnItemFromMountain(new Vector3(newPosition.x, newPosition.y, 0));
             spawnPositions.Add(newPosition);
         }
     }

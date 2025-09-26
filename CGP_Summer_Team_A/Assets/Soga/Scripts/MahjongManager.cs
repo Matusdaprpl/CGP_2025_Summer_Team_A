@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Linq;
 using System;
@@ -34,37 +33,19 @@ public class MahjongManager : MonoBehaviour
     public event Action OnPlayerHitItem;
     public static MahjongManager instance;
 
+    public List<Tile> mountain;
+    public List<Tile> playerHand;
+
     private void Awake()
     {
         if (instance == null) instance = this;
         else Destroy(gameObject);
     }
 
-    public void PlayerHitItem()
-    {
-        OnPlayerHitItem?.Invoke();
-    }
-
-    [Header("プレハブ設定")]
-    public GameObject worldItemPrefab;
-    public GameObject handTilePrefab;
-    public Transform handPanel;
-    public List<Tile> mountain;
-    public List<Tile> playerHand;
-    private Dictionary<string, Sprite> tileSprites;
-
-    [Header("UI")]
-    public Text mountainCountText;
-    public Text playerHandCountText;
-
-    [Header("ツモスロット間隔")]
-    public float tsumoSpacerWidth = 30f;
-
     void Start()
     {
-        LoadTileSprites();
         CreateMountain();
-        SuffleMountain();
+        ShuffleMountain();
         playerHand = new List<Tile>();
 
         // 初期配牌
@@ -73,7 +54,7 @@ public class MahjongManager : MonoBehaviour
             playerHand.Add(DrawTile());
         }
         SortHand();
-        UpdateHandUI();
+        MahjongUIManager.instance.UpdateHandUI(playerHand);
 
         OnPlayerHitItem += OnItemGetDrawnAndWaitDiscard;
 
@@ -85,6 +66,7 @@ public class MahjongManager : MonoBehaviour
         if (playerHand == null) playerHand = new List<Tile>();
         playerHand.Clear();
 
+        var tileSprites = MahjongUIManager.instance.GetTileSprites();
         foreach (var data in tilesData)
         {
             string spriteName = (data.suit == Suit.Honor)
@@ -101,7 +83,7 @@ public class MahjongManager : MonoBehaviour
         }
 
         SortHand();
-        UpdateHandUI();
+        MahjongUIManager.instance.UpdateHandUI(playerHand);
         Debug.Log($"【テスト配牌完了】手牌が {playerHand.Count} 枚に設定されました。");
     }
 
@@ -122,70 +104,7 @@ public class MahjongManager : MonoBehaviour
         if (drawnTile == null) return;
 
         playerHand.Add(drawnTile);
-        UpdateHandUI();
-    }
-
-    void LoadTileSprites()
-    {
-        tileSprites = new Dictionary<string, Sprite>();
-        Sprite[] sprites = Resources.LoadAll<Sprite>("Tiles");
-        foreach (Sprite sprite in sprites)
-        {
-            tileSprites[sprite.name] = sprite;
-        }
-    }
-
-    void UpdateHandUI()
-    {
-        // 既存のUIをクリア
-        foreach (Transform child in handPanel)
-            Destroy(child.gameObject);
-
-        // 基本の14枚を並べる
-        int baseCount = Mathf.Min(playerHand.Count, 14);
-        for (int i = 0; i < baseCount; i++)
-        {
-            CreateTileUI(playerHand[i], i);
-        }
-
-        // Spacerを追加
-        GameObject spacer = new GameObject("TsumoSpacer");
-        spacer.transform.SetParent(handPanel, false);
-        LayoutElement le = spacer.AddComponent<LayoutElement>();
-        le.preferredWidth = tsumoSpacerWidth;
-        le.preferredHeight = handTilePrefab.GetComponent<LayoutElement>().preferredHeight;
-
-        // ツモスロット（15枚目 or 空白）
-        if (playerHand.Count == 15)
-        {
-            CreateTileUI(playerHand[14], 14);
-        }
-        else
-        {
-            GameObject emptySlot = new GameObject("TsumoSlot");
-            emptySlot.transform.SetParent(handPanel, false);
-            LayoutElement le2 = emptySlot.AddComponent<LayoutElement>();
-            le2.preferredWidth = handTilePrefab.GetComponent<LayoutElement>().preferredWidth;
-            le2.preferredHeight = handTilePrefab.GetComponent<LayoutElement>().preferredHeight;
-        }
-    }
-
-    void CreateTileUI(Tile tile, int index)
-    {
-        GameObject newTileObj = Instantiate(handTilePrefab, handPanel);
-        string spriteName = (tile.suit == Suit.Honor)
-            ? $"Honor_{tile.rank}"
-            : $"{tile.suit}_{tile.rank}";
-        if (tileSprites.ContainsKey(spriteName))
-        {
-            newTileObj.GetComponent<Image>().sprite = tileSprites[spriteName];
-        }
-
-        Button tileButton = newTileObj.GetComponent<Button>();
-        if (tileButton != null)
-        {
-            tileButton.onClick.AddListener(() => DiscardTile(index));
-        }
+        MahjongUIManager.instance.UpdateHandUI(playerHand);
     }
 
     public void PlayerDraw()
@@ -199,7 +118,7 @@ public class MahjongManager : MonoBehaviour
         if (drawnTile != null)
         {
             playerHand.Add(drawnTile);
-            UpdateHandUI();
+            MahjongUIManager.instance.UpdateHandUI(playerHand);
         }
     }
 
@@ -222,13 +141,14 @@ public class MahjongManager : MonoBehaviour
         mountain.Add(discardedTile);
         playerHand.RemoveAt(handIndex);
         SortHand();
-        UpdateHandUI();
-        UpdateMountainCountUI();
+        MahjongUIManager.instance.UpdateHandUI(playerHand);
+        MahjongUIManager.instance.UpdateMountainCountUI(mountain.Count);
     }
 
     void CreateMountain()
     {
         mountain = new List<Tile>();
+        var tileSprites = MahjongUIManager.instance.GetTileSprites();
         foreach (Suit s in new Suit[] { Suit.Manzu, Suit.Pinzu, Suit.Souzu })
         {
             for (int rank = 1; rank <= 9; rank++)
@@ -257,7 +177,7 @@ public class MahjongManager : MonoBehaviour
         Debug.Log($"牌の山を作成しました。合計：{mountain.Count}枚");
     }
 
-    void SuffleMountain()
+    void ShuffleMountain()
     {
         if (mountain == null) return;
         for (int i = 0; i < mountain.Count; i++)
@@ -279,7 +199,7 @@ public class MahjongManager : MonoBehaviour
         }
         Tile drawTile = mountain[0];
         mountain.RemoveAt(0);
-        UpdateMountainCountUI();
+        MahjongUIManager.instance.UpdateMountainCountUI(mountain.Count);
         return drawTile;
     }
 
@@ -291,42 +211,11 @@ public class MahjongManager : MonoBehaviour
                                .ToList();
     }
 
-    private void UpdateMountainCountUI()
-    {
-        if (mountainCountText != null)
-            mountainCountText.text = $"残りの牌:{mountain.Count}枚";
-    }
-
     public Tile PeekNextTileInMountain()
     {
         if (mountain != null && mountain.Count > 0)
             return mountain[0];
         return null;
-    }
-
-    public ItemController SpawnItemFromMountain(Vector3 pos)
-    {
-        Tile tile = DrawTile();
-        if (tile == null) return null;
-
-        Sprite sp = null;
-        if (tileSprites != null)
-        {
-            var key = (tile.suit == Suit.Honor) ? $"Honor_{tile.rank}" : $"{tile.suit}_{tile.rank}";
-            tileSprites.TryGetValue(key, out sp);
-        }
-        tile.sprite = sp;
-
-        var go = Instantiate(worldItemPrefab, pos, Quaternion.identity);
-        var ic = go.GetComponent<ItemController>();
-        if (ic != null)
-        {
-            var key = (tile.suit == Suit.Honor) ? $"Honor_{tile.rank}" : $"{tile.suit}_{tile.rank}";
-            if (tileSprites.ContainsKey(key))
-                tile.sprite = tileSprites[key];
-            ic.SetTile(this, tile);
-        }
-        return ic;
     }
 
     public bool AddTileToPlayerHand(Tile tile)
@@ -336,7 +225,14 @@ public class MahjongManager : MonoBehaviour
         if (playerHand.Count >= 15) return false;
 
         playerHand.Add(tile);
-        UpdateHandUI();
+        MahjongUIManager.instance.UpdateHandUI(playerHand);
         return true;
     }
+
+    public void PlayerHitItem()
+    {
+        OnPlayerHitItem?.Invoke();
+    }
+
+    
 }
