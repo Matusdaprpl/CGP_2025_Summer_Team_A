@@ -122,6 +122,9 @@ public class MahjongManager : MonoBehaviour
         }
     }
 
+    [Header("捨て牌設定")]
+    public float discardOffset = 2f;
+
     public void DiscardTile(int handIndex)
     {
         if (playerHand.Count <= 14)
@@ -138,7 +141,15 @@ public class MahjongManager : MonoBehaviour
         Tile discardedTile = playerHand[handIndex];
         Debug.Log($"捨て牌:{discardedTile.GetDisplayName()}");
 
-        mountain.Add(discardedTile);
+        GameObject player = GameObject.FindWithTag("Player");
+        Vector3 dropPosition = player != null
+            ? player.transform.position - player.transform.right * discardOffset
+            : Vector3.zero;
+
+        Debug.Log($"DiscardTile: ドロップ位置 {dropPosition}");
+
+        ItemManager.instance.DropDiscardedTile(discardedTile, dropPosition);
+
         playerHand.RemoveAt(handIndex);
         SortHand();
         MahjongUIManager.instance.UpdateHandUI(playerHand);
@@ -234,5 +245,4 @@ public class MahjongManager : MonoBehaviour
         OnPlayerHitItem?.Invoke();
     }
 
-    
 }

@@ -15,7 +15,6 @@ public class ItemBasedDrawTrigger : DrawTrigger
         // 衝突した相手のタグが設定したものであれば
         if (other.CompareTag(itemTag))
         {
-            Debug.Log(other.name + " に接触しました。牌を引きます。");
             
             // DrawTriggerの基本機能を使って、牌を引くリクエストを発行する
             RequestDraw();
