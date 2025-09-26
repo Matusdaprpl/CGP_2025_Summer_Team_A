@@ -96,7 +96,6 @@ public class MahjongManager : MonoBehaviour
         }
         if (playerHand.Count >= 15)
         {
-            Debug.Log("手牌がいっぱいです。捨て牌をしてください。");
             return;
         }
 
@@ -129,7 +128,6 @@ public class MahjongManager : MonoBehaviour
     {
         if (playerHand.Count <= 14)
         {
-            Debug.Log("ツモってください。");
             return;
         }
         if (handIndex < 0 || handIndex >= playerHand.Count)
@@ -145,8 +143,6 @@ public class MahjongManager : MonoBehaviour
         Vector3 dropPosition = player != null
             ? player.transform.position - player.transform.right * discardOffset
             : Vector3.zero;
-
-        Debug.Log($"DiscardTile: ドロップ位置 {dropPosition}");
 
         ItemManager.instance.DropDiscardedTile(discardedTile, dropPosition);
 
@@ -245,4 +241,11 @@ public class MahjongManager : MonoBehaviour
         OnPlayerHitItem?.Invoke();
     }
 
+    public void ReturnTileToMountain(Tile tile)
+    {
+        if (tile != null && mountain != null)
+        {
+            mountain.Add(tile);
+        }
+    }
 }

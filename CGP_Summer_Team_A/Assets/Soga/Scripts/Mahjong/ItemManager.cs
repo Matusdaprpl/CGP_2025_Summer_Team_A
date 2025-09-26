@@ -56,7 +56,6 @@ public class ItemManager : MonoBehaviour
         if (ic != null)
         {
             ic.SetTile(MahjongManager.instance, discardedTile);
-            Debug.Log("DropDiscardedTile: アイテムを生成しました。");
         }
         else
         {

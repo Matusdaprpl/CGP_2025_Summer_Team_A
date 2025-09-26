@@ -241,7 +241,7 @@ public class NPCplayer : MonoBehaviour
         npcMahjong.AddTileToHand(pickedTile);
         
         // ★追加：どのNPCがどの牌を拾ったかログに出す
-        Debug.Log($"[{gameObject.name}] 牌を拾った: {pickedTile.GetDisplayName()}");
+        Debug.Log($"{gameObject.name}の拾った牌: {pickedTile.GetDisplayName()}");
 
         yield return new WaitForSeconds(1.0f);
         
