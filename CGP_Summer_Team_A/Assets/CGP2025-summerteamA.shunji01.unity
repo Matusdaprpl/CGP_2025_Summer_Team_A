@@ -242,7 +242,6 @@ GameObject:
   - component: {fileID: 93837153}
   - component: {fileID: 93837152}
   - component: {fileID: 93837156}
-  - component: {fileID: 93837157}
   - component: {fileID: 93837158}
   m_Layer: 0
   m_Name: NPC3
@@ -264,7 +263,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   minSpeed: 5
-  maxSpeed: 13
+  maxSpeed: 15
   speedChangeInterval: 3
   laneMoveSpeed: 5
   minLaneY: -2
@@ -274,6 +273,7 @@ MonoBehaviour:
   itemSearchInterval: 1
   countdownTime: 3
   countdownText: {fileID: 0}
+  npcMahjong: {fileID: 93837156}
   laneChangeCooldown: 2
 --- !u!50 &93837153
 Rigidbody2D:
@@ -385,19 +385,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetYakuman: 0
---- !u!114 &93837157
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 93837151}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 36fb0d8229e95b14a8e0f02dc71e8a20, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemTag: Item
+  discardOffset: 2
 --- !u!61 &93837158
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -1426,6 +1414,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee38ae503e6ca5140b5846ce6905a7f4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  discardOffset: 2
 --- !u!4 &668795117
 Transform:
   m_ObjectHideFlags: 0
@@ -1700,7 +1689,6 @@ GameObject:
   - component: {fileID: 911804198}
   - component: {fileID: 911804197}
   - component: {fileID: 911804201}
-  - component: {fileID: 911804202}
   - component: {fileID: 911804203}
   m_Layer: 0
   m_Name: NPC2
@@ -1721,8 +1709,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 46740c47b2ab67045adc359b2fb5f692, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  minSpeed: 8
-  maxSpeed: 10
+  minSpeed: 5
+  maxSpeed: 15
   speedChangeInterval: 3
   laneMoveSpeed: 5
   minLaneY: -2
@@ -1732,6 +1720,7 @@ MonoBehaviour:
   itemSearchInterval: 1
   countdownTime: 3
   countdownText: {fileID: 0}
+  npcMahjong: {fileID: 911804201}
   laneChangeCooldown: 2
 --- !u!50 &911804198
 Rigidbody2D:
@@ -1843,19 +1832,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetYakuman: 0
---- !u!114 &911804202
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 911804196}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 36fb0d8229e95b14a8e0f02dc71e8a20, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemTag: Item
+  discardOffset: 2
 --- !u!61 &911804203
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -2459,7 +2436,6 @@ GameObject:
   - component: {fileID: 1983959247}
   - component: {fileID: 1983959246}
   - component: {fileID: 1983959245}
-  - component: {fileID: 1983959244}
   - component: {fileID: 1983959250}
   m_Layer: 0
   m_Name: NPC1
@@ -2468,19 +2444,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1983959244
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1983959243}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 36fb0d8229e95b14a8e0f02dc71e8a20, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemTag: Item
 --- !u!114 &1983959245
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2494,6 +2457,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetYakuman: 0
+  discardOffset: 2
 --- !u!114 &1983959246
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2506,8 +2470,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 46740c47b2ab67045adc359b2fb5f692, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  minSpeed: 7
-  maxSpeed: 10
+  minSpeed: 8
+  maxSpeed: 15
   speedChangeInterval: 3
   laneMoveSpeed: 5
   minLaneY: -2
@@ -2517,6 +2481,7 @@ MonoBehaviour:
   itemSearchInterval: 1
   countdownTime: 3
   countdownText: {fileID: 0}
+  npcMahjong: {fileID: 1983959245}
   laneChangeCooldown: 2
 --- !u!50 &1983959247
 Rigidbody2D:
@@ -2958,13 +2923,13 @@ MonoBehaviour:
   itemPrefab: {fileID: 8261760855208729183, guid: a1fce91b982b52540a44167b6dd43cb6, type: 3}
   itemCount: 80
   minX: 0
-  maxX: 1000
+  maxX: 2000
   fixedYValues:
   - -4
   - -2.5
   - -1.5
   - 0.5
-  minDistance: 1
+  minDistance: 5
 --- !u!4 &2118395339
 Transform:
   m_ObjectHideFlags: 0

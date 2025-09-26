@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using UnityEngine;
 
 public class ItemController : MonoBehaviour
@@ -26,8 +27,6 @@ public class ItemController : MonoBehaviour
         {
             spriteRenderer.sprite = tile.sprite;
         }
-        // 必要ならデバッグ表示
-        // Debug.Log($"生成: {tile.GetDisplayName()}");
     }
 
     public Tile GetTile()
@@ -37,37 +36,27 @@ public class ItemController : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        var root = other.transform.root;
-        
-        if (root.CompareTag("Player"))
+        if (other.CompareTag("Player"))
         {
-           if (manager == null || tile == null) return;
+            if (manager == null || tile == null) return;
 
-            // 成功時のみ削除
-            if (manager.AddTileToPlayerHand(tile))
+            if (manager.playerHand != null && manager.playerHand.Count >= 15)
             {
-                Debug.Log($"プレイヤーが拾った牌: {tile.GetDisplayName()}");
-                OnItemPickedUp?.Invoke(tile.suit.ToString(), tile.rank);
-                Destroy(gameObject);
+                return;
             }
-            else
-            {
-                // 上限などで追加不可 → 何もしない（アイテムは残す）
-                Debug.Log("手牌上限のため拾えません。アイテムは残します。");
-            }
+
+            manager.AddTileToPlayerHand(tile);
+
+            OnItemPickedUp?.Invoke(tile.suit.ToString(), tile.rank);
+            UnityEngine.Debug.Log($"拾った牌:{tile.GetDisplayName()}");
+
+            Destroy(gameObject);
+
         }
-        else if (root.CompareTag("NPC"))
+        else if (other.CompareTag("NPC"))
         {
-            NPCmahjong npc = other.GetComponent<NPCmahjong>();
-            if (npc != null && tile != null)
-            {
-                if (npc.hand.Count < 15)
-                {
-                    npc.hand.Add(tile);
-                    Debug.Log($"NPCが牌を拾った: {tile.GetDisplayName()}");
-                    Destroy(gameObject);
-                }
-            }
+            OnItemPickedUp?.Invoke(tile.suit.ToString(), tile.rank);
+            UnityEngine.Debug.Log($"NPCの拾った牌:{tile.GetDisplayName()}");
         }
     }
     
