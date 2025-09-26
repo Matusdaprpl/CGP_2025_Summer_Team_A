@@ -51,8 +51,6 @@ public class ItemManager : MonoBehaviour
             return;
         }
 
-        Debug.Log($"DropDiscardedTile: 牌 {discardedTile.GetDisplayName()} を位置 {dropPosition} にドロップします。");
-
         var go = Instantiate(worldItemPrefab, dropPosition, Quaternion.identity);
         var ic = go.GetComponent<ItemController>();
         if (ic != null)
