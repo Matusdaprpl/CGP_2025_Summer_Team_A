@@ -1442,9 +1442,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bb80f90ccb951484197b1ac9eb5f79c1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerMove: {fileID: 423721864}
+  raceBGM: {fileID: 2079826516}
+  countdownSE: {fileID: 1403280673}
+  npcMoveScripts:
+  - {fileID: 1983959246}
+  - {fileID: 911804197}
+  - {fileID: 93837152}
   agariButton: {fileID: 190110715}
   scoreManager: {fileID: 423721869}
-  forceDaisangenHand: 0
+  forceDaisangenHand: 1
   forceSuuankouHand: 0
   forceKokushiHand: 0
   forceSuukantsuHand: 0
