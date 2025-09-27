@@ -272,8 +272,8 @@ MonoBehaviour:
   itemDetectionRadius: 20
   itemSearchInterval: 1
   countdownTime: 3
-  countdownText: {fileID: 0}
-  npcMahjong: {fileID: 0}
+  countdownText: {fileID: 124096091}
+  npcMahjong: {fileID: 93837156}
   laneChangeCooldown: 2
 --- !u!50 &93837153
 Rigidbody2D:
@@ -955,6 +955,8 @@ MonoBehaviour:
   countdownTime: 3
   countdownText: {fileID: 191965976}
   raceBGM: {fileID: 2079826516}
+  CountdownSE: {fileID: 1403280673}
+  countdownSE: {fileID: 8300000, guid: 04eaaf26abee47c449f32ce85cd01c42, type: 3}
   itemGetSE: {fileID: 8300000, guid: 3e3c723f725146e4babb5dcf06ef0358, type: 3}
 --- !u!114 &423721865
 MonoBehaviour:
@@ -1726,8 +1728,8 @@ MonoBehaviour:
   itemDetectionRadius: 20
   itemSearchInterval: 1
   countdownTime: 3
-  countdownText: {fileID: 0}
-  npcMahjong: {fileID: 0}
+  countdownText: {fileID: 124096091}
+  npcMahjong: {fileID: 911804201}
   laneChangeCooldown: 2
 --- !u!50 &911804198
 Rigidbody2D:
@@ -2274,7 +2276,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 8300000, guid: 04eaaf26abee47c449f32ce85cd01c42, type: 3}
-  m_PlayOnAwake: 1
+  m_PlayOnAwake: 0
   m_Volume: 0.4
   m_Pitch: 1
   Loop: 0
@@ -2731,8 +2733,8 @@ MonoBehaviour:
   itemDetectionRadius: 20
   itemSearchInterval: 1
   countdownTime: 3
-  countdownText: {fileID: 0}
-  npcMahjong: {fileID: 0}
+  countdownText: {fileID: 124096091}
+  npcMahjong: {fileID: 1983959245}
   laneChangeCooldown: 2
 --- !u!50 &1983959247
 Rigidbody2D:
