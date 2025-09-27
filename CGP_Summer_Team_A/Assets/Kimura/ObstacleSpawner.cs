@@ -13,7 +13,7 @@ public class ObstacleSpawner : MonoBehaviour
     [Header("Y座標と間隔の設定")]
     [SerializeField]
     [Tooltip("Obstacle が生成されるY座標の固定値（複数設定可能）")]
-    private float[] fixedYValues = new float[] { 0.165f, -1.33f, -2.76f, -4.26f };
+    private float[] fixedYValues = new float[] { 0.165f, -1.25f, -2.75f, -4.25f };
 
     [SerializeField]
     [Tooltip("Obstacle 同士が最低でもこれだけ離れる距離")]
