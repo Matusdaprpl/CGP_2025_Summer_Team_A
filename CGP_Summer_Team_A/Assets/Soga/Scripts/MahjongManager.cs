@@ -1,12 +1,11 @@
 using UnityEngine;
-using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Linq;
 using System;
 
 public enum Suit
 {
-    Manzu, 
+    Manzu,
     Pinzu,
     Souzu,
     Honor
@@ -18,93 +17,76 @@ public class Tile
     public int rank;
     public Sprite sprite;
 
-    public Tile(Suit suit,int rank,Sprite sprite)
+    public Tile(Suit suit, int rank, Sprite sprite)
     {
         this.suit = suit;
         this.rank = rank;
         this.sprite = sprite;
     }
 
-    public string GetDisplayName() => (suit == Suit.Honor) ? $"Honor_{rank}" : $"{suit}_{rank}";
+    public string GetDisplayName() =>
+        (suit == Suit.Honor) ? $"Honor_{rank}" : $"{suit}_{rank}";
 }
 
 public class MahjongManager : MonoBehaviour
 {
     public event Action OnPlayerHitItem;
-
-    public void PlayerHitItem()
-    {
-        OnPlayerHitItem?.Invoke();
-    }
     public static MahjongManager instance;
-    private void Awake()
-    {
-        if (instance == null)
-        {
-            instance = this;
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-    }
 
-    [Header("プレハブ設定")]
-    public GameObject worldItemPrefab; 
-    public GameObject handTilePrefab; 
-    public Transform handPanel;
     public List<Tile> mountain;
     public List<Tile> playerHand;
-    private Dictionary<string, Sprite> tileSprites;
+
+    private void Awake()
+    {
+        if (instance == null) instance = this;
+        else Destroy(gameObject);
+    }
 
     void Start()
     {
-        LoadTileSprites();
         CreateMountain();
-        SuffleMountain();
+        ShuffleMountain();
         playerHand = new List<Tile>();
 
-        // 【★修正箇所★】GameManager2のテスト配牌フラグがオフの場合、通常の配牌を行う
+        // 初期配牌
         for (int i = 0; i < 14; i++)
         {
             playerHand.Add(DrawTile());
         }
         SortHand();
-        UpdateHandUI();
-        
+        MahjongUIManager.instance.UpdateHandUI(playerHand);
+
         OnPlayerHitItem += OnItemGetDrawnAndWaitDiscard;
 
-        Debug.Log("MahjongManager側の確認: 山の準備完了。牌の総数: " + mountain.Count);
+        Debug.Log("MahjongManager側: 山の準備完了。牌の総数: " + mountain.Count);
     }
 
     public void SetTestHand(List<(Suit suit, int rank)> tilesData)
     {
         if (playerHand == null) playerHand = new List<Tile>();
         playerHand.Clear();
-        
+
+        var tileSprites = MahjongUIManager.instance.GetTileSprites();
         foreach (var data in tilesData)
         {
-            string spriteName = (data.suit == Suit.Honor) ? $"Honor_{data.rank}" : $"{data.suit}_{data.rank}";
-            Sprite sprite = null;
-            
-            if (tileSprites.ContainsKey(spriteName))
-            {
-                sprite = tileSprites[spriteName];
-            }
-            else
-            {
+            string spriteName = (data.suit == Suit.Honor)
+                ? $"Honor_{data.rank}"
+                : $"{data.suit}_{data.rank}";
+            Sprite sprite = tileSprites.ContainsKey(spriteName)
+                ? tileSprites[spriteName]
+                : null;
+
+            if (sprite == null)
                 Debug.LogError($"テスト配牌用スプライトが見つかりません: {spriteName}");
-            }
-            
+
             playerHand.Add(new Tile(data.suit, data.rank, sprite));
         }
-        
+
         SortHand();
-        UpdateHandUI();
-        
+        MahjongUIManager.instance.UpdateHandUI(playerHand);
         Debug.Log($"【テスト配牌完了】手牌が {playerHand.Count} 枚に設定されました。");
     }
-    
+
     void OnItemGetDrawnAndWaitDiscard()
     {
         if (mountain.Count == 0)
@@ -112,10 +94,8 @@ public class MahjongManager : MonoBehaviour
             Debug.Log("流局です。");
             return;
         }
-
         if (playerHand.Count >= 15)
         {
-            Debug.Log("手牌がいっぱいです。捨て牌をしてください。");
             return;
         }
 
@@ -123,66 +103,7 @@ public class MahjongManager : MonoBehaviour
         if (drawnTile == null) return;
 
         playerHand.Add(drawnTile);
-        UpdateHandUI();
-    }
-
-    void LoadTileSprites()
-    {
-        tileSprites = new Dictionary<string, Sprite>();
-        Sprite[] sprites = Resources.LoadAll<Sprite>("Tiles");
-
-        foreach (Sprite sprite in sprites)
-        {
-            tileSprites[sprite.name] = sprite;
-        }
-    }
-
-    void UpdateHandUI()
-    {
-        foreach (Transform child in handPanel)
-        {
-            Destroy(child.gameObject);
-        }
-
-        bool isDrawingPhase = playerHand.Count == 15;
-
-        for (int i = 0; i < playerHand.Count; i++)
-        {
-            // ツモ牌（最後の牌）の直前にスペーサーを挿入する
-            if (isDrawingPhase && i == playerHand.Count - 1)
-            {
-                // スペーサー用の空のGameObjectを作成
-                GameObject spacer = new GameObject("Spacer");
-                spacer.transform.SetParent(handPanel, false);
-
-                // Layout Elementコンポーネントを追加して、幅を指定
-                LayoutElement le = spacer.AddComponent<LayoutElement>();
-                
-                // この数値を変更すると間隔を調整できます
-                le.preferredWidth = 30f; 
-            }
-
-            GameObject newTileObj = Instantiate(handTilePrefab, handPanel);
-
-            Tile tile = playerHand[i];
-            string spriteName = tile.suit == Suit.Honor ? $"Honor_{tile.rank}" : $"{tile.suit}_{tile.rank}";
-
-            if (tileSprites.ContainsKey(spriteName))
-            {
-                newTileObj.GetComponent<Image>().sprite = tileSprites[spriteName];
-            }
-            else
-            {
-                Debug.LogError($"スプライトが見つかりません:{spriteName}");
-            }
-
-            Button tileButton = newTileObj.GetComponent<Button>();
-            if (tileButton != null)
-            {
-                int index = i;
-                tileButton.onClick.AddListener(() => DiscardTile(index));
-            }
-        }
+        MahjongUIManager.instance.UpdateHandUI(playerHand);
     }
 
     public void PlayerDraw()
@@ -192,20 +113,21 @@ public class MahjongManager : MonoBehaviour
             Debug.Log("流局です。");
             return;
         }
-
         Tile drawnTile = DrawTile();
         if (drawnTile != null)
         {
             playerHand.Add(drawnTile);
-            drawnTile.ToString();
-            UpdateHandUI();
+            MahjongUIManager.instance.UpdateHandUI(playerHand);
         }
     }
+
+    [Header("捨て牌設定")]
+    public float discardOffset = 2f;
+
     public void DiscardTile(int handIndex)
     {
         if (playerHand.Count <= 14)
         {
-            Debug.Log("ツモってください。");
             return;
         }
         if (handIndex < 0 || handIndex >= playerHand.Count)
@@ -217,17 +139,23 @@ public class MahjongManager : MonoBehaviour
         Tile discardedTile = playerHand[handIndex];
         Debug.Log($"捨て牌:{discardedTile.GetDisplayName()}");
 
-        mountain.Add(discardedTile);
+        GameObject player = GameObject.FindWithTag("Player");
+        Vector3 dropPosition = player != null
+            ? player.transform.position - player.transform.right * discardOffset
+            : Vector3.zero;
+
+        ItemManager.instance.DropDiscardedTile(discardedTile, dropPosition);
 
         playerHand.RemoveAt(handIndex);
         SortHand();
-        UpdateHandUI();
-        UpdateMountainCountUI();
+        MahjongUIManager.instance.UpdateHandUI(playerHand);
+        MahjongUIManager.instance.UpdateMountainCountUI(mountain.Count);
     }
+
     void CreateMountain()
     {
         mountain = new List<Tile>();
-
+        var tileSprites = MahjongUIManager.instance.GetTileSprites();
         foreach (Suit s in new Suit[] { Suit.Manzu, Suit.Pinzu, Suit.Souzu })
         {
             for (int rank = 1; rank <= 9; rank++)
@@ -237,9 +165,7 @@ public class MahjongManager : MonoBehaviour
                 {
                     Sprite sprite = tileSprites[spriteName];
                     for (int i = 0; i < 4; i++)
-                    {
                         mountain.Add(new Tile(s, rank, sprite));
-                    }
                 }
             }
         }
@@ -251,20 +177,16 @@ public class MahjongManager : MonoBehaviour
             {
                 Sprite sprite = tileSprites[spriteName];
                 for (int i = 0; i < 4; i++)
-                    
-                {
                     mountain.Add(new Tile(Suit.Honor, rank, sprite));
-                }
             }
         }
 
         Debug.Log($"牌の山を作成しました。合計：{mountain.Count}枚");
     }
 
-    void SuffleMountain()
+    void ShuffleMountain()
     {
         if (mountain == null) return;
-
         for (int i = 0; i < mountain.Count; i++)
         {
             int randomIndex = UnityEngine.Random.Range(i, mountain.Count);
@@ -282,12 +204,9 @@ public class MahjongManager : MonoBehaviour
             Debug.Log("山に牌がありません！");
             return null;
         }
-
         Tile drawTile = mountain[0];
         mountain.RemoveAt(0);
-
-        UpdateMountainCountUI();
-
+        MahjongUIManager.instance.UpdateMountainCountUI(mountain.Count);
         return drawTile;
     }
 
@@ -299,82 +218,34 @@ public class MahjongManager : MonoBehaviour
                                .ToList();
     }
 
-    void PrintHand(List<Tile> hand)
-    {
-        string handString = "";
-        foreach (Tile tile in hand)
-        {
-            handString += tile.ToString() + "|";
-        }
-        Debug.Log(handString);
-    }
-
-    [Header("UI")]
-    public Text mountainCountText;
-    public Text playerHandCountText;
-
-    private void UpdateMountainCountUI()
-    {
-        if (mountainCountText != null)
-        {
-            mountainCountText.text = $"残りの牌:{mountain.Count}枚";
-        }
-    }
     public Tile PeekNextTileInMountain()
     {
         if (mountain != null && mountain.Count > 0)
-        {
             return mountain[0];
-        }
-
         return null;
     }
 
-    public ItemController SpawnItemFromMountain(Vector3 pos)
-    {
-        Tile tile = DrawTile();
-        if (tile == null) return null;
-
-        Sprite sp = null;
-        if (tileSprites != null)
-        {
-            var key = (tile.suit == Suit.Honor) ? $"Honor_{tile.rank}" : $"{tile.suit}_{tile.rank}";
-            tileSprites.TryGetValue(key, out sp);
-        }
-        tile.sprite = sp;
-
-        var go = Instantiate(worldItemPrefab, pos, Quaternion.identity);
-        var ic = go.GetComponent<ItemController>();
-        if (ic != null)
-        {
-            var key = (tile.suit == Suit.Honor) ? $"Honor_{tile.rank}" : $"{tile.suit}_{tile.rank}";
-            if (tileSprites.ContainsKey(key))
-            {
-                tile.sprite = tileSprites[key];
-            }
-            ic.SetTile(this, tile);
-        }
-        return ic;
-    }
     public bool AddTileToPlayerHand(Tile tile)
     {
-        if (tile == null)
-        {
-            return false;
-        }
+        if (tile == null) return false;
+        if (playerHand == null) playerHand = new List<Tile>();
+        if (playerHand.Count >= 15) return false;
 
-        if (playerHand == null)
-        {
-            playerHand = new List<Tile>();
-        }
-
-        if (playerHand.Count >= 15)
-        {
-            return false;
-        }
-        
         playerHand.Add(tile);
-        UpdateHandUI();
+        MahjongUIManager.instance.UpdateHandUI(playerHand);
         return true;
+    }
+
+    public void PlayerHitItem()
+    {
+        OnPlayerHitItem?.Invoke();
+    }
+
+    public void ReturnTileToMountain(Tile tile)
+    {
+        if (tile != null && mountain != null)
+        {
+            mountain.Add(tile);
+        }
     }
 }

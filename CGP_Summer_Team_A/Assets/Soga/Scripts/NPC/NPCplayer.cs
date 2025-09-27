@@ -2,6 +2,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using TMPro;
 using System.Collections.Generic;
+using System.Collections;
 using System.Linq;
 
 public class NPCplayer : MonoBehaviour
@@ -28,7 +29,7 @@ public class NPCplayer : MonoBehaviour
     public float maxLaneY = 2f;
 
     [Tooltip("レーンの変更間隔（秒）")]
-    public float laneChangeInterval = 2f; 
+    public float laneChangeInterval = 2f;
 
     [Header("アイテム追跡設定")]
     [Tooltip("アイテムを探す範囲")]
@@ -46,7 +47,9 @@ public class NPCplayer : MonoBehaviour
     [Tooltip("カウントダウンのUIテキスト")]
     public TMP_Text countdownText;
 
-    public List<Tile> hand = new List<Tile>();
+    [Header("牌の管理")]
+    [SerializeField]
+    private NPCmahjong npcMahjong;
 
     private Rigidbody2D rb;
     private float currentSpeed;
@@ -72,7 +75,7 @@ public class NPCplayer : MonoBehaviour
         var yakumanValues = System.Enum.GetValues(typeof(Yakuman));
 
         targetYakuman = (Yakuman)yakumanValues.GetValue(Random.Range(1, yakumanValues.Length));
-        Debug.Log($"NPCの目標役満: {targetYakuman}");
+        Debug.Log($"{gameObject.name}の目標役満: {targetYakuman}");
 
         UpdateSpeed();
         timeSinceLastChange = 0f;
@@ -167,7 +170,7 @@ public class NPCplayer : MonoBehaviour
 
                 float distance = Vector2.Distance(transform.position, itemCollider.transform.position);
 
-                bool isNeeded = YakumanEvaluator.IsTileNeededFor(itemTile, targetYakuman, this.hand);
+                bool isNeeded = YakumanEvaluator.IsTileNeededFor(itemTile, targetYakuman, npcMahjong.hand);
 
                 if (isNeeded)
                 {
@@ -207,33 +210,44 @@ public class NPCplayer : MonoBehaviour
         }
     }
 
+    private bool isProcessingTile = false;
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Item"))
+        if (other.CompareTag("Item") && !isProcessingTile && npcMahjong.hand.Count < 15)
         {
-            if (hand.Count >= 15)
-            {
-                return;
-            }
-
             ItemController itemController = other.GetComponent<ItemController>();
             if (itemController != null)
             {
                 Tile pickedTile = itemController.GetTile();
                 if (pickedTile != null)
                 {
-                    hand.Add(pickedTile);
-                    Debug.Log($"NPCが牌を拾った: {pickedTile.GetDisplayName()}");
-
+                    Destroy(other.gameObject);
                     if (other.transform == targetItem)
                     {
                         targetItem = null;
                     }
 
-                    Destroy(other.gameObject);
+                    // ★名前をより分かりやすく変更 (ProcessPickedTile → ProcessTileExchange)
+                    StartCoroutine(ProcessTileExchange(pickedTile));
                 }
             }
         }
+    }
+    
+    private IEnumerator ProcessTileExchange(Tile pickedTile)
+    {
+        isProcessingTile = true;
+        
+        npcMahjong.AddTileToHand(pickedTile);
+        
+        // ★追加：どのNPCがどの牌を拾ったかログに出す
+        Debug.Log($"{gameObject.name}の拾った牌: {pickedTile.GetDisplayName()}");
+
+        yield return new WaitForSeconds(1.0f);
+        
+        npcMahjong.DiscardTile();
+        
+        isProcessingTile = false;
     }
 }
 

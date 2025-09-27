@@ -8,18 +8,11 @@ public class NPCmahjong : MonoBehaviour
     [Tooltip("目指す役満")]
     public Yakuman targetYakuman;
     public List<Tile> hand = new List<Tile>();
-    private DrawTrigger drawTrigger;
 
-    void Awake()
-    {
-        drawTrigger = GetComponent<DrawTrigger>();
-        if (drawTrigger == null)
-        {
-            Debug.LogError("DrawTriggerコンポーネントが見つかりません。");
-            return;
-        }
-        drawTrigger.OnDrawRequested += HandleDrawRequest;
-    }
+    [Header("捨て牌設定")]
+    [Tooltip("捨て牌のドロップ位置オフセット")]
+    [SerializeField]
+    private float discardOffset = 2.0f;
 
     void Start()
     {
@@ -29,29 +22,26 @@ public class NPCmahjong : MonoBehaviour
         }
     }
 
-    private void HandleDrawRequest()
-    {
-        Tile drawnTile = MahjongManager.instance.DrawTile();
-        if (drawnTile == null) return;
-
-        hand.Add(drawnTile);
-        DiscardTile();
-    }
-
-    private void DiscardTile()
+    public void DiscardTile()
     {
         if (hand.Count == 0) return;
 
         Tile tileToDiscard = YakumanEvaluator.ChooseDiscardTile(hand, targetYakuman);
         hand.Remove(tileToDiscard);
-        Debug.Log($"NPCの捨て牌: {tileToDiscard.GetDisplayName()}");
+
+        Vector3 dropPosition = new Vector3(transform.position.x - discardOffset, transform.position.y, transform.position.z);
+        ItemManager.instance.DropDiscardedTile(tileToDiscard, dropPosition);
+
+        Debug.Log($"{gameObject.name}の捨て牌: {tileToDiscard.GetDisplayName()}");
     }
 
-    void OnDestroy()
+    public void AddTileToHand(Tile tile)
     {
-        if (drawTrigger != null)
-        {
-            drawTrigger.OnDrawRequested -= HandleDrawRequest;
-        }
+        if (tile == null || hand == null) return;
+        if (hand.Count >= 15) return; // 上限チェック
+
+        hand.Add(tile);
     }
+
+    
 }
