@@ -4,11 +4,11 @@ using TMPro;
 public class PlayerMove : MonoBehaviour
 {
     [Header("速度設定")]
-    public float startSpeed = 10f;  // 初期速度
-    public float maxSpeed = 20f;     // 最大速度
+    public float startSpeed = 10f;   // 初期速度
+    public float maxSpeed = 15f;     // 最大速度（通常時）
     public float accel = 10f;        // 加速の強さ
     public float decel = 10f;        // 減速の強さ
-    public float smooth = 5f;        // currentSpeed の滑らかさ
+    public float smooth = 5f;        // 通常時の滑らかさ
     public float baseSpeed = 10f;    // キーを離したとき戻る速度
 
     [Header("カウントダウン設定")]
@@ -20,17 +20,22 @@ public class PlayerMove : MonoBehaviour
     public AudioSource CountdownSE; // BGM
 
     public AudioClip countdownSE;
+
     public AudioClip itemGetSE;
     private AudioSource audioSource;
 
     private bool hasplayed = false;
     private float targetSpeed;       // 入力による目標速度
     private float currentSpeed;      // 実際の速度
-
-
     private float remainingCountdownTime;
     private bool isCountdownActive = true;
     public bool IsCountdownActive => isCountdownActive;
+
+    // --- Obstacle関連 ---
+    private bool isOnObstacle = false;   // Obstacle中か
+    private float obstacleMaxSpeed = 2f; // Obstacle時の最大速度
+    private float obstacleMinSpeed = 0f; // Obstacle時の最小速度
+    private float obstacleSmooth = 20f;  // Obstacle時の減速スピード
 
     void Start()
     {
@@ -44,7 +49,6 @@ public class PlayerMove : MonoBehaviour
         }
 
         audioSource = GetComponent<AudioSource>();
-
     }
 
     void Update()
@@ -94,20 +98,31 @@ public class PlayerMove : MonoBehaviour
             isKeyPressed = true;
         }
 
-        // 入力なし → baseSpeed に滑らかに戻す
-        if (!isKeyPressed)
+        // 入力なし → baseSpeed に滑らかに戻す（Obstacle中は除外）
+        if (!isKeyPressed && !isOnObstacle)
         {
             targetSpeed = Mathf.MoveTowards(targetSpeed, baseSpeed, smooth * Time.deltaTime);
         }
 
-        // 速度制限
-        targetSpeed = Mathf.Clamp(targetSpeed, 0f, maxSpeed);
+        // --- 速度制限 & 減速処理 ---
+        if (isOnObstacle)
+        {
+            // Obstacle中は速度を0〜2fに制限
+            targetSpeed = Mathf.Clamp(targetSpeed, obstacleMinSpeed, obstacleMaxSpeed);
 
-        // currentSpeed を滑らかに追従
-        currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, smooth * Time.deltaTime);
+            // 急速に減速する（obstacleSmoothを使用）
+            currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, obstacleSmooth * Time.deltaTime);
+        }
+        else
+        {
+            // 通常は0〜maxSpeedに制限
+            targetSpeed = Mathf.Clamp(targetSpeed, 0f, maxSpeed);
+
+            // 通常の滑らかさ
+            currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, smooth * Time.deltaTime);
+        }
 
         // --- 移動 ---
-
         transform.Translate(Vector2.right * currentSpeed * Time.deltaTime);
     }
 
@@ -121,5 +136,31 @@ public class PlayerMove : MonoBehaviour
     public float GetCurrentSpeed()
     {
         return currentSpeed;
+    }
+
+    // --- Obstacleに入ったとき ---
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Obstacle"))
+        {
+            if (currentSpeed <= 11f) // 速度11以下のときのみ制限適用
+            {
+                Debug.Log("Obstacleに衝突 → 速度制限(0〜2f)");
+                isOnObstacle = true;
+            }
+        }
+    }
+
+    // --- Obstacleから出たとき ---
+    private void OnTriggerExit2D(Collider2D other)
+    {
+        if (other.CompareTag("Obstacle"))
+        {
+            if (isOnObstacle)
+            {
+                Debug.Log("Obstacleから離脱 → 通常速度に戻す");
+                isOnObstacle = false;
+            }
+        }
     }
 }

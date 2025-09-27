@@ -11,8 +11,9 @@ public class ItemSpawner : MonoBehaviour
     [SerializeField] private float maxX = 10f;
 
     [Header("Y座標と間隔の設定")]
+    [SerializeField]
     [Tooltip("アイテムが生成されるY座標の固定値（4つ設定）")]
-    [SerializeField] private float[] fixedYValues = new float[] { -4f, -2.5f, -1f, 0f };
+    private float[] fixedYValues = new float[] { -4f, -2.5f, -1f, 0f };
 
     [SerializeField]
     [Tooltip("アイテム同士が最低でもこれだけ離れる距離")]
