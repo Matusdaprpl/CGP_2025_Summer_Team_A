@@ -5,7 +5,7 @@ public class PlayerMove : MonoBehaviour
 {
     [Header("速度設定")]
     public float startSpeed = 10f;   // 初期速度
-    public float maxSpeed = 20f;     // 最大速度（通常時）
+    public float maxSpeed = 15f;     // 最大速度（通常時）
     public float accel = 10f;        // 加速の強さ
     public float decel = 10f;        // 減速の強さ
     public float smooth = 5f;        // 通常時の滑らかさ
@@ -132,7 +132,7 @@ public class PlayerMove : MonoBehaviour
     {
         if (other.CompareTag("Obstacle"))
         {
-            if (currentSpeed <= 12f) // 速度12以下のときのみ制限適用
+            if (currentSpeed <= 11f) // 速度11以下のときのみ制限適用
             {
                 Debug.Log("Obstacleに衝突 → 速度制限(0〜2f)");
                 isOnObstacle = true;
