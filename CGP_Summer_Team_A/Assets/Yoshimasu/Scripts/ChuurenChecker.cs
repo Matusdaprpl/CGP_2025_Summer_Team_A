@@ -4,9 +4,9 @@ using System.Linq;
 using Unity.VisualScripting;
 using NUnit.Framework;
 
-public static class NinegateChecker
+public static class ChuurenChecker
 {
-    public static bool IsNineGates(List<Tile> hand)
+    public static bool IsChuuren(List<Tile> hand)
     {
         if (hand == null || hand.Count != 14) return false;
 

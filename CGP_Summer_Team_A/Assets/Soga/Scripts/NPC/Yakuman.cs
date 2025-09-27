@@ -6,9 +6,8 @@ public enum Yakuman
     Daisangen,        // 大三元
     Shousuushii,      // 小四喜
     Daisuushii,       // 大四喜
-    Tsuuiisou,        // 字一色
+    Tsuiso,        // 字一色
     Chinroutou,       // 清老頭
     Ryuuiisou,        // 緑一色
-    ChuurenPoutou,    // 九蓮宝燈
-    SuuKantsu,       // 四槓子
+    Chuuren,    // 九蓮宝燈
 }

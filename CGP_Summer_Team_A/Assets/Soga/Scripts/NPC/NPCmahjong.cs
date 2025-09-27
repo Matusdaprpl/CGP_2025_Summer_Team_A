@@ -9,14 +9,23 @@ public class NPCmahjong : MonoBehaviour
     public Yakuman targetYakuman;
     public List<Tile> hand = new List<Tile>();
 
+    [Header("参照")]
+    [SerializeField]
+    private NPCplayer npcPlayer;
+
     [Header("捨て牌設定")]
     [Tooltip("捨て牌のドロップ位置オフセット")]
     [SerializeField]
     private float discardOffset = 2.0f;
 
+    private void Awake()
+    {
+        if (npcPlayer == null) npcPlayer = GetComponent<NPCplayer>();
+    }
+
     void Start()
     {
-        if (targetYakuman == Yakuman.None)
+        if (npcPlayer == null && targetYakuman == Yakuman.None)
         {
             targetYakuman = (Random.Range(0, 2) == 0) ? Yakuman.KokushiMusou : Yakuman.Daisangen;
         }
@@ -26,7 +35,9 @@ public class NPCmahjong : MonoBehaviour
     {
         if (hand.Count == 0) return;
 
-        Tile tileToDiscard = YakumanEvaluator.ChooseDiscardTile(hand, targetYakuman);
+        Yakuman target = (npcPlayer != null) ? npcPlayer.TargetYakuman : targetYakuman;
+
+        Tile tileToDiscard = YakumanEvaluator.ChooseDiscardTile(hand, target);
         hand.Remove(tileToDiscard);
 
         Vector3 dropPosition = new Vector3(transform.position.x - discardOffset, transform.position.y, transform.position.z);
