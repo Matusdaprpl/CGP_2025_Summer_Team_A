@@ -8,28 +8,43 @@ public class LaneMove : MonoBehaviour
     public int laneCount = 4;        // レーン数（4等分）
     public float moveSpeed = 5f;     // スムーズ移動の速度
 
-    private int currentLane = -1;     // 現在のレーン番号（0〜laneCount-1）
+    private int currentLane = 3;     // 現在のレーン番号（0〜laneCount-1）
     private float[] lanePositions;   // レーンごとのY座標
     private bool isOnObstacle = false; // Obstacleに当たっているかどうか
 
     void Start()
     {
-        // レーンごとのY座標を計算
+    // レーンごとのY座標を計算
         lanePositions = new float[laneCount];
-        float interval = (topY - bottomY) / (laneCount - 1);
 
-        for (int i = 0; i < laneCount; i++)
+    // laneCountが1より大きい場合のみ間隔を計算
+        if (laneCount > 1)
         {
+            float interval = (topY - bottomY) / (laneCount - 1);
+            for (int i = 0; i < laneCount; i++)
+            {
             lanePositions[i] = bottomY + interval * i;
+            }
+        }
+        else if (laneCount == 1)
+        {
+        // レーンが1つなら、中央（bottomYとtopYの平均）に配置
+        lanePositions[0] = (topY + bottomY) / 2f;
         }
 
-        // 初期位置を中央レーンにセット
-        currentLane = laneCount / 1;
-        transform.position = new Vector3(
+    // 初期位置を中央レーンにセット
+    // (laneCount - 1) / 2 にすることで、偶数でも下のレーンが選ばれ、より直感的な中央になる
+        int currentLane = (laneCount - 1) / 2;
+
+    // currentLaneが配列の範囲内にあることを念のため確認
+        if (currentLane >= 0 && currentLane < laneCount)
+        {
+            transform.position = new Vector3(
             transform.position.x,
             lanePositions[currentLane],
             transform.position.z
-        );
+            );
+        }
     }
 
     void Update()
