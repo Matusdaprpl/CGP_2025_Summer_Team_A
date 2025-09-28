@@ -21,12 +21,17 @@ public class PlayerMove : MonoBehaviour
     public TMP_Text countdownText;
 
     [Header("サウンド設定")]
-    public AudioSource raceBGM;
+    public AudioSource raceBGM; // BGM
+    public AudioSource CountdownSE; // BGM
+
+    public AudioClip countdownSE;
+
     public AudioClip itemGetSE;
     private AudioSource audioSource;
 
-    private float targetSpeed;
-    private float currentSpeed;
+    private bool hasplayed = false;
+    private float targetSpeed;       // 入力による目標速度
+    private float currentSpeed;      // 実際の速度
     private float remainingCountdownTime;
     private bool isCountdownActive = true;
     public bool IsCountdownActive => isCountdownActive;
@@ -58,18 +63,28 @@ public class PlayerMove : MonoBehaviour
             if (countdownText != null)
                 countdownText.text = Mathf.Ceil(remainingCountdownTime).ToString();
 
-            if (remainingCountdownTime <= 0)
+            if (remainingCountdownTime >= 2.1 && remainingCountdownTime <= 2.98 && !hasplayed)
             {
-                isCountdownActive = false;
-                if (countdownText != null)
-                {
-                    countdownText.text = "Go!";
-                    Invoke("HideCountdownText", 1f);
-                }
 
-                if (raceBGM != null)
-                    raceBGM.Play();
+                CountdownSE.PlayOneShot(countdownSE);
+                hasplayed = true;
             }
+            
+            if (remainingCountdownTime <= 0)
+                {
+                    isCountdownActive = false;
+                    if (countdownText != null)
+                    {
+                        countdownText.text = "Go!";
+                        Invoke("HideCountdownText", 1f);
+                    }
+                    Debug.Log("レース開始！！");
+
+                    if (raceBGM != null)
+                    {
+                        raceBGM.Play();
+                    }
+                }
             return;
         }
 
