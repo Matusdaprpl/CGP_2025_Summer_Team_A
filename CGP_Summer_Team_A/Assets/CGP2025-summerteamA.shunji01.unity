@@ -904,9 +904,9 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingLayerID: -1892967577
+  m_SortingLayer: 1
+  m_SortingOrder: 3
   m_Sprite: {fileID: 4414811085585333610, guid: 83d326e48834a3e47bcb62925dac9341, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -948,10 +948,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   startSpeed: 5
   maxSpeed: 15
+  maxSpeedCharged: 15
   accel: 10
   decel: 10
   smooth: 3
   baseSpeed: 10
+  requiredChargeTime: 10
   countdownTime: 3
   countdownText: {fileID: 191965976}
   raceBGM: {fileID: 2079826516}

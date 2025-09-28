@@ -4,12 +4,17 @@ using TMPro;
 public class PlayerMove : MonoBehaviour
 {
     [Header("速度設定")]
-    public float startSpeed = 10f;   // 初期速度
-    public float maxSpeed = 15f;     // 最大速度（通常時）
-    public float accel = 10f;        // 加速の強さ
-    public float decel = 10f;        // 減速の強さ
-    public float smooth = 5f;        // 通常時の滑らかさ
-    public float baseSpeed = 10f;    // キーを離したとき戻る速度
+    public float startSpeed = 10f;       // 初期速度
+    public float maxSpeed = 10f;         // チャージなしでの最大速度
+    public float maxSpeedCharged = 15f;  // チャージ完了後の最大速度
+    public float accel = 10f;            // 加速の強さ
+    public float decel = 10f;            // 減速の強さ
+    public float smooth = 5f;            // 通常の滑らかさ
+    public float baseSpeed = 10f;        // キー離しで戻る速度
+
+    [Header("チャージ設定")]
+    public float requiredChargeTime = 2f; // チャージ完了に必要な時間
+    private float chargeTime = 0f;        // 現在のチャージ時間
 
     [Header("カウントダウン設定")]
     public float countdownTime = 3f;
@@ -32,10 +37,10 @@ public class PlayerMove : MonoBehaviour
     public bool IsCountdownActive => isCountdownActive;
 
     // --- Obstacle関連 ---
-    private bool isOnObstacle = false;   // Obstacle中か
-    private float obstacleMaxSpeed = 2f; // Obstacle時の最大速度
-    private float obstacleMinSpeed = 0f; // Obstacle時の最小速度
-    private float obstacleSmooth = 20f;  // Obstacle時の減速スピード
+    private bool isOnObstacle = false;
+    private float obstacleMaxSpeed = 2f;
+    private float obstacleMinSpeed = 0f;
+    private float obstacleSmooth = 20f;
 
     void Start()
     {
@@ -44,9 +49,7 @@ public class PlayerMove : MonoBehaviour
         remainingCountdownTime = countdownTime;
 
         if (countdownText != null)
-        {
             countdownText.text = Mathf.Ceil(remainingCountdownTime).ToString();
-        }
 
         audioSource = GetComponent<AudioSource>();
     }
@@ -62,6 +65,7 @@ public class PlayerMove : MonoBehaviour
 
             if (remainingCountdownTime >= 2.1 && remainingCountdownTime <= 2.98 && !hasplayed)
             {
+
                 CountdownSE.PlayOneShot(countdownSE);
                 hasplayed = true;
             }
@@ -85,40 +89,55 @@ public class PlayerMove : MonoBehaviour
         }
 
         // --- 入力処理 ---
-        bool isKeyPressed = false;
+        bool isAccelerateKey = Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow);
+        bool isBackwardKey = Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow);
 
-        if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
+        // --- チャージ処理 ---
+        if (Input.GetKeyUp(KeyCode.D) || Input.GetKeyUp(KeyCode.RightArrow))
+        {
+            chargeTime = 0f; // 加速キー離したらチャージリセット
+        }
+        else
+        {
+            chargeTime += Time.deltaTime; // キー押下中・後退中・何もしていなくてもチャージ増加
+        }
+
+        // --- 10f以上加速制限 ---
+        bool canAccelerate = true;
+        if (currentSpeed >= 10f && chargeTime < requiredChargeTime)
+        {
+            canAccelerate = false; // チャージ満タンでない場合は加速無効化
+        }
+
+        // --- 速度更新 ---
+        if (isAccelerateKey && canAccelerate)
         {
             targetSpeed += accel * Time.deltaTime;
-            isKeyPressed = true;
-        }
-        else if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
-        {
-            targetSpeed -= decel * Time.deltaTime;
-            isKeyPressed = true;
         }
 
-        // 入力なし → baseSpeed に滑らかに戻す（Obstacle中は除外）
-        if (!isKeyPressed && !isOnObstacle)
+        if (isBackwardKey)
+        {
+            targetSpeed -= decel * Time.deltaTime;
+        }
+
+        // --- キー離しで baseSpeed への補正 ---
+        if (!isAccelerateKey && !isBackwardKey && !isOnObstacle)
         {
             targetSpeed = Mathf.MoveTowards(targetSpeed, baseSpeed, smooth * Time.deltaTime);
         }
 
-        // --- 速度制限 & 減速処理 ---
+        // --- 最大速度の制限 ---
+        float currentMaxSpeed = (chargeTime >= requiredChargeTime) ? maxSpeedCharged : maxSpeed;
+        targetSpeed = Mathf.Clamp(targetSpeed, 0f, currentMaxSpeed);
+
+        // --- Obstacle処理 ---
         if (isOnObstacle)
         {
-            // Obstacle中は速度を0〜2fに制限
             targetSpeed = Mathf.Clamp(targetSpeed, obstacleMinSpeed, obstacleMaxSpeed);
-
-            // 急速に減速する（obstacleSmoothを使用）
             currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, obstacleSmooth * Time.deltaTime);
         }
         else
         {
-            // 通常は0〜maxSpeedに制限
-            targetSpeed = Mathf.Clamp(targetSpeed, 0f, maxSpeed);
-
-            // 通常の滑らかさ
             currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, smooth * Time.deltaTime);
         }
 
@@ -132,35 +151,24 @@ public class PlayerMove : MonoBehaviour
             countdownText.gameObject.SetActive(false);
     }
 
-    // 現在の速度を取得するメソッド
     public float GetCurrentSpeed()
     {
         return currentSpeed;
     }
 
-    // --- Obstacleに入ったとき ---
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Obstacle"))
+        if (other.CompareTag("Obstacle") && currentSpeed <= 11f)
         {
-            if (currentSpeed <= 11f) // 速度11以下のときのみ制限適用
-            {
-                Debug.Log("Obstacleに衝突 → 速度制限(0〜2f)");
-                isOnObstacle = true;
-            }
+            isOnObstacle = true;
         }
     }
 
-    // --- Obstacleから出たとき ---
     private void OnTriggerExit2D(Collider2D other)
     {
-        if (other.CompareTag("Obstacle"))
+        if (other.CompareTag("Obstacle") && isOnObstacle)
         {
-            if (isOnObstacle)
-            {
-                Debug.Log("Obstacleから離脱 → 通常速度に戻す");
-                isOnObstacle = false;
-            }
+            isOnObstacle = false;
         }
     }
 }
