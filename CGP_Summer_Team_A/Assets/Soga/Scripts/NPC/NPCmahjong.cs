@@ -54,20 +54,21 @@ public class NPCmahjong : MonoBehaviour
         hand.Add(tile);
     }
  // オブジェクトが他のコライダーと衝突した瞬間に呼び出されるメソッド
-    private void OnCollisionEnter2D(Collision2D collision)
+    private void OnTriggerEnter2D(Collider2D other)
     {
         // 衝突した相手のタグが "Bullet" だった場合
-        if (collision.gameObject.CompareTag("Bullet"))
+        if (other.gameObject.CompareTag("Bullet"))
         {
             DropItem(); // アイテムをドロップする
-            Destroy(collision.gameObject); // 衝突した弾を消す
+            Destroy(other.gameObject); // 衝突した弾を消す
             Debug.Log($"{gameObject.name}が弾に当たりました。");
         }
     }
 
     private void DropItem()
     {
-        if (hand.Count == 0) return;
+        Debug.Log($"がドロップした牌: ");
+        //if (hand.Count == 0) return;
 
         // ランダムに手牌から1枚選ぶ
         int randomIndex = Random.Range(0, hand.Count);
