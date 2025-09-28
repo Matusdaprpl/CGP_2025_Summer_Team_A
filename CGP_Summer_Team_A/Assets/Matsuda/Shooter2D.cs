@@ -3,6 +3,9 @@ using TMPro;
 
 public class Shooter2D : MonoBehaviour
 {
+    [Header("効果音")]
+    public AudioClip fireSound; // 発射音のオーディオクリップ
+    private AudioSource audioSource; // 音を再生するためのコンポーネント
     public TextMeshProUGUI scoreText;
     [Header("弾のプレハブ")]
     public GameObject bulletPrefab;
@@ -18,6 +21,8 @@ public class Shooter2D : MonoBehaviour
     void Start()
     {
         // Start処理が必要であればここに記述
+        //このオブジェクトに付いているAudioSourceコンポーネントを取得
+        audioSource = GetComponent<AudioSource>();
     }
 
     // Update is called once per frame
@@ -44,23 +49,28 @@ public class Shooter2D : MonoBehaviour
             Debug.LogError("プレハブまたは射出ポイントが設定されていません。");
             return;
         }
+     // もしfireSoundが設定されていて、audioSourceが取得できていれば音を再生
+        if (audioSource != null && fireSound != null)
+        {
+            // PlayOneShotを使うと、他の音を中断せずに再生できるため効果音に最適
+            audioSource.PlayOneShot(fireSound);
+        }
+
+        GameObject bullet = Instantiate(bulletPrefab,firePoint.position,firePoint.rotation);
+
+        Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
     
+        // Rigidbody2Dの線形速度を設定
+        // rb.linearVelocity = firePoint.right*bulletSpeed;
+        // Unityのバージョンによっては velocity を使用
+        rb.linearVelocity = firePoint.right*bulletSpeed;
 
-    GameObject bullet = Instantiate(bulletPrefab,firePoint.position,firePoint.rotation);
+        score-=fireCost;
 
-    Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
-    
-    // Rigidbody2Dの線形速度を設定
-    // rb.linearVelocity = firePoint.right*bulletSpeed;
-    // Unityのバージョンによっては velocity を使用
-    rb.linearVelocity = firePoint.right*bulletSpeed;
-
-    score-=fireCost;
-
-    Debug.Log("点棒を発射！残り点数："+score);
+        Debug.Log("点棒を発射！残り点数："+score);
 
 
-    Destroy (bullet,3f);
+        Destroy (bullet,3f);
     }
     
     // ★★★ 役満判定からのスコア加算機能（追加・修正箇所） ★★★
