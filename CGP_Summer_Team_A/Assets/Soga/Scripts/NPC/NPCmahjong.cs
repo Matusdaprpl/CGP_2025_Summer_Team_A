@@ -37,13 +37,19 @@ public class NPCmahjong : MonoBehaviour
 
         Yakuman target = (npcPlayer != null) ? npcPlayer.TargetYakuman : targetYakuman;
 
+        string handDescription = string.Join(",", hand.Select(t => t.GetDisplayName()));
+        Debug.Log($"{gameObject.name}の手牌: {handDescription}, 目標役満: {target}");
+
         Tile tileToDiscard = YakumanEvaluator.ChooseDiscardTile(hand, target);
+
+        bool isNeeded = YakumanEvaluator.IsTileNeededFor(tileToDiscard, target, hand);
+        string reason=isNeeded?"必要牌":"不要牌";
+        Debug.Log($"{gameObject.name}の捨て牌:{tileToDiscard.GetDisplayName()}({reason})");
+
         hand.Remove(tileToDiscard);
 
         Vector3 dropPosition = new Vector3(transform.position.x - discardOffset, transform.position.y, transform.position.z);
         ItemManager.instance.DropDiscardedTile(tileToDiscard, dropPosition);
-
-        Debug.Log($"{gameObject.name}の捨て牌: {tileToDiscard.GetDisplayName()}");
     }
 
     public void AddTileToHand(Tile tile)
@@ -53,6 +59,12 @@ public class NPCmahjong : MonoBehaviour
 
         hand.Add(tile);
     }
-
     
+    public void PrintHandToConsole(string contextMessage)
+    {
+        if (hand == null) return;
+
+        string handDescription = string.Join(", ", hand.Select(t => t.GetDisplayName()));
+        Debug.Log($"{gameObject.name} [{contextMessage}] 手牌 ({hand.Count}枚): {handDescription}");
+    }
 }

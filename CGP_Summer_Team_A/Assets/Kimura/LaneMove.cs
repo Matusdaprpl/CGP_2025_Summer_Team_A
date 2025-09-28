@@ -32,6 +32,7 @@ public class LaneMove : MonoBehaviour
         lanePositions[0] = (topY + bottomY) / 2f;
         }
 
+
     // 初期位置を中央レーンにセット
     // (laneCount - 1) / 2 にすることで、偶数でも下のレーンが選ばれ、より直感的な中央になる
         int currentLane = (laneCount - 1) / 2;
