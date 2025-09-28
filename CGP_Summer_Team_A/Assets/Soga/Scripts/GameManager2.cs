@@ -30,6 +30,8 @@ public class GameManager2 : MonoBehaviour
     public bool forceRyuuisoHand = false;
     public bool forceTsuisoHand = false;
     public bool forceShosushiHand = false;
+    
+    public GameObject ResultPanel;
 
     // MahjongUIManager の初期化遅延に対応するため、コルーチンで実行
     void Start()
@@ -318,13 +320,13 @@ public class GameManager2 : MonoBehaviour
     public void GameOver()
     {
         Debug.Log("役満成立！ゲーム終了！");
-        
+
         // 1. プレイヤーの移動を停止
         if (playerMove != null)
         {
-            playerMove.enabled = false; 
+            playerMove.enabled = false;
         }
-        
+
         // 2. BGMとSEの再生を停止
         if (raceBGM != null && raceBGM.isPlaying)
         {
@@ -343,13 +345,14 @@ public class GameManager2 : MonoBehaviour
                 if (script != null)
                 {
                     // NPCplayerスクリプトのStopMovementメソッドを呼び出し、Rigidbodyの速度をリセットさせる
-                    script.StopMovement(); 
+                    script.StopMovement();
                 }
             }
             Debug.Log($"NPC {npcMoveScripts.Length} 体の停止メソッドを呼び出しました。");
         }
-        
+
         // 4. その他の処理（リザルト画面表示など）
-        // Time.timeScale = 0f; 
+        // Time.timeScale = 0f;
+        ResultPanel.SetActive(true);
     }
 }

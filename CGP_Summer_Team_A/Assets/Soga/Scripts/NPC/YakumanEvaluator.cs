@@ -52,7 +52,7 @@ public static class YakumanEvaluator
                         return hand.Count(t => t.GetDisplayName() == tileName) < 4;
                     }
                     // 刻子を作るために必要
-                    return hand.Count(t => t.GetDisplayName() == tileName) is > 0 and < 4;
+                    return hand.Count(t => t.GetDisplayName() == tileName) < 4;
                 }
 
             case Yakuman.SuuAnkou:
