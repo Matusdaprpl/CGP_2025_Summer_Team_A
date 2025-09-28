@@ -267,15 +267,14 @@ MonoBehaviour:
   maxSpeed: 20
   speedChangeInterval: 3
   laneMoveSpeed: 5
-  minLaneY: -2
-  maxLaneY: 2
-  laneChangeInterval: 2
+  minLaneY: -5
+  maxLaneY: -0.5
+  laneChangeCooldown: 2
   itemDetectionRadius: 20
   itemSearchInterval: 1
   countdownTime: 3
   countdownText: {fileID: 0}
   npcMahjong: {fileID: 93837156}
-  laneChangeCooldown: 2
 --- !u!50 &93837153
 Rigidbody2D:
   serializedVersion: 5
@@ -966,7 +965,7 @@ Transform:
   m_GameObject: {fileID: 423721860}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -7.11, y: 0.37, z: 0}
+  m_LocalPosition: {x: -7.11, y: -1.23, z: 0}
   m_LocalScale: {x: 2.2, y: 2.2, z: 0.64055}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1045,17 +1044,17 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: 0.04549259, y: 0.15520996}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
+    pivot: {x: 0.5, y: 0.3}
     oldSize: {x: 0.96, y: 0.61}
     newSize: {x: 2.81, y: 2.65}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 0.6}
+  m_Size: {x: 0.87690246, y: 0.40732563}
   m_EdgeRadius: 0
 --- !u!50 &423721867
 Rigidbody2D:
@@ -1764,15 +1763,14 @@ MonoBehaviour:
   maxSpeed: 18
   speedChangeInterval: 3
   laneMoveSpeed: 5
-  minLaneY: -2
-  maxLaneY: 2
-  laneChangeInterval: 2
+  minLaneY: -5
+  maxLaneY: -0.5
+  laneChangeCooldown: 2
   itemDetectionRadius: 20
   itemSearchInterval: 1
   countdownTime: 3
   countdownText: {fileID: 0}
   npcMahjong: {fileID: 911804201}
-  laneChangeCooldown: 2
 --- !u!50 &911804198
 Rigidbody2D:
   serializedVersion: 5
@@ -1864,7 +1862,7 @@ Transform:
   m_GameObject: {fileID: 911804196}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -7.032, y: -1.935, z: 0}
+  m_LocalPosition: {x: -7.032, y: -0.49, z: 0}
   m_LocalScale: {x: 2.2, y: 2.2, z: 0.6047421}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2143,10 +2141,10 @@ MonoBehaviour:
   minX: 10
   maxX: 1500
   fixedYValues:
-  - 0.165
-  - -1.33
-  - -2.76
-  - -4.26
+  - -1
+  - -2.5
+  - -4
+  - -5.4
   minDistance: 7
 --- !u!212 &1159338542
 SpriteRenderer:
@@ -2665,15 +2663,14 @@ MonoBehaviour:
   maxSpeed: 17
   speedChangeInterval: 3
   laneMoveSpeed: 5
-  minLaneY: -2
-  maxLaneY: 2
-  laneChangeInterval: 2
+  minLaneY: -5
+  maxLaneY: -0.5
+  laneChangeCooldown: 2
   itemDetectionRadius: 20
   itemSearchInterval: 1
   countdownTime: 3
   countdownText: {fileID: 0}
   npcMahjong: {fileID: 1983959245}
-  laneChangeCooldown: 2
 --- !u!50 &1983959247
 Rigidbody2D:
   serializedVersion: 5
@@ -2805,7 +2802,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0.014869481, y: 0.44309253}
+  m_Offset: {x: 0.026102036, y: 0.44309253}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5157895, y: -0.16393442}
@@ -2815,7 +2812,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.9377536, y: 0.5361973}
+  m_Size: {x: 0.9152885, y: 0.5361973}
   m_EdgeRadius: 0
 --- !u!95 &1983959251
 Animator:
@@ -3138,9 +3135,9 @@ MonoBehaviour:
   minX: 0
   maxX: 2000
   fixedYValues:
-  - -4
+  - -4.5
   - -2.5
-  - -1
+  - -1.5
   - 0.5
   minDistance: 5
 --- !u!4 &2118395339
@@ -3183,19 +3180,19 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2579527275413131875, guid: 7ae593617d104b54298f2064bd909ae4, type: 3}
       propertyPath: m_Size.x
-      value: 0.67492276
+      value: 0.5270426
       objectReference: {fileID: 0}
     - target: {fileID: 2579527275413131875, guid: 7ae593617d104b54298f2064bd909ae4, type: 3}
       propertyPath: m_Size.y
-      value: 0.41327
+      value: 0.33921677
       objectReference: {fileID: 0}
     - target: {fileID: 2579527275413131875, guid: 7ae593617d104b54298f2064bd909ae4, type: 3}
       propertyPath: m_Offset.x
-      value: 0.028327972
+      value: 0.039160185
       objectReference: {fileID: 0}
     - target: {fileID: 2579527275413131875, guid: 7ae593617d104b54298f2064bd909ae4, type: 3}
       propertyPath: m_Offset.y
-      value: 0.37189102
+      value: 0.37357417
       objectReference: {fileID: 0}
     - target: {fileID: 2579527275413131875, guid: 7ae593617d104b54298f2064bd909ae4, type: 3}
       propertyPath: m_SpriteTilingProperty.pivot.x

@@ -29,7 +29,7 @@ public class NPCplayer : MonoBehaviour
     public float maxLaneY = 2f;
 
     [Tooltip("レーンの変更間隔（秒）")]
-    public float laneChangeInterval = 2f;
+    public float laneChangeCooldown = 2.0f;
 
     [Header("アイテム追跡設定")]
     [Tooltip("アイテムを探す範囲")]
@@ -58,7 +58,6 @@ public class NPCplayer : MonoBehaviour
     private bool isCountdownActive = true;
     private Transform targetItem;
     private float timeSinceLastItemSearch;
-    public float laneChangeCooldown = 2.0f;
     private Yakuman targetYakuman;
     public Yakuman TargetYakuman => targetYakuman;
 
