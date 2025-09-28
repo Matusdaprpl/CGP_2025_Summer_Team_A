@@ -5,6 +5,7 @@ using System;
 
 public enum Suit
 {
+    None,    //牌がない場合のデフォルト
     Manzu,
     Pinzu,
     Souzu,
@@ -32,6 +33,7 @@ public class MahjongManager : MonoBehaviour
 {
     public event Action OnPlayerHitItem;
     public static MahjongManager instance;
+    private bool roundOver = false;
 
     public List<Tile> mountain;
     public List<Tile> playerHand;
@@ -247,5 +249,13 @@ public class MahjongManager : MonoBehaviour
         {
             mountain.Add(tile);
         }
+    }
+
+    public void OnNpcWin(string npcName, Yakuman yakuman, List<Tile> hand)
+    {
+        if (roundOver) return;
+        roundOver = true;
+
+
     }
 }

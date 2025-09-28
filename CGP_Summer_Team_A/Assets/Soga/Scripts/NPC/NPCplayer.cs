@@ -60,6 +60,7 @@ public class NPCplayer : MonoBehaviour
     private float timeSinceLastItemSearch;
     public float laneChangeCooldown = 2.0f;
     private Yakuman targetYakuman;
+    public Yakuman TargetYakuman => targetYakuman;
 
     // ★★★ 停止フラグを追加 ★★★
     private bool isStopped = false; 
@@ -253,6 +254,15 @@ public class NPCplayer : MonoBehaviour
         npcMahjong.AddTileToHand(pickedTile);
         
         Debug.Log($"{gameObject.name}の拾った牌: {pickedTile.GetDisplayName()}");
+
+        if (YakumanEvaluator.IsYakumanComplete(npcMahjong.hand, TargetYakuman))
+        {
+            Debug.Log($"{gameObject.name}は役満 {TargetYakuman} を完成させました！");
+            MahjongManager.instance?.OnNpcWin(gameObject.name, TargetYakuman, npcMahjong.hand);
+            isProcessingTile = false;
+            yield break; // ← 捨て処理には進まない
+
+        }
 
         yield return new WaitForSeconds(1.0f);
         

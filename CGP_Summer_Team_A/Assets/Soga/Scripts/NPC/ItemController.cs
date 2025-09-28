@@ -58,5 +58,4 @@ public class ItemController : MonoBehaviour
             OnItemPickedUp?.Invoke(tile.suit.ToString(), tile.rank);
         }
     }
-    
 }

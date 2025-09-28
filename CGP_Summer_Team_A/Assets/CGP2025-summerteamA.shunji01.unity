@@ -385,6 +385,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetYakuman: 0
+  npcPlayer: {fileID: 93837152}
   discardOffset: 2
 --- !u!61 &93837158
 BoxCollider2D:
@@ -1843,6 +1844,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetYakuman: 0
+  npcPlayer: {fileID: 911804197}
   discardOffset: 2
 --- !u!61 &911804203
 BoxCollider2D:
@@ -2712,6 +2714,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetYakuman: 0
+  npcPlayer: {fileID: 1983959246}
   discardOffset: 2
 --- !u!114 &1983959246
 MonoBehaviour:
