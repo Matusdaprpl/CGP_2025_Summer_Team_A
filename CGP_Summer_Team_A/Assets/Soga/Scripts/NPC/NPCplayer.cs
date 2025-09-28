@@ -62,6 +62,9 @@ public class NPCplayer : MonoBehaviour
     private Yakuman targetYakuman;
     public Yakuman TargetYakuman => targetYakuman;
 
+    // ★★★ 停止フラグを追加 ★★★
+    private bool isStopped = false; 
+
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -91,6 +94,9 @@ public class NPCplayer : MonoBehaviour
 
     void Update()
     {
+        // ★★★ 停止フラグのチェックを追加 ★★★
+        if (isStopped) return; 
+
         if (isCountdownActive)
         {
             remainingCountdownTime -= Time.deltaTime;
@@ -118,8 +124,12 @@ public class NPCplayer : MonoBehaviour
 
     void FixedUpdate()
     {
+        // ★★★ 停止フラグのチェックを追加 ★★★
+        if (isStopped) return; 
+
         if (!isCountdownActive && rb != null)
         {
+            // ここで速度を設定している
             rb.linearVelocity = new Vector2(currentSpeed, 0);
         }
 
@@ -153,7 +163,7 @@ public class NPCplayer : MonoBehaviour
 
     private void FindClosestItem()
     {
-        Collider2D[] itemsInRange = Physics2D.OverlapCircleAll(transform.position, itemDetectionRadius, LayerMask.GetMask("Default")); // "Item"レイヤーなど、アイテムのレイヤーに合わせて調整
+        Collider2D[] itemsInRange = Physics2D.OverlapCircleAll(transform.position, itemDetectionRadius, LayerMask.GetMask("Default")); 
 
         float bestTargetDistance = float.MaxValue;
         Transform bestTarget = null;
@@ -191,6 +201,7 @@ public class NPCplayer : MonoBehaviour
                 {
                     bestTargetDistance = distance;
                     bestTarget = itemCollider.transform;
+                    bestTarget = itemCollider.transform;
                 }
             }
         }
@@ -214,6 +225,8 @@ public class NPCplayer : MonoBehaviour
     private bool isProcessingTile = false;
     private void OnTriggerEnter2D(Collider2D other)
     {
+        if (isStopped) return; // ★★★ 停止中はアイテム取得もスキップ ★★★
+
         if (other.CompareTag("Item") && !isProcessingTile && npcMahjong.hand.Count < 15)
         {
             ItemController itemController = other.GetComponent<ItemController>();
@@ -228,7 +241,6 @@ public class NPCplayer : MonoBehaviour
                         targetItem = null;
                     }
 
-                    // ★名前をより分かりやすく変更 (ProcessPickedTile → ProcessTileExchange)
                     StartCoroutine(ProcessTileExchange(pickedTile));
                 }
             }
@@ -241,7 +253,6 @@ public class NPCplayer : MonoBehaviour
         
         npcMahjong.AddTileToHand(pickedTile);
         
-        // ★追加：どのNPCがどの牌を拾ったかログに出す
         Debug.Log($"{gameObject.name}の拾った牌: {pickedTile.GetDisplayName()}");
 
         if (YakumanEvaluator.IsYakumanComplete(npcMahjong.hand, TargetYakuman))
@@ -259,5 +270,20 @@ public class NPCplayer : MonoBehaviour
         
         isProcessingTile = false;
     }
-}
 
+    // ★★★ GameManager2から呼ばれる停止メソッド ★★★
+    public void StopMovement()
+    {
+        isStopped = true; // フラグを立ててUpdate/FixedUpdateを停止
+        
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector2.zero; // Rigidbodyの速度を強制的にゼロにする (重要!)
+            rb.angularVelocity = 0f;
+            Debug.Log($"{gameObject.name} のRigidbody速度をリセットしました。");
+        }
+        
+        this.enabled = false; // スクリプト自体も無効化 (二重の停止措置)
+        Debug.Log($"{gameObject.name} の動きを完全に停止しました。");
+    }
+}
