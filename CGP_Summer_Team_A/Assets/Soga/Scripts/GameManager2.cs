@@ -44,7 +44,7 @@ public class GameManager2 : MonoBehaviour
         // 参照がInspectorで設定されていない場合の自動検索（補助的な機能）
         if (playerMove == null)
         {
-            playerMove = FindObjectOfType<PlayerMove>();
+            playerMove = FindFirstObjectByType<PlayerMove>();
         }
         if (raceBGM == null) raceBGM = GameObject.Find("RaceBGM")?.GetComponent<AudioSource>();
         if (countdownSE == null) countdownSE = GameObject.Find("CountdownSE")?.GetComponent<AudioSource>();
