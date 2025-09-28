@@ -24,7 +24,7 @@ public class LaneMove : MonoBehaviour
         }
 
         // 初期位置を中央レーンにセット
-        currentLane = laneCount / 2;
+        currentLane = laneCount / 1;
         transform.position = new Vector3(
             transform.position.x,
             lanePositions[currentLane],
