@@ -47,19 +47,13 @@ public class NPCmahjong : MonoBehaviour
 
         Yakuman target = (npcPlayer != null) ? npcPlayer.TargetYakuman : targetYakuman;
 
-        string handDescription = string.Join(",", hand.Select(t => t.GetDisplayName()));
-        Debug.Log($"{gameObject.name}の手牌: {handDescription}, 目標役満: {target}");
-
         Tile tileToDiscard = YakumanEvaluator.ChooseDiscardTile(hand, target);
-
-        bool isNeeded = YakumanEvaluator.IsTileNeededFor(tileToDiscard, target, hand);
-        string reason=isNeeded?"必要牌":"不要牌";
-        Debug.Log($"{gameObject.name}の捨て牌:{tileToDiscard.GetDisplayName()}({reason})");
-
         hand.Remove(tileToDiscard);
 
         Vector3 dropPosition = new Vector3(transform.position.x - discardOffset, transform.position.y, transform.position.z);
         ItemManager.instance.DropDiscardedTile(tileToDiscard, dropPosition);
+
+        Debug.Log($"{gameObject.name}の捨て牌: {tileToDiscard.GetDisplayName()}");
     }
 
     public void AddTileToHand(Tile tile)
@@ -69,12 +63,34 @@ public class NPCmahjong : MonoBehaviour
 
         hand.Add(tile);
     }
-    
-    public void PrintHandToConsole(string contextMessage)
+ // オブジェクトが他のコライダーと衝突した瞬間に呼び出されるメソッド
+    private void OnTriggerEnter2D(Collider2D other)
     {
-        if (hand == null) return;
+        // 衝突した相手のタグが "Bullet" だった場合
+        if (other.gameObject.CompareTag("Bullet"))
+        {
+            DropItem(); // アイテムをドロップする
+            Destroy(other.gameObject); // 衝突した弾を消す
+            Debug.Log($"{gameObject.name}が弾に当たりました。");
+        }
+    }
 
-        string handDescription = string.Join(", ", hand.Select(t => t.GetDisplayName()));
-        Debug.Log($"{gameObject.name} [{contextMessage}] 手牌 ({hand.Count}枚): {handDescription}");
+    private void DropItem()
+    {
+        Debug.Log($"がドロップした牌: ");
+        //if (hand.Count == 0) return;
+
+        // ランダムに手牌から1枚選ぶ
+        int randomIndex = Random.Range(0, hand.Count);
+        Tile tileToDrop = hand[randomIndex];
+        hand.RemoveAt(randomIndex);
+
+        // アイテムをドロップする位置を計算
+        Vector3 dropPosition = new Vector3(transform.position.x, transform.position.y, transform.position.z);
+
+        // アイテムをドロップ
+        ItemManager.instance.DropItem(tileToDrop, dropPosition);
+
+        Debug.Log($"{gameObject.name}がドロップした牌: {tileToDrop.GetDisplayName()}");
     }
 }

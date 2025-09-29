@@ -62,4 +62,9 @@ public class ItemManager : MonoBehaviour
             Debug.LogError("DropDiscardedTile: ItemController コンポーネントが見つかりません。");
         }
     }
+    public void DropItem(Tile tile, Vector3 position)
+    {
+    // 牌をドロップする処理をここに記述
+    // 例: Instantiate(tilePrefab, position, Quaternion.identity);
+    }
 }
