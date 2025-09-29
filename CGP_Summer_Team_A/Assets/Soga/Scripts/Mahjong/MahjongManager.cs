@@ -31,6 +31,9 @@ public class Tile
 
 public class MahjongManager : MonoBehaviour
 {
+    [Header("リザルト画面設定")]
+    public GameObject ResultPanel2;//ゴールのリザルト画面
+
     public event Action OnPlayerHitItem;
     public static MahjongManager instance;
     private bool roundOver = false;
@@ -256,6 +259,23 @@ public class MahjongManager : MonoBehaviour
         if (roundOver) return;
         roundOver = true;
 
+        Debug.Log($"{npcName}が{yakuman}で上がりました！");
+    }
 
+    public void OnCharacterGoal(string characterName)
+    {
+        if (roundOver) return;
+        roundOver = true;
+
+        Debug.Log($"{characterName}がゴールしました！");
+
+        if (ResultPanel2 != null)
+        {
+            ResultPanel2.SetActive(true);
+        }
+        else
+        {
+            {Debug.LogError("ResultPanel2が設定されていません。");}
+        }
     }
 }

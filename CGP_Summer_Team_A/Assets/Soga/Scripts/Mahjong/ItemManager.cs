@@ -33,13 +33,8 @@ public class ItemManager : MonoBehaviour
             tileSprites.TryGetValue(key, out sp);
         }
         tile.sprite = sp;
-
-        Debug.Log($"生成しようとしている座標: {pos}");
         
         var go = Instantiate(worldItemPrefab, pos, Quaternion.identity);
-
-        Debug.Log($"実際に生成された座標: {go.transform.position}");       
-
         var ic = go.GetComponent<ItemController>();
         if (ic != null)
         {
