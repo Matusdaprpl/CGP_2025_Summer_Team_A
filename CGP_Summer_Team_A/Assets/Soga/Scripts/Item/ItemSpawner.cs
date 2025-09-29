@@ -20,7 +20,9 @@ public class ItemSpawner : MonoBehaviour
     private float minDistance = 1.0f;
 
     public static int MaxItemCount => Instance?.itemCount ?? 10;
-    private static ItemSpawner Instance;
+    public static ItemSpawner Instance;
+
+    public float[] FixedYValues => fixedYValues;
 
     void Awake()
     {

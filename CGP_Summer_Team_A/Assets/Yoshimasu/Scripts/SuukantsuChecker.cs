@@ -21,7 +21,7 @@ public static class SuukantsuChecker
         // 14枚でなければ不成立
         if (hand == null || hand.Count != 14)
         {
-            Debug.Log("[SuukantsuChecker DEBUG] Hand count is not 14. Failed.");
+            //Debug.Log("[SuukantsuChecker DEBUG] Hand count is not 14. Failed.");
             return false;
         }
 
@@ -30,10 +30,10 @@ public static class SuukantsuChecker
                          .ToDictionary(g => g.Key, g => g.Count());
         
         // ★★★ デバッグログを追加 ★★★
-        Debug.Log("[SuukantsuChecker DEBUG] Counted tiles:");
+        //Debug.Log("[SuukantsuChecker DEBUG] Counted tiles:");
         foreach (var pair in counts)
         {
-            Debug.Log($"  - {pair.Key.suit} {pair.Key.rank}: {pair.Value}枚");
+            //Debug.Log($"  - {pair.Key.suit} {pair.Key.rank}: {pair.Value}枚");
         }
 
         int countQuads = 0;   // 4枚組の数 (槓子)
@@ -60,17 +60,17 @@ public static class SuukantsuChecker
 
         // 3. 判定ロジック
         // ★★★ デバッグログを追加 ★★★
-        Debug.Log($"[SuukantsuChecker DEBUG] Final Counts: Quads={countQuads}, Pairs={countPairs}, Others={otherCount}");
+        //Debug.Log($"[SuukantsuChecker DEBUG] Final Counts: Quads={countQuads}, Pairs={countPairs}, Others={otherCount}");
 
         // 条件: 4枚組がちょうど4つ AND 2枚組がちょうど1つ AND 他の組がない
         if (countQuads == 4 && countPairs == 1 && otherCount == 0)
         {
-            Debug.Log("[SuukantsuChecker DEBUG] Passed all conditions.");
+            //Debug.Log("[SuukantsuChecker DEBUG] Passed all conditions.");
             return true;
         }
         else
         {
-            Debug.Log("[SuukantsuChecker DEBUG] Failed to meet all conditions.");
+            //Debug.Log("[SuukantsuChecker DEBUG] Failed to meet all conditions.");
             return false;
         }
     }

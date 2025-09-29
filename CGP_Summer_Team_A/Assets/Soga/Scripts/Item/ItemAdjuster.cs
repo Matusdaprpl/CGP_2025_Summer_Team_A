@@ -163,7 +163,13 @@ public class ItemAdjuster : MonoBehaviour
         float cameraRightX = rightEdgeWorld.x;
 
         float newX = cameraRightX + Random.Range(5f, 15f);
-        float[] fixedYValues = new float[] { -4, -2.5f, -1f, 0f };
+        ItemSpawner spawner= ItemSpawner.Instance;
+        if (spawner == null || spawner.FixedYValues == null || spawner.FixedYValues.Length == 0)
+        {
+            Debug.LogError("ItemSpawner または FixedYValues が見つかりません。");
+            return new Vector2(newX, 0);
+        }
+        float[] fixedYValues = spawner.FixedYValues;
         float newY = fixedYValues[Random.Range(0, fixedYValues.Length)];
         return new Vector2(newX, newY);
     }

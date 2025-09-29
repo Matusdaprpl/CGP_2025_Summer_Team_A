@@ -61,12 +61,12 @@ public static class SuuankouChecker
         // 条件: 3枚組がちょうど4つ AND 2枚組がちょうど1つ AND 他の組がない
         if (countTriplets == 4 && countPairs == 1 && otherCount == 0)
         {
-            Debug.Log("[SuuankouChecker DEBUG] Passed all conditions.");
+            //Debug.Log("[SuuankouChecker DEBUG] Passed all conditions.");
             return true;
         }
         else
         {
-            Debug.Log($"[SuuankouChecker DEBUG] Failed. Triplets:{countTriplets}, Pairs:{countPairs}, Others:{otherCount}");
+            //Debug.Log($"[SuuankouChecker DEBUG] Failed. Triplets:{countTriplets}, Pairs:{countPairs}, Others:{otherCount}");
             return false;
         }
     }

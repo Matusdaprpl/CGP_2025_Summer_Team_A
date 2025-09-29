@@ -15,7 +15,7 @@ public static class ShosushiChecker
         // 14枚でなければ不成立
         if (hand == null || hand.Count != 14)
         {
-            Debug.Log("[ShosushiChecker DEBUG] Hand count is not 14. Failed.");
+            //Debug.Log("[ShosushiChecker DEBUG] Hand count is not 14. Failed.");
             return false;
         }
 
@@ -24,10 +24,10 @@ public static class ShosushiChecker
                          .ToDictionary(g => g.Key, g => g.Count());
 
         // ★★★ デバッグログを追加 ★★★
-        Debug.Log("[ShosushiChecker DEBUG] Counted tiles:");
+        //Debug.Log("[ShosushiChecker DEBUG] Counted tiles:");
         foreach (var pair in counts)
         {
-            Debug.Log($"  - {pair.Key.suit} {pair.Key.rank}: {pair.Value}枚");
+            //Debug.Log($"  - {pair.Key.suit} {pair.Key.rank}: {pair.Value}枚");
         }
 
         int countWindTriplets = 0; // 風牌の3枚組/4枚組の数
@@ -51,7 +51,7 @@ public static class ShosushiChecker
             else
             {
                 // 風牌が3,4,2枚組以外の場合は不成立
-                Debug.Log($"[ShosushiChecker DEBUG] A wind tile is not a triplet, quad, or pair. Failed.");
+                //Debug.Log($"[ShosushiChecker DEBUG] A wind tile is not a triplet, quad, or pair. Failed.");
                 return false;
             }
         }
@@ -69,12 +69,12 @@ public static class ShosushiChecker
             {
                 // ここで順子か刻子かを確認するロジックが必要（省略）
                 // 簡易判定として、ここではtrueを返します
-                Debug.Log("[ShosushiChecker DEBUG] Passed all conditions. Remaining tiles are assumed to form a valid meld.");
+                //Debug.Log("[ShosushiChecker DEBUG] Passed all conditions. Remaining tiles are assumed to form a valid meld.");
                 return true;
             }
         }
-        
-        Debug.Log($"[ShosushiChecker DEBUG] Failed. Wind Triples/Quads: {countWindTriplets}, Wind Pair: {countWindPair}");
+
+        //Debug.Log($"[ShosushiChecker DEBUG] Failed. Wind Triples/Quads: {countWindTriplets}, Wind Pair: {countWindPair}");
         return false;
     }
 }
