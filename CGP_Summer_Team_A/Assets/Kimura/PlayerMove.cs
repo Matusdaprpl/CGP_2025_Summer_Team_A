@@ -224,7 +224,7 @@ public class PlayerMove : MonoBehaviour
             // ※前回の会話で作成した順位判定ができるGameManagerを呼び出すように変更
             if (MahjongManager.instance != null)
             {
-                MahjongManager.instance.OnCharacterGoal("Player"); 
+                MahjongManager.instance.OnCharacterGoal("Player");
             }
 
             this.enabled = false; // プレイヤーの操作を停止
@@ -233,7 +233,9 @@ public class PlayerMove : MonoBehaviour
         else if (other.CompareTag("Obstacle") && currentSpeed <= 11f)
         {
             isOnObstacle = true;
+        }
     }
+
 
     private void OnTriggerExit2D(Collider2D other)
     {
