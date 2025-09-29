@@ -33,7 +33,7 @@ public class ItemManager : MonoBehaviour
             tileSprites.TryGetValue(key, out sp);
         }
         tile.sprite = sp;
-
+        
         var go = Instantiate(worldItemPrefab, pos, Quaternion.identity);
         var ic = go.GetComponent<ItemController>();
         if (ic != null)
