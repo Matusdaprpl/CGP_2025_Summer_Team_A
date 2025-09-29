@@ -896,8 +896,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae75c1c82fff4f64bb415b2d47618481, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  topY: 0.15
-  bottomY: -4.25
+  topY: -0.5
+  bottomY: -5
   laneCount: 4
   moveSpeed: 5
 --- !u!212 &423721862
@@ -952,7 +952,7 @@ SpriteRenderer:
   m_Size: {x: 2.81, y: 2.65}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!4 &423721863
@@ -964,7 +964,7 @@ Transform:
   m_GameObject: {fileID: 423721860}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -7.11, y: -1.23, z: 0}
+  m_LocalPosition: {x: -7.11, y: -1.51, z: 0}
   m_LocalScale: {x: 2.2, y: 2.2, z: 0.64055}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1046,7 +1046,7 @@ BoxCollider2D:
   m_Offset: {x: 0.04549259, y: 0.15520996}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
-      pivot: {x: 0.5, y: 0.4}
+    pivot: {x: 0.5, y: 0.4}
     oldSize: {x: 0.96, y: 0.61}
     newSize: {x: 2.81, y: 2.65}
     adaptiveTilingThreshold: 0.5

@@ -3,12 +3,12 @@ using UnityEngine;
 public class LaneMove : MonoBehaviour
 {
     [Header("レーン設定")]
-    public float topY = 0.15f;       // 上端のY座標
-    public float bottomY = -4.25f;   // 下端のY座標
+    public float topY = -1.25f;       // 上端のY座標
+    public float bottomY = -5.75f;   // 下端のY座標
     public int laneCount = 4;        // レーン数（4等分）
     public float moveSpeed = 5f;     // スムーズ移動の速度
 
-    private int currentLane = 3;     // 現在のレーン番号（0〜laneCount-1）
+    private int currentLane = 2;     // 現在のレーン番号（0〜laneCount-1）
     private float[] lanePositions;   // レーンごとのY座標
     private bool isOnObstacle = false; // Obstacleに当たっているかどうか
 
