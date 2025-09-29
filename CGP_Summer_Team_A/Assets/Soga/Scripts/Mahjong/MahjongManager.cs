@@ -269,6 +269,7 @@ public class MahjongManager : MonoBehaviour
 
         Debug.Log($"{characterName}がゴールしました！");
 
+        // リザルト画面（ゴール）
         if (ResultPanel2 != null)
         {
             ResultPanel2.SetActive(true);
