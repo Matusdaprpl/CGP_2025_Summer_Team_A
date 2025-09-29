@@ -15,7 +15,7 @@ public static class TsuisoChecker
         // 14枚でなければ不成立
         if (hand == null || hand.Count != 14)
         {
-            Debug.Log("[TsuisoChecker DEBUG] Hand count is not 14. Failed.");
+            //Debug.Log("[TsuisoChecker DEBUG] Hand count is not 14. Failed.");
             return false;
         }
 
@@ -24,7 +24,7 @@ public static class TsuisoChecker
         {
             if (tile.suit != Suit.Honor)
             {
-                Debug.Log($"[TsuisoChecker DEBUG] Hand contains a non-honor tile: {tile.suit} {tile.rank}. Failed.");
+                //Debug.Log($"[TsuisoChecker DEBUG] Hand contains a non-honor tile: {tile.suit} {tile.rank}. Failed.");
                 return false;
             }
         }
@@ -51,7 +51,7 @@ public static class TsuisoChecker
         if (totalCount == 14)
         {
             // 正式な実装では、IsStandardHand(hand)のような関数で「4面子1雀頭」の判定が必要
-            Debug.Log("[TsuisoChecker DEBUG] All tiles are honor tiles. Assumed valid hand.");
+            //Debug.Log("[TsuisoChecker DEBUG] All tiles are honor tiles. Assumed valid hand.");
             return true;
         }
 

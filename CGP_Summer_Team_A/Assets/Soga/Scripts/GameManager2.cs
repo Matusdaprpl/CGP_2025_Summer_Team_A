@@ -30,7 +30,8 @@ public class GameManager2 : MonoBehaviour
     public bool forceRyuuisoHand = false;
     public bool forceTsuisoHand = false;
     public bool forceShosushiHand = false;
-    
+
+    [Header("リザルト画面設定")]
     public GameObject ResultPanel;
 
     // MahjongUIManager の初期化遅延に対応するため、コルーチンで実行
@@ -351,8 +352,14 @@ public class GameManager2 : MonoBehaviour
             Debug.Log($"NPC {npcMoveScripts.Length} 体の停止メソッドを呼び出しました。");
         }
 
-        // 4. その他の処理（リザルト画面表示など）
-        // Time.timeScale = 0f;
-        ResultPanel.SetActive(true);
+        // 4. リザルト画面表示（役満）
+        if (ResultPanel != null)
+        {
+            ResultPanel.SetActive(true);
+        }
+        else
+        {
+            Debug.LogError("ResultPanelが設定されていません。");
+        }
     }
 }

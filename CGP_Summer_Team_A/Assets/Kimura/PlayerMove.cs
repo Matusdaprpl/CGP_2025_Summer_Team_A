@@ -87,7 +87,7 @@ public class PlayerMove : MonoBehaviour
                 hasplayed = true;
             }
 
-            if (remainingCountdownTime <= 0f)
+            if (remainingCountdownTime <= 0)
             {
                 isCountdownActive = false;
                 if (countdownText != null)
@@ -95,9 +95,12 @@ public class PlayerMove : MonoBehaviour
                     countdownText.text = "Go!";
                     Invoke("HideCountdownText", 1f);
                 }
+                Debug.Log("レース開始！！");
 
                 if (raceBGM != null)
+                {
                     raceBGM.Play();
+                }
             }
             return;
         }
@@ -212,7 +215,23 @@ public class PlayerMove : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if(other.CompareTag("Obstacle") && currentSpeed <= 11f)
+        // ゴールタグに接触した場合の処理
+        if (other.CompareTag("Goal"))
+        {
+            Debug.Log("ゴール！！");
+
+            // GameManagerにゴールしたことを通知する
+            // ※前回の会話で作成した順位判定ができるGameManagerを呼び出すように変更
+            if (MahjongManager.instance != null)
+            {
+                MahjongManager.instance.OnCharacterGoal("Player"); 
+            }
+
+            this.enabled = false; // プレイヤーの操作を停止
+        }
+        // 障害物タグに接触した場合の処理
+        else if (other.CompareTag("Obstacle") && currentSpeed <= 11f)
+        {
             isOnObstacle = true;
     }
 

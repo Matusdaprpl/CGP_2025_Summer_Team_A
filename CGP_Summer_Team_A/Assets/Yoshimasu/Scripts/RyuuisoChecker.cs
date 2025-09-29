@@ -15,7 +15,7 @@ public static class RyuuisoChecker
         // 14枚でなければ不成立
         if (hand == null || hand.Count != 14)
         {
-            Debug.Log("[RyuuisoChecker DEBUG] Hand count is not 14. Failed.");
+            //Debug.Log("[RyuuisoChecker DEBUG] Hand count is not 14. Failed.");
             return false;
         }
 
@@ -37,7 +37,7 @@ public static class RyuuisoChecker
 
             if (!isGreenTile)
             {
-                Debug.Log($"[RyuuisoChecker DEBUG] Hand contains a non-green tile: {tile.suit} {tile.rank}. Failed.");
+                //Debug.Log($"[RyuuisoChecker DEBUG] Hand contains a non-green tile: {tile.suit} {tile.rank}. Failed.");
                 return false;
             }
         }
@@ -71,7 +71,7 @@ public static class RyuuisoChecker
             // 刻子、順子、雀頭の組み合わせを再帰的に判定する
             // 簡易判定のため、ここでは省略
             // 正式な実装には、IsStandardHand(hand)のような関数が必要
-            Debug.Log("[RyuuisoChecker DEBUG] All tiles are green. Assumed valid hand.");
+            //Debug.Log("[RyuuisoChecker DEBUG] All tiles are green. Assumed valid hand.");
             return true;
         }
 
