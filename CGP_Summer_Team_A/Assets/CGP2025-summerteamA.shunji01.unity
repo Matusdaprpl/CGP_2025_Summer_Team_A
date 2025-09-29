@@ -6409,7 +6409,7 @@ MonoBehaviour:
   scoreManager: {fileID: 423721869}
   forceDaisangenHand: 0
   forceSuuankouHand: 0
-  forceKokushiHand: 0
+  forceKokushiHand: 1
   forceSuukantsuHand: 0
   forceDaisushiHand: 0
   forceChinroutouHand: 0
