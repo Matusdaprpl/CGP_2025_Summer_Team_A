@@ -34,7 +34,7 @@ public class NPCmahjong : MonoBehaviour
             }
         }
         Debug.Log($"{gameObject.name}の初期手牌: {string.Join(", ", hand.Select(t => t.GetDisplayName()))}");
-        
+
         if (npcPlayer == null && targetYakuman == Yakuman.None)
         {
             targetYakuman = (Random.Range(0, 2) == 0) ? Yakuman.KokushiMusou : Yakuman.Daisangen;
@@ -63,7 +63,7 @@ public class NPCmahjong : MonoBehaviour
 
         hand.Add(tile);
     }
- // オブジェクトが他のコライダーと衝突した瞬間に呼び出されるメソッド
+    // オブジェクトが他のコライダーと衝突した瞬間に呼び出されるメソッド
     private void OnTriggerEnter2D(Collider2D other)
     {
         // 衝突した相手のタグが "Bullet" だった場合
@@ -92,5 +92,11 @@ public class NPCmahjong : MonoBehaviour
         ItemManager.instance.DropItem(tileToDrop, dropPosition);
 
         Debug.Log($"{gameObject.name}がドロップした牌: {tileToDrop.GetDisplayName()}");
+    }
+
+    public void PrintHandToConsole(string context)
+    {
+        string handDescription = string.Join(",", hand.Select(t => t.GetDisplayName()));
+        Debug.Log($"{context}: {handDescription}");
     }
 }
