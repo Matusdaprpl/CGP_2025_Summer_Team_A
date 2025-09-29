@@ -3,6 +3,7 @@ using TMPro;
 
 public class Shooter2D : MonoBehaviour
 {
+    public TextMeshProUGUI ResultscoreText;
     public TextMeshProUGUI scoreText;
     [Header("弾のプレハブ")]
     public GameObject bulletPrefab;
@@ -25,7 +26,7 @@ public class Shooter2D : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            if (score >=fireCost) 
+            if (score >= fireCost)
             {
                 Shoot();
             }
@@ -35,6 +36,7 @@ public class Shooter2D : MonoBehaviour
             }
         }
         scoreText.text = "SCORE: " + score;
+        ResultscoreText.text = "SCORE: " + score;
     }
     
     void Shoot()
