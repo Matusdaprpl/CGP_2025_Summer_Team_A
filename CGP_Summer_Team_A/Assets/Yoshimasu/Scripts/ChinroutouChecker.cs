@@ -15,7 +15,7 @@ public static class ChinroutouChecker
         // 14枚でなければ不成立
         if (hand == null || hand.Count != 14)
         {
-            Debug.Log("[ChinroutouChecker DEBUG] Hand count is not 14. Failed.");
+            //Debug.Log("[ChinroutouChecker DEBUG] Hand count is not 14. Failed.");
             return false;
         }
 
@@ -24,12 +24,12 @@ public static class ChinroutouChecker
         {
             if (tile.suit == Suit.Honor) // 字牌は清老頭に含まれない
             {
-                Debug.Log("[ChinroutouChecker DEBUG] Hand contains an Honor tile. Failed.");
+               //Debug.Log("[ChinroutouChecker DEBUG] Hand contains an Honor tile. Failed.");
                 return false;
             }
             if (tile.rank != 1 && tile.rank != 9)
             {
-                Debug.Log($"[ChinroutouChecker DEBUG] Hand contains non-routo tile: {tile.suit} {tile.rank}. Failed.");
+                //Debug.Log($"[ChinroutouChecker DEBUG] Hand contains non-routo tile: {tile.suit} {tile.rank}. Failed.");
                 return false;
             }
         }
@@ -60,7 +60,7 @@ public static class ChinroutouChecker
             else
             {
                 // 1枚組が含まれる場合は不成立
-                Debug.Log($"[ChinroutouChecker DEBUG] Hand contains a group of {count}. Failed.");
+                //Debug.Log($"[ChinroutouChecker DEBUG] Hand contains a group of {count}. Failed.");
                 return false;
             }
         }
@@ -69,12 +69,12 @@ public static class ChinroutouChecker
         // 条件：3枚組と4枚組の合計が4つ AND 2枚組が1つ
         if ((countTriplets + countQuads) == 4 && countPairs == 1)
         {
-            Debug.Log("[ChinroutouChecker DEBUG] Passed all conditions.");
+            //Debug.Log("[ChinroutouChecker DEBUG] Passed all conditions.");
             return true;
         }
         else
         {
-            Debug.Log($"[ChinroutouChecker DEBUG] Failed. Triplets:{countTriplets}, Quads:{countQuads}, Pairs:{countPairs}");
+            //Debug.Log($"[ChinroutouChecker DEBUG] Failed. Triplets:{countTriplets}, Quads:{countQuads}, Pairs:{countPairs}");
             return false;
         }
     }

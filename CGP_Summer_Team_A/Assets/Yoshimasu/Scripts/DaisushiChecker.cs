@@ -15,7 +15,7 @@ public static class DaisushiChecker
         // 14枚でなければ不成立
         if (hand == null || hand.Count != 14)
         {
-            Debug.Log("[DaisushiChecker DEBUG] Hand count is not 14. Failed.");
+            //Debug.Log("[DaisushiChecker DEBUG] Hand count is not 14. Failed.");
             return false;
         }
 
@@ -24,10 +24,10 @@ public static class DaisushiChecker
                          .ToDictionary(g => g.Key, g => g.Count());
 
         // ★★★ デバッグログを追加 ★★★
-        Debug.Log("[DaisushiChecker DEBUG] Counted tiles:");
+        //Debug.Log("[DaisushiChecker DEBUG] Counted tiles:");
         foreach (var pair in counts)
         {
-            Debug.Log($"  - {pair.Key.suit} {pair.Key.rank}: {pair.Value}枚");
+            //Debug.Log($"  - {pair.Key.suit} {pair.Key.rank}: {pair.Value}枚");
         }
 
         int countWindTriplets = 0; // 風牌の3枚組/4枚組の数
@@ -49,7 +49,7 @@ public static class DaisushiChecker
                 else
                 {
                     // 風牌が3枚組や4枚組でない場合は不成立
-                    Debug.Log("[DaisushiChecker DEBUG] A wind tile is not a triplet or quad. Failed.");
+                   //Debug.Log("[DaisushiChecker DEBUG] A wind tile is not a triplet or quad. Failed.");
                     return false;
                 }
             }
@@ -65,17 +65,17 @@ public static class DaisushiChecker
 
         // 3. 最終判定
         // ★★★ デバッグログを追加 ★★★
-        Debug.Log($"[DaisushiChecker DEBUG] Wind Triples/Quads: {countWindTriplets}, Pairs: {countPairs}, Others: {otherCount}");
+        //Debug.Log($"[DaisushiChecker DEBUG] Wind Triples/Quads: {countWindTriplets}, Pairs: {countPairs}, Others: {otherCount}");
 
         // 条件：風牌の刻子/槓子が4つ AND 2枚組が1つ AND 他の牌がない
         if (countWindTriplets == 4 && countPairs == 1 && otherCount == 0)
         {
-            Debug.Log("[DaisushiChecker DEBUG] Passed all conditions.");
+            //Debug.Log("[DaisushiChecker DEBUG] Passed all conditions.");
             return true;
         }
         else
         {
-            Debug.Log("[DaisushiChecker DEBUG] Failed to meet all conditions.");
+            //Debug.Log("[DaisushiChecker DEBUG] Failed to meet all conditions.");
             return false;
         }
     }

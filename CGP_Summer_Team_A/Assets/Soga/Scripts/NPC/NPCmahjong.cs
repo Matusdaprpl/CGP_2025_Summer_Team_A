@@ -25,6 +25,16 @@ public class NPCmahjong : MonoBehaviour
 
     void Start()
     {
+        for (int i = 0; i < 14; i++)
+        {
+            Tile tile = MahjongManager.instance.DrawTile();
+            if (tile != null)
+            {
+                hand.Add(tile);
+            }
+        }
+        Debug.Log($"{gameObject.name}の初期手牌: {string.Join(", ", hand.Select(t => t.GetDisplayName()))}");
+        
         if (npcPlayer == null && targetYakuman == Yakuman.None)
         {
             targetYakuman = (Random.Range(0, 2) == 0) ? Yakuman.KokushiMusou : Yakuman.Daisangen;
