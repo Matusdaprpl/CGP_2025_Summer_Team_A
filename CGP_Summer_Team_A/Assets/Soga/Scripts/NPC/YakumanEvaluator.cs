@@ -1,37 +1,55 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
 using NUnit.Framework.Internal;
 using Unity.VisualScripting;
+using UnityEngine;
 
 public static class YakumanEvaluator
 {
     // 手牌と目標役満から、最も不要な牌を1枚選んで返す
     public static Tile ChooseDiscardTile(List<Tile> hand, Yakuman target)
     {
-        switch (target)
+        var unnecessaryTiles=hand.Where(tile=>!IsTileNeededFor(tile,target,hand)).ToList();
+
+        if (unnecessaryTiles.Any())
         {
-            case Yakuman.KokushiMusou:
-                return ChooseDiscardForKokushi(hand);
-            case Yakuman.Daisangen:
-                return ChooseDiscardForDaisangen(hand);
-            case Yakuman.SuuAnkou:
-                return ChooseDiscardForSuuankou(hand);
-            case Yakuman.Tsuiso:
-                return ChooseDiscardForTsuuiisou(hand);
-            case Yakuman.Chinroutou:
-                return ChooseDiscardForChinroutou(hand);
-            case Yakuman.Ryuuiisou:
-                return ChooseDiscardForRyuuiisou(hand);
-            case Yakuman.Shousuushii:
-            case Yakuman.Daisuushii:
-                return ChooseDiscardForSuushii(hand);
-            case Yakuman.Chuuren:
-                return ChooseDiscardForChuuren(hand);
-            default:
-                // デフォルトは適当に一番右の牌を捨てる
-                return hand.Last();
+            return unnecessaryTiles[UnityEngine.Random.Range(0, unnecessaryTiles.Count)];
         }
+        
+        var necessaryTiles=hand.Where(tile=>IsTileNeededFor(tile,target,hand)).ToList();
+        if (necessaryTiles.Any())
+        {
+            var tileCounts = necessaryTiles.GroupBy(tile => tile.GetDisplayName())
+                                         .ToDictionary(g => g.Key, g => g.Count());
+
+            var leastDuplicatedTile = necessaryTiles.OrderBy(tile => tileCounts[tile.GetDisplayName()]).First();
+            return leastDuplicatedTile;
+        }
+        switch (target)
+            {
+                case Yakuman.KokushiMusou:
+                    return ChooseDiscardForKokushi(hand);
+                case Yakuman.Daisangen:
+                    return ChooseDiscardForDaisangen(hand);
+                case Yakuman.SuuAnkou:
+                    return ChooseDiscardForSuuankou(hand);
+                case Yakuman.Tsuiso:
+                    return ChooseDiscardForTsuuiisou(hand);
+                case Yakuman.Chinroutou:
+                    return ChooseDiscardForChinroutou(hand);
+                case Yakuman.Ryuuiisou:
+                    return ChooseDiscardForRyuuiisou(hand);
+                case Yakuman.Shousuushii:
+                case Yakuman.Daisuushii:
+                    return ChooseDiscardForSuushii(hand);
+                case Yakuman.Chuuren:
+                    return ChooseDiscardForChuuren(hand);
+                default:
+                    // デフォルトは適当に一番右の牌を捨てる
+                    return hand.Last();
+            }
     }
 
     public static bool IsTileNeededFor(Tile tile, Yakuman target, List<Tile> hand)
@@ -46,21 +64,14 @@ public static class YakumanEvaluator
             case Yakuman.Daisangen:
                 {
                     var requiredHonors = new HashSet<string> { "Honor_5", "Honor_6", "Honor_7" };
-                    if (requiredHonors.Contains(tileName))
-                    {
-                        //すでに4枚持っていたら不要
-                        return hand.Count(t => t.GetDisplayName() == tileName) < 4;
-                    }
-                    // 刻子を作るために必要
-                    return hand.Count(t => t.GetDisplayName() == tileName) < 4;
+                    // 修正: ドラゴン牌のみ必要。他の牌は不要
+                    return requiredHonors.Contains(tileName);
                 }
 
             case Yakuman.SuuAnkou:
-            {
-                    // すでに4枚持っていたら不要
-                    return hand.Count(t => t.GetDisplayName() == tileName) < 4;
-                
-            }
+                // 修正: 四暗刻では全ての牌が重複して必要になるため、4枚未満の牌は必要
+                return hand.Count(t => t.GetDisplayName() == tileName) < 4;
+
             case Yakuman.Tsuiso:
                 // 字牌なら必要
                 return tile.suit == Suit.Honor;
@@ -79,14 +90,13 @@ public static class YakumanEvaluator
                 return requiredWinds.Contains(tileName);
 
             case Yakuman.Chuuren:
-                if(tile.suit == Suit.Honor) return false; // 修正: TestSuite -> Suit
+                if (tile.suit == Suit.Honor) return false;
                 var dominantSuit = hand.Where(t => t.suit != Suit.Honor)
                     .GroupBy(t => t.suit)
                     .OrderByDescending(g => g.Count())
                     .Select(g => g.Key)
                     .FirstOrDefault();
                 if (dominantSuit == Suit.None) return true;
-
                 return tile.suit == dominantSuit;
 
             default:
