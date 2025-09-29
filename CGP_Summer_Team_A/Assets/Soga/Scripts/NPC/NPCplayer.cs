@@ -251,6 +251,7 @@ public class NPCplayer : MonoBehaviour
         isProcessingTile = true;
         
         npcMahjong.AddTileToHand(pickedTile);
+        npcMahjong.PrintHandToConsole("牌を拾った直後");
 
         string handDescription=string.Join(",", npcMahjong.hand.Select(t=>t.GetDisplayName()));
         Debug.Log($"{gameObject.name}の拾った牌: {pickedTile.GetDisplayName()}");
@@ -268,6 +269,7 @@ public class NPCplayer : MonoBehaviour
         yield return new WaitForSeconds(1.0f);
         
         npcMahjong.DiscardTile();
+        npcMahjong.PrintHandToConsole("捨て牌後");
         
         isProcessingTile = false;
     }
