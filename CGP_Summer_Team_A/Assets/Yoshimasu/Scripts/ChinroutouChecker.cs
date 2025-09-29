@@ -18,8 +18,7 @@ public static class ChinroutouChecker
             Debug.Log("[ChinroutouChecker DEBUG] Hand count is not 14. Failed.");
             return false;
         }
-
-        // 1. すべての牌が老頭牌（1または9）であるかを確認
+// 1. すべての牌が老頭牌（1または9）であるかを確認
         foreach (var tile in hand)
         {
             if (tile.suit == Suit.Honor) // 字牌は清老頭に含まれない
@@ -42,7 +41,7 @@ public static class ChinroutouChecker
         int countTriplets = 0; // 3枚組の数
         int countQuads = 0;    // 4枚組の数
         int countPairs = 0;    // 2枚組の数
-        
+
         foreach (var count in counts.Values)
         {
             if (count == 3)
@@ -64,7 +63,7 @@ public static class ChinroutouChecker
                 return false;
             }
         }
-        
+
         // 3. 最終判定
         // 条件：3枚組と4枚組の合計が4つ AND 2枚組が1つ
         if ((countTriplets + countQuads) == 4 && countPairs == 1)

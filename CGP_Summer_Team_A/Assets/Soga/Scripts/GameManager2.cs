@@ -6,6 +6,17 @@ using System.Collections;
 
 public class GameManager2 : MonoBehaviour
 {
+    private List<Tile> myHand = new List<Tile>();
+    [SerializeField] private GameObject shousushiImage;
+    [SerializeField] private GameObject tsuisoImage;
+    [SerializeField] private GameObject ryuuisoImage;
+    [SerializeField] private GameObject daisushiImage;   
+    [SerializeField] private GameObject chinroutouImage;
+    [SerializeField] private GameObject kokushiImage;
+    //[SerializeField] private GameObject suukantsuImage;
+    [SerializeField] private GameObject daisangenImage;
+    [SerializeField] private GameObject suuankouImage;
+
     // ★★★ ゲーム終了管理用のフィールド ★★★
     [Header("ゲーム終了管理")]
     public PlayerMove playerMove;    // プレイヤーの車を停止させる
@@ -245,7 +256,7 @@ public class GameManager2 : MonoBehaviour
         }
         
         const int YAKUMAN_SCORE = 32000; 
-        var myHand = new List<Tile>(MahjongManager.instance.playerHand);
+        myHand = new List<Tile>(MahjongManager.instance.playerHand);
         
         // --- 役満判定とゲーム終了 ---
         
@@ -354,5 +365,19 @@ public class GameManager2 : MonoBehaviour
         // 4. その他の処理（リザルト画面表示など）
         // Time.timeScale = 0f;
         ResultPanel.SetActive(true);
+    }
+    void Update()
+    {
+        shousushiImage.SetActive(ShosushiChecker.IsShosushi(myHand));
+        
+        
+        tsuisoImage.SetActive(TsuisoChecker.IsTsuiso(myHand));
+        
+        //suukantsuImage.SetActive(SuukantsuChecker.IsSuukantsu(myHand));
+            
+        ryuuisoImage.SetActive(RyuuisoChecker.IsRyuuiso(myHand));
+        daisushiImage.SetActive(DaisushiChecker.IsDaisushi(myHand));
+        chinroutouImage.SetActive(ChinroutouChecker.IsChinroutou(myHand));
+        kokushiImage.SetActive(KokushiChecker.IsKokushi(myHand));        
     }
 }
