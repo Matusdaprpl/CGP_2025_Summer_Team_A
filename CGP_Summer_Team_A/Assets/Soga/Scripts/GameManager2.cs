@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Linq; 
-using System.Collections; 
+using System.Collections;
 
 public class GameManager2 : MonoBehaviour
 {
@@ -24,15 +24,31 @@ public class GameManager2 : MonoBehaviour
     public bool forceDaisangenHand = false; 
     public bool forceSuuankouHand = false; 
     public bool forceKokushiHand = false;
-    public bool forceSuukantsuHand = false;
+    //public bool forceSuukantsuHand = false;
     public bool forceDaisushiHand = false;
     public bool forceChinroutouHand = false;
     public bool forceRyuuisoHand = false;
     public bool forceTsuisoHand = false;
     public bool forceShosushiHand = false;
+    public bool forceChuurenHand = false; // 追加
 
     [Header("リザルト画面設定")]
     public GameObject ResultPanel;
+    public Image yakumanImage;
+    public GameObject ResultPanel3;
+    public Image yakumanImage3;
+
+
+   [Header("役満スプライト設定")]
+    [SerializeField] private Sprite kokushiSprite;
+    [SerializeField] private Sprite daisangenSprite;
+    [SerializeField] private Sprite suuankouSprite;
+    [SerializeField] private Sprite daisushiSprite;
+    [SerializeField] private Sprite chinroutouSprite;
+    [SerializeField] private Sprite ryuuisoSprite;
+    [SerializeField] private Sprite tsuisoSprite;
+    [SerializeField] private Sprite shosushiSprite;
+    [SerializeField] private Sprite chuurenSprite;
 
     // MahjongUIManager の初期化遅延に対応するため、コルーチンで実行
     void Start()
@@ -57,10 +73,6 @@ public class GameManager2 : MonoBehaviour
         if (forceDaisangenHand)
         {
             SetDaisangenHand();
-        }
-        else if (forceSuukantsuHand)
-        {
-            SetSuukantsuHand();
         }
         else if (forceSuuankouHand)
         {
@@ -89,6 +101,10 @@ public class GameManager2 : MonoBehaviour
         else if (forceShosushiHand) 
         {
             SetShosushiHand();
+        }
+        else if (forceChuurenHand) // 追加
+        {
+            SetChuurenHand();
         }
         
         if (agariButton != null)
@@ -144,19 +160,6 @@ public class GameManager2 : MonoBehaviour
             (Suit.Manzu, 1) 
         };
         PassHandToManager(handData, "国士無双");
-    }
-
-    private void SetSuukantsuHand()
-    {
-        var handData = new List<(Suit suit, int rank)>
-        {
-            (Suit.Manzu, 1), (Suit.Manzu, 1), (Suit.Manzu, 1), 
-            (Suit.Pinzu, 2), (Suit.Pinzu, 2), (Suit.Pinzu, 2), 
-            (Suit.Souzu, 3), (Suit.Souzu, 3), (Suit.Souzu, 3), 
-            (Suit.Honor, 4), (Suit.Honor, 4), (Suit.Honor, 4), 
-            (Suit.Pinzu, 5), (Suit.Pinzu, 5) 
-        };
-        PassHandToManager(handData, "四槓子");
     }
 
     private void SetDaisushiHand()
@@ -223,6 +226,19 @@ public class GameManager2 : MonoBehaviour
         };
         PassHandToManager(handData, "小四喜");
     }
+
+    private void SetChuurenHand() // 追加
+    {
+        var handData = new List<(Suit suit, int rank)>
+        {
+            (Suit.Manzu, 1), (Suit.Manzu, 1), (Suit.Manzu, 1), 
+            (Suit.Manzu, 2), (Suit.Manzu, 3), (Suit.Manzu, 4), 
+            (Suit.Manzu, 5), (Suit.Manzu, 6), (Suit.Manzu, 7), 
+            (Suit.Manzu, 8), (Suit.Manzu, 9), (Suit.Manzu, 9), 
+            (Suit.Manzu, 9), (Suit.Pinzu, 1) 
+        };
+        PassHandToManager(handData, "九蓮宝燈");
+    }
     
     private void PassHandToManager(List<(Suit suit, int rank)> handData, string name)
     {
@@ -244,76 +260,95 @@ public class GameManager2 : MonoBehaviour
             Debug.LogError("MahjongManager.instance が null です。");
             return;
         }
-        
-        const int YAKUMAN_SCORE = 32000; 
+
+        const int YAKUMAN_SCORE = 32000;
         var myHand = new List<Tile>(MahjongManager.instance.playerHand);
-        
+
         // --- 役満判定とゲーム終了 ---
-        
+        Sprite spriteToShow = null;
+
         if (ShosushiChecker.IsShosushi(myHand))
         {
             Debug.Log("🎉 小四喜です！");
             scoreManager?.AddScore(YAKUMAN_SCORE);
-            GameOver(); 
+            spriteToShow = shosushiSprite;
+            GameOver();
         }
         else if (TsuisoChecker.IsTsuiso(myHand))
         {
             Debug.Log("🎉 字一色です！");
             scoreManager?.AddScore(YAKUMAN_SCORE);
-            GameOver(); 
+            spriteToShow = tsuisoSprite;
+            GameOver();
         }
         else if (RyuuisoChecker.IsRyuuiso(myHand))
         {
             Debug.Log("🎉 緑一色です！");
             scoreManager?.AddScore(YAKUMAN_SCORE);
-            GameOver(); 
+            spriteToShow = ryuuisoSprite;
+            GameOver();
         }
         else if (DaisushiChecker.IsDaisushi(myHand))
         {
             Debug.Log("🎉 大四喜です！");
             scoreManager?.AddScore(YAKUMAN_SCORE * 2);
-            GameOver(); 
+            spriteToShow = daisushiSprite;
+            GameOver();
         }
         else if (ChinroutouChecker.IsChinroutou(myHand))
         {
             Debug.Log("🎉 清老頭です！");
             scoreManager?.AddScore(YAKUMAN_SCORE);
-            GameOver(); 
+            spriteToShow = chinroutouSprite;
+            GameOver();
         }
         else if (KokushiChecker.IsKokushi(myHand))
         {
             Debug.Log("🎉 国士無双です！");
             scoreManager?.AddScore(YAKUMAN_SCORE);
-            GameOver(); 
-        }
-        else if (SuukantsuChecker.IsSuukantsu(myHand))
-        {
-            Debug.Log("🎉 四槓子です！");
-            scoreManager?.AddScore(YAKUMAN_SCORE);
-            GameOver(); 
+            spriteToShow = kokushiSprite;
+            GameOver();
         }
         else if (DaisangenChecker.IsDaisangen(myHand))
         {
             Debug.Log("🎉 大三元です！");
             scoreManager?.AddScore(YAKUMAN_SCORE);
-            GameOver(); 
+            spriteToShow = daisangenSprite;
+            GameOver();
         }
         else if (SuuankouChecker.IsSuuankou(myHand))
         {
             Debug.Log("🎉 四暗刻です！");
             scoreManager?.AddScore(YAKUMAN_SCORE);
-            GameOver(); 
+            spriteToShow = suuankouSprite;
+            GameOver();
+        }
+        else if (ChuurenChecker.IsChuuren(myHand)) // 追加
+        {
+            Debug.Log("🎉 九蓮宝燈です！");
+            scoreManager?.AddScore(YAKUMAN_SCORE);
+            spriteToShow = chuurenSprite;
+            GameOver();
         }
         else
         {
             Debug.Log("役満ではありません。（他の役の判定は未実装です）");
         }
-        
+
         if (scoreManager == null)
         {
             Debug.LogError("Score Manager (Shooter2D) が設定されていません。Inspectorを確認してください！");
         }
+
+        if (yakumanImage != null && spriteToShow != null)
+        {
+            yakumanImage.sprite = spriteToShow;
+            yakumanImage.gameObject.SetActive(true); // 表示
+        }
+
+        GameOver();
     }
+
 
     // ----------------------------------------------------
     // ★★★ ゲーム終了メソッド (すべての要素を停止) ★★★

@@ -2,6 +2,8 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 using System;
+using UnityEngine.InputSystem.LowLevel;
+using UnityEngine.UI;
 
 public enum Suit
 {
@@ -33,6 +35,19 @@ public class MahjongManager : MonoBehaviour
 {
     [Header("リザルト画面設定")]
     public GameObject ResultPanel2;//ゴールのリザルト画面
+    public GameObject ResultPanel3;//NPCの役満のリザルト画面
+    public Image yakumanImage;
+
+    [Header("役満スプライト設定 (NPC)")] // 追加
+    [SerializeField] private Sprite npcKokushiSprite;
+    [SerializeField] private Sprite npcDaisangenSprite;
+    [SerializeField] private Sprite npcSuuankouSprite;
+    [SerializeField] private Sprite npcDaisushiSprite;
+    [SerializeField] private Sprite npcChinroutouSprite;
+    [SerializeField] private Sprite npcRyuuisoSprite;
+    [SerializeField] private Sprite npcTsuisoSprite;
+    [SerializeField] private Sprite npcShosushiSprite;
+    [SerializeField] private Sprite npcChuurenSprite;
 
     public event Action OnPlayerHitItem;
     public static MahjongManager instance;
@@ -131,10 +146,6 @@ public class MahjongManager : MonoBehaviour
 
     public void DiscardTile(int handIndex)
     {
-        if (playerHand.Count <= 14)
-        {
-            return;
-        }
         if (handIndex < 0 || handIndex >= playerHand.Count)
         {
             Debug.Log($"無効なインデックスを捨てようとしました:{handIndex}");
@@ -260,6 +271,49 @@ public class MahjongManager : MonoBehaviour
         roundOver = true;
 
         Debug.Log($"{npcName}が{yakuman}で上がりました！");
+
+        Sprite spriteToShow = null;
+        switch (yakuman)
+        {
+            case Yakuman.KokushiMusou: spriteToShow = npcKokushiSprite; break;
+            case Yakuman.Daisangen: spriteToShow = npcDaisangenSprite; break;
+            case Yakuman.SuuAnkou: spriteToShow = npcSuuankouSprite; break;
+            case Yakuman.Daisuushii: spriteToShow = npcDaisushiSprite; break;
+            case Yakuman.Chinroutou: spriteToShow = npcChinroutouSprite; break;
+            case Yakuman.Ryuuiisou: spriteToShow = npcRyuuisoSprite; break;
+            case Yakuman.Tsuiso: spriteToShow = npcTsuisoSprite; break;
+            case Yakuman.Shousuushii: spriteToShow = npcShosushiSprite; break;
+            case Yakuman.Chuuren: spriteToShow = npcChuurenSprite; break;
+            default: Debug.LogWarning("未定義の役満スプライト"); break;
+        }
+
+        if (yakumanImage != null && spriteToShow != null)
+        {
+            yakumanImage.sprite = spriteToShow;
+            yakumanImage.gameObject.SetActive(true);
+        }
+
+        if (ResultPanel2 != null)
+        {
+            ResultPanel3.SetActive(true);
+        }
+        else
+        {
+            Debug.LogError("ResultPanel3が設定されていません。");
+        }
+
+        var gameManager2 = FindFirstObjectByType<GameManager2>();
+        if (gameManager2 != null)
+        {
+            gameManager2.GameOver();
+        }
+
+        var playerMove = FindFirstObjectByType<PlayerMove>();
+        if (playerMove != null)
+        {
+            playerMove.enabled = false;
+
+        }
     }
 
     public void OnCharacterGoal(string characterName)

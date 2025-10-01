@@ -8,6 +8,8 @@ TagManager:
   - NPC
   - Obstacle
   - Goal
+  - Undefined
+  - Bullet
   layers:
   - Default
   - TransparentFX
