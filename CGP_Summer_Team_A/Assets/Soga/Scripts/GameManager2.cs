@@ -257,7 +257,6 @@ public class GameManager2 : MonoBehaviour
 
     public void OnAgariButton()
     {
-        Debug.Log("和了ボタンが押されました。");
         if (MahjongManager.instance == null)
         {
             Debug.LogError("MahjongManager.instance が null です。");
@@ -268,10 +267,12 @@ public class GameManager2 : MonoBehaviour
         var myHand = new List<Tile>(MahjongManager.instance.playerHand);
 
         // --- 役満判定とゲーム終了 ---
+        bool isYakuman = false;
         Sprite spriteToShow = null;
 
         if (ShosushiChecker.IsShosushi(myHand))
         {
+            isYakuman = true;
             Debug.Log("🎉 小四喜です！");
             scoreManager?.AddScore(YAKUMAN_SCORE);
             spriteToShow = shosushiSprite;
@@ -279,6 +280,7 @@ public class GameManager2 : MonoBehaviour
         }
         else if (TsuisoChecker.IsTsuiso(myHand))
         {
+            isYakuman = true;
             Debug.Log("🎉 字一色です！");
             scoreManager?.AddScore(YAKUMAN_SCORE);
             spriteToShow = tsuisoSprite;
@@ -286,6 +288,7 @@ public class GameManager2 : MonoBehaviour
         }
         else if (RyuuisoChecker.IsRyuuiso(myHand))
         {
+            isYakuman = true;
             Debug.Log("🎉 緑一色です！");
             scoreManager?.AddScore(YAKUMAN_SCORE);
             spriteToShow = ryuuisoSprite;
@@ -293,6 +296,7 @@ public class GameManager2 : MonoBehaviour
         }
         else if (DaisushiChecker.IsDaisushi(myHand))
         {
+            isYakuman = true;
             Debug.Log("🎉 大四喜です！");
             scoreManager?.AddScore(YAKUMAN_SCORE * 2);
             spriteToShow = daisushiSprite;
@@ -300,6 +304,7 @@ public class GameManager2 : MonoBehaviour
         }
         else if (ChinroutouChecker.IsChinroutou(myHand))
         {
+            isYakuman = true;
             Debug.Log("🎉 清老頭です！");
             scoreManager?.AddScore(YAKUMAN_SCORE);
             spriteToShow = chinroutouSprite;
@@ -307,6 +312,7 @@ public class GameManager2 : MonoBehaviour
         }
         else if (KokushiChecker.IsKokushi(myHand))
         {
+            isYakuman = true;
             Debug.Log("🎉 国士無双です！");
             scoreManager?.AddScore(YAKUMAN_SCORE);
             spriteToShow = kokushiSprite;
@@ -314,6 +320,7 @@ public class GameManager2 : MonoBehaviour
         }
         else if (DaisangenChecker.IsDaisangen(myHand))
         {
+            isYakuman = true;
             Debug.Log("🎉 大三元です！");
             scoreManager?.AddScore(YAKUMAN_SCORE);
             spriteToShow = daisangenSprite;
@@ -321,6 +328,7 @@ public class GameManager2 : MonoBehaviour
         }
         else if (SuuankouChecker.IsSuuankou(myHand))
         {
+            isYakuman = true;
             Debug.Log("🎉 四暗刻です！");
             scoreManager?.AddScore(YAKUMAN_SCORE);
             spriteToShow = suuankouSprite;
@@ -328,25 +336,33 @@ public class GameManager2 : MonoBehaviour
         }
         else if (ChuurenChecker.IsChuuren(myHand)) // 追加
         {
+            isYakuman = true;
             Debug.Log("🎉 九蓮宝燈です！");
             scoreManager?.AddScore(YAKUMAN_SCORE);
             spriteToShow = chuurenSprite;
             GameOver();
         }
-        else
+
+        //役満ではない時
+        if (!isYakuman)
         {
             Debug.Log("役満ではありません。（他の役の判定は未実装です）");
-        }
-
-        if (scoreManager == null)
-        {
-            Debug.LogError("Score Manager (Shooter2D) が設定されていません。Inspectorを確認してください！");
+            return;
         }
 
         if (yakumanImage != null && spriteToShow != null)
         {
             yakumanImage.sprite = spriteToShow;
-            yakumanImage.gameObject.SetActive(true); // 表示
+            yakumanImage.gameObject.SetActive(true);
+        }
+
+        if (ResultPanel != null)
+        {
+            ResultPanel.SetActive(true);
+        }
+        else
+        {
+            Debug.LogError("ResultPanelが設定されていません。");
         }
 
         GameOver();
@@ -358,7 +374,6 @@ public class GameManager2 : MonoBehaviour
     // ----------------------------------------------------
     public void GameOver()
     {
-        Debug.Log("役満成立！ゲーム終了！");
 
         // 1. プレイヤーの移動を停止
         if (playerMove != null)
@@ -387,17 +402,6 @@ public class GameManager2 : MonoBehaviour
                     script.StopMovement();
                 }
             }
-            Debug.Log($"NPC {npcMoveScripts.Length} 体の停止メソッドを呼び出しました。");
-        }
-
-        // 4. リザルト画面表示（役満）
-        if (ResultPanel != null)
-        {
-            ResultPanel.SetActive(true);
-        }
-        else
-        {
-            Debug.LogError("ResultPanelが設定されていません。");
         }
     }
 
