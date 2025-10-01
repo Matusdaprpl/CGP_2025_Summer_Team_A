@@ -4,17 +4,17 @@ using TMPro;
 public class PlayerMove : MonoBehaviour
 {
     [Header("速度設定")]
-    public float startSpeed = 10f;       
-    public float maxSpeed = 10f;         
-    public float maxSpeedCharged = 15f;  
-    public float accel = 10f;            
-    public float decel = 10f;            
-    public float smooth = 5f;            
-    public float baseSpeed = 10f;        
+    public float startSpeed = 10f;
+    public float maxSpeed = 10f;
+    public float maxSpeedCharged = 15f;
+    public float accel = 10f;
+    public float decel = 10f;
+    public float smooth = 5f;
+    public float baseSpeed = 10f;
 
     [Header("チャージ設定")]
-    public float requiredChargeTime = 2f; 
-    private float chargeTime = 0f;        
+    public float requiredChargeTime = 2f;
+    private float chargeTime = 0f;
 
     [Header("カウントダウン設定")]
     public float countdownTime = 3f;
@@ -28,15 +28,16 @@ public class PlayerMove : MonoBehaviour
     private AudioSource audioSource;
 
     [Header("ブースト設定")]
-    public float boostDuration = 3f;  // ブースト時間
-    public float boostSpeed = 20f;    // ブースト最大速度
+    public float boostDuration = 3f; // ブースト時間
+    public float boostSpeed = 20f;   // ブースト最大速度
+    private bool isBoostAvailable = false;
     private bool isBoostActive = false;
     private float boostTimer = 0f;
 
     [Header("光る設定")]
     public ParticleSystem boostParticles;
-
     private bool hasplayed = false;
+
     private float targetSpeed;
     private float currentSpeed;
     private float remainingCountdownTime;
@@ -45,8 +46,23 @@ public class PlayerMove : MonoBehaviour
 
     // --- Obstacle関連 ---
     private bool isOnObstacle = false;
-    private float obstacleMaxSpeed = 2f;    
-    private float obstacleSmooth = 20f;     
+    private float obstacleMaxSpeed = 2f;
+    private float obstacleSmooth = 20f;
+
+    [Header("色変化設定")]
+    public SpriteRenderer playerRenderer;  // PlayerのSpriteRenderer
+    public float colorChangeSpeed = 1f;    // 基本色変化速度
+
+    private Color[] rainbowColors = new Color[]
+    {
+        Color.red,
+        Color.yellow,
+        Color.green,
+        Color.blue,
+        new Color(0.5f, 0f, 0.5f) // 紫
+    };
+    private int currentColorIndex = 0;
+    private float colorLerpT = 0f;
 
     void Start()
     {
@@ -59,22 +75,26 @@ public class PlayerMove : MonoBehaviour
 
         audioSource = GetComponent<AudioSource>();
 
-        if(boostParticles == null)
+        if (boostParticles == null)
             boostParticles = GetComponentInChildren<ParticleSystem>();
 
-        if(boostParticles != null)
+        if (boostParticles != null)
         {
-            boostParticles.Stop(); // 初期状態は停止
+            var renderer = boostParticles.GetComponent<ParticleSystemRenderer>();
+            renderer.sortingLayerName = "Default";
+            renderer.sortingOrder = 5;
 
-            // パーティクル色を黄色に変更
             var main = boostParticles.main;
             main.startColor = Color.yellow;
         }
+
+        if (playerRenderer == null)
+            playerRenderer = GetComponent<SpriteRenderer>();
     }
 
     void Update()
     {
-        // --- カウントダウン処理 ---
+        // --- カウントダウン ---
         if (isCountdownActive)
         {
             remainingCountdownTime -= Time.deltaTime;
@@ -87,7 +107,7 @@ public class PlayerMove : MonoBehaviour
                 hasplayed = true;
             }
 
-            if (remainingCountdownTime <= 0)
+            if (remainingCountdownTime <= 0f)
             {
                 isCountdownActive = false;
                 if (countdownText != null)
@@ -95,84 +115,76 @@ public class PlayerMove : MonoBehaviour
                     countdownText.text = "Go!";
                     Invoke("HideCountdownText", 1f);
                 }
-                Debug.Log("レース開始！！");
-
-                if (raceBGM != null)
-                {
-                    raceBGM.Play();
-                }
+                if (raceBGM != null) raceBGM.Play();
             }
             return;
         }
 
-        // --- 入力処理 ---
         bool isAccelerateKey = Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow);
         bool isBackwardKey = Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow);
 
         // --- チャージ処理 ---
-        if (Input.GetKeyUp(KeyCode.D) || Input.GetKeyUp(KeyCode.RightArrow))
-        {
-            chargeTime = 0f;
-        }
-        else
+        if (!isBoostActive)
         {
             chargeTime += Time.deltaTime;
+            if (chargeTime >= requiredChargeTime)
+                isBoostAvailable = true;
         }
 
-        // --- ブースト開始（チャージ完了かつキー押下時） ---
-        if (!isBoostActive && chargeTime >= requiredChargeTime && Input.GetKeyDown(KeyCode.D))
+        // --- 速度10以上で加速キーを離した場合チャージリセット ---
+        if (currentSpeed > 10f && !isAccelerateKey)
+        {
+            chargeTime = 0f;
+            isBoostAvailable = false;
+        }
+
+        // --- ブースト開始 ---
+        if (isBoostAvailable && !isBoostActive && isAccelerateKey)
         {
             isBoostActive = true;
             boostTimer = 0f;
-
-            if(boostParticles != null)
-                boostParticles.Play();
+            isBoostAvailable = false;
         }
 
         // --- ブースト処理 ---
         if (isBoostActive)
         {
             boostTimer += Time.deltaTime;
+            targetSpeed = Mathf.MoveTowards(
+                targetSpeed,
+                boostSpeed,
+                (boostSpeed - baseSpeed) / boostDuration * Time.deltaTime
+            );
 
-            // boostSpeed まで徐々に加速
-            targetSpeed = Mathf.MoveTowards(targetSpeed, boostSpeed, (boostSpeed - baseSpeed) / boostDuration * Time.deltaTime);
-
-            // boostDuration 秒経過で終了
-            if (boostTimer >= boostDuration)
+            if (boostTimer >= boostDuration || !isAccelerateKey)
             {
                 isBoostActive = false;
                 boostTimer = 0f;
-                chargeTime = 0f;
-
                 targetSpeed = baseSpeed;
-
-                if(boostParticles != null)
-                    boostParticles.Stop();
             }
         }
         else
         {
-            // --- 通常加速処理 ---
+            // 通常加速
             bool canAccelerate = true;
-            if(currentSpeed >= 10f && chargeTime < requiredChargeTime)
+            if (currentSpeed >= 10f && chargeTime < requiredChargeTime)
                 canAccelerate = false;
 
-            if(isAccelerateKey && canAccelerate)
+            if (isAccelerateKey && canAccelerate)
                 targetSpeed += accel * Time.deltaTime;
-
-            if(isBackwardKey)
+            if (isBackwardKey)
                 targetSpeed -= decel * Time.deltaTime;
-
-            if(!isAccelerateKey && !isBackwardKey && !isOnObstacle)
+            if (!isAccelerateKey && !isBackwardKey && !isOnObstacle)
                 targetSpeed = Mathf.MoveTowards(targetSpeed, baseSpeed, smooth * Time.deltaTime);
         }
 
-        // --- 最大速度制限 ---
-        float currentMaxSpeed = isBoostActive ? boostSpeed : ((chargeTime >= requiredChargeTime) ? maxSpeedCharged : maxSpeed);
+        // 最大速度制限
+        float currentMaxSpeed = isBoostActive ? boostSpeed :
+            ((chargeTime >= requiredChargeTime) ? maxSpeedCharged : maxSpeed);
         targetSpeed = Mathf.Clamp(targetSpeed, 0f, currentMaxSpeed);
 
-        // --- 障害物制限 ---
-        if(isOnObstacle)
+        // 障害物制限
+        if (isOnObstacle)
         {
             targetSpeed = Mathf.Clamp(targetSpeed, 0f, obstacleMaxSpeed);
             currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, obstacleSmooth * Time.deltaTime);
@@ -182,29 +194,62 @@ public class PlayerMove : MonoBehaviour
             currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, smooth * Time.deltaTime);
         }
 
-        // --- 移動 ---
+        // 移動
         transform.Translate(Vector2.right * currentSpeed * Time.deltaTime);
 
-        // --- 光る処理（ParticleSystem） ---
-        if(boostParticles != null)
+        // パーティクル制御
+        if (boostParticles != null)
         {
-            // チャージ完了 or ブースト中は光らせる
-            if(isBoostActive || chargeTime >= requiredChargeTime)
+            boostParticles.transform.position = transform.position;
+            if (isBoostAvailable || isBoostActive)
             {
-                if(!boostParticles.isPlaying)
-                    boostParticles.Play();
+                if (!boostParticles.isPlaying) boostParticles.Play();
             }
             else
             {
-                if(boostParticles.isPlaying)
-                    boostParticles.Stop();
+                if (boostParticles.isPlaying) boostParticles.Stop();
+            }
+        }
+
+        // --- 色変化処理 ---
+        if (playerRenderer != null)
+        {
+            if (currentSpeed > 10f)
+            {
+                // 速度10超え → 激しい虹グラデーション
+                colorLerpT += Time.deltaTime * 3f; // 激しめ
+                if (colorLerpT >= 1f)
+                {
+                    colorLerpT = 0f;
+                    currentColorIndex = (currentColorIndex + 1) % rainbowColors.Length;
+                }
+                int nextColorIndex = (currentColorIndex + 1) % rainbowColors.Length;
+                playerRenderer.color = Color.Lerp(
+                    rainbowColors[currentColorIndex],
+                    rainbowColors[nextColorIndex],
+                    colorLerpT
+                );
+            }
+            else if (chargeTime >= requiredChargeTime && currentSpeed <= 10f)
+            {
+                // チャージ溜まって速度10以下 → 赤→黄のゆるめグラデーション
+                colorLerpT += Time.deltaTime * 1f; // ゆるめ
+                if (colorLerpT >= 1f) colorLerpT = 0f;
+                playerRenderer.color = Color.Lerp(Color.red, Color.yellow, colorLerpT);
+            }
+            else
+            {
+                // 通常色に戻す
+                playerRenderer.color = Color.white;
+                colorLerpT = 0f;
+                currentColorIndex = 0;
             }
         }
     }
 
     void HideCountdownText()
     {
-        if(countdownText != null)
+        if (countdownText != null)
             countdownText.gameObject.SetActive(false);
     }
 
@@ -215,31 +260,13 @@ public class PlayerMove : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        // ゴールタグに接触した場合の処理
-        if (other.CompareTag("Goal"))
-        {
-            Debug.Log("ゴール！！");
-
-            // GameManagerにゴールしたことを通知する
-            // ※前回の会話で作成した順位判定ができるGameManagerを呼び出すように変更
-            if (MahjongManager.instance != null)
-            {
-                MahjongManager.instance.OnCharacterGoal("Player");
-            }
-
-            this.enabled = false; // プレイヤーの操作を停止
-        }
-        // 障害物タグに接触した場合の処理
-        else if (other.CompareTag("Obstacle") && currentSpeed <= 11f)
-        {
+        if (other.CompareTag("Obstacle") && currentSpeed <= 11f)
             isOnObstacle = true;
-        }
     }
-
 
     private void OnTriggerExit2D(Collider2D other)
     {
-        if(other.CompareTag("Obstacle") && isOnObstacle)
+        if (other.CompareTag("Obstacle") && isOnObstacle)
             isOnObstacle = false;
     }
 }
