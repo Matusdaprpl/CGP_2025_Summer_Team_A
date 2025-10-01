@@ -36,7 +36,7 @@ public class GameManager2 : MonoBehaviour
     public GameObject ResultPanel;
     public Image yakumanImage;
     public GameObject ResultPanel3;
-    public Image yakumanImage3;
+    public Image goalImage; // 追加: ゴール用スプライト表示Image
 
 
    [Header("役満スプライト設定")]
@@ -49,6 +49,9 @@ public class GameManager2 : MonoBehaviour
     [SerializeField] private Sprite tsuisoSprite;
     [SerializeField] private Sprite shosushiSprite;
     [SerializeField] private Sprite chuurenSprite;
+
+    [Header("ゴールスプライト設定")] // 追加
+    [SerializeField] private Sprite goalSprite; // 追加
 
     // MahjongUIManager の初期化遅延に対応するため、コルーチンで実行
     void Start()
@@ -396,5 +399,31 @@ public class GameManager2 : MonoBehaviour
         {
             Debug.LogError("ResultPanelが設定されていません。");
         }
+    }
+
+    public void OnGoal(string characterName)
+    {
+        if (MahjongManager.instance.roundOver) return;
+        MahjongManager.instance.roundOver = true;
+
+        Debug.Log($"{characterName}がゴールしました。流局です。");
+
+        // スプライトを設定
+        if (goalImage != null && goalSprite != null)
+        {
+            goalImage.sprite = goalSprite;
+            goalImage.gameObject.SetActive(true);
+        }
+
+        if (ResultPanel3 != null)
+        {
+            ResultPanel3.SetActive(true);
+        }
+        else
+        {
+            Debug.LogError("ResultPanel3が設定されていません。");
+        }
+
+        GameOver();
     }
 }

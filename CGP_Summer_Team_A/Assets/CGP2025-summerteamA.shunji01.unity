@@ -1095,15 +1095,15 @@ SpriteRenderer:
   m_SortingLayerID: -1892967577
   m_SortingLayer: 1
   m_SortingOrder: 3
-  m_Sprite: {fileID: 4414811085585333610, guid: 83d326e48834a3e47bcb62925dac9341, type: 3}
+  m_Sprite: {fileID: 5670963955183462801, guid: 83d326e48834a3e47bcb62925dac9341, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 2.81, y: 2.65}
+  m_Size: {x: 0.96, y: 0.61}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 0
+  m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!4 &423721863
@@ -1115,7 +1115,7 @@ Transform:
   m_GameObject: {fileID: 423721860}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -7.11, y: -1.51, z: 0}
+  m_LocalPosition: {x: -7.11, y: -2.11, z: 0}
   m_LocalScale: {x: 2.2, y: 2.2, z: 0.64055}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1200,17 +1200,17 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0.04549259, y: 0.15520996}
+  m_Offset: {x: 0.019944757, y: 0.40898323}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.4}
+    pivot: {x: 0.5208333, y: -0.16393442}
     oldSize: {x: 0.96, y: 0.61}
-    newSize: {x: 2.81, y: 2.65}
+    newSize: {x: 0.96, y: 0.61}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.87690246, y: 0.40732563}
+  m_Size: {x: 0.8530584, y: 0.46523356}
   m_EdgeRadius: 0
 --- !u!50 &423721867
 Rigidbody2D:
@@ -6460,6 +6460,7 @@ MonoBehaviour:
   npcTsuisoSprite: {fileID: -2206183387210774967, guid: 40d0941168b1a054cbea8d57aa1012f9, type: 3}
   npcShosushiSprite: {fileID: 4270423836112061805, guid: be87b3ff1830fa44e92e827f16bf85a8, type: 3}
   npcChuurenSprite: {fileID: -6730560384432055838, guid: 2eef17d4b9811024f9e353f70d2afeac, type: 3}
+  roundOver: 0
   discardOffset: 2
 --- !u!4 &668795117
 Transform:
@@ -6499,17 +6500,17 @@ MonoBehaviour:
   scoreManager: {fileID: 423721869}
   forceDaisangenHand: 0
   forceSuuankouHand: 0
-  forceKokushiHand: 1
+  forceKokushiHand: 0
   forceDaisushiHand: 0
   forceChinroutouHand: 0
   forceRyuuisoHand: 0
   forceTsuisoHand: 0
-  forceShosushiHand: 0
+  forceShosushiHand: 1
   forceChuurenHand: 0
   ResultPanel: {fileID: 728114042}
   yakumanImage: {fileID: 335736690}
   ResultPanel3: {fileID: 1058269682}
-  yakumanImage3: {fileID: 2134405838}
+  goalImage: {fileID: 2134405838}
   kokushiSprite: {fileID: -1890120653528842045, guid: 1c96543d1fbb31540887bd745342ff57, type: 3}
   daisangenSprite: {fileID: -6220683512351603966, guid: 58967fe9391a9dd478f87231155b4201, type: 3}
   suuankouSprite: {fileID: -4306257101274904203, guid: 320dcdf90700cdd459c81e811f7cd0ff, type: 3}
@@ -6519,6 +6520,7 @@ MonoBehaviour:
   tsuisoSprite: {fileID: -3921440091532511562, guid: 9c6594a782eb0ae4d8bf3560912eb1e7, type: 3}
   shosushiSprite: {fileID: -8532050911287868223, guid: 33b5b59d559383742ad01257f89a2da4, type: 3}
   chuurenSprite: {fileID: -5934855215270247213, guid: 0abb0a48ae5d88644a9d3dbceb6d38c7, type: 3}
+  goalSprite: {fileID: -8307759106210265128, guid: 97bff67bcf6979a44a5297aee5b671fd, type: 3}
 --- !u!114 &668795119
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8473,8 +8475,8 @@ Transform:
   m_GameObject: {fileID: 1519230853}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2000, y: -5, z: 0}
-  m_LocalScale: {x: 1, y: 5, z: 1}
+  m_LocalPosition: {x: 2000, y: -2, z: 0}
+  m_LocalScale: {x: 1, y: 10, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -9252,7 +9254,7 @@ Transform:
   m_GameObject: {fileID: 2093245683}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0.333, y: 0.449, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -9498,6 +9500,10 @@ PrefabInstance:
       propertyPath: m_Sprite
       value: 
       objectReference: {fileID: -8782928144205733613, guid: db4029989ca46d542b1355826366e66c, type: 3}
+    - target: {fileID: 8595128398046671459, guid: 7ae593617d104b54298f2064bd909ae4, type: 3}
+      propertyPath: m_SortingOrder
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

@@ -34,8 +34,8 @@ public class Tile
 public class MahjongManager : MonoBehaviour
 {
     [Header("リザルト画面設定")]
-    public GameObject ResultPanel2;//ゴールのリザルト画面
-    public GameObject ResultPanel3;//NPCの役満のリザルト画面
+    public GameObject ResultPanel2;//NPCの役満達成
+    public GameObject ResultPanel3;//ゴール達成
     public Image yakumanImage;
 
     [Header("役満スプライト設定 (NPC)")] // 追加
@@ -51,7 +51,7 @@ public class MahjongManager : MonoBehaviour
 
     public event Action OnPlayerHitItem;
     public static MahjongManager instance;
-    private bool roundOver = false;
+    public bool roundOver = false;
 
     public List<Tile> mountain;
     public List<Tile> playerHand;
@@ -295,11 +295,11 @@ public class MahjongManager : MonoBehaviour
 
         if (ResultPanel2 != null)
         {
-            ResultPanel3.SetActive(true);
+            ResultPanel2.SetActive(true);
         }
         else
         {
-            Debug.LogError("ResultPanel3が設定されていません。");
+            Debug.LogError("ResultPanel2が設定されていません。");
         }
 
         var gameManager2 = FindFirstObjectByType<GameManager2>();
@@ -330,7 +330,7 @@ public class MahjongManager : MonoBehaviour
         }
         else
         {
-            {Debug.LogError("ResultPanel2が設定されていません。");}
+            Debug.LogError("ResultPanel2が設定されていません。");
         }
     }
 }
