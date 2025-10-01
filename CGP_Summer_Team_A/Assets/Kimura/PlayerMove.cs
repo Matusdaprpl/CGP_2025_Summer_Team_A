@@ -262,6 +262,22 @@ public class PlayerMove : MonoBehaviour
     {
         if (other.CompareTag("Obstacle") && currentSpeed <= 11f)
             isOnObstacle = true;
+        {
+            Debug.Log($"OnTriggerEnter2D called with:{other.gameObject.name},Tag:{other.tag}");
+            if(other.CompareTag("Goal"))
+            {
+                Debug.Log("ゴール！！");
+                var gameManager2 = FindFirstObjectByType<GameManager2>(); // 追加: GameManager2を取得
+                if (gameManager2 != null)
+                {
+                    gameManager2.OnGoal("Player");
+                }
+                else
+                {
+                    Debug.LogError("GameManager2が見つかりません。");
+                }
+            }
+        }
     }
 
     private void OnTriggerExit2D(Collider2D other)
