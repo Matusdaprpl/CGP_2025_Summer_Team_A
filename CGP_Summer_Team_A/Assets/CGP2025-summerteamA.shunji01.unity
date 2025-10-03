@@ -6504,8 +6504,8 @@ MonoBehaviour:
   forceDaisushiHand: 0
   forceChinroutouHand: 0
   forceRyuuisoHand: 0
-  forceTsuisoHand: 0
-  forceShosushiHand: 1
+  forceTsuisoHand: 1
+  forceShosushiHand: 0
   forceChuurenHand: 0
   ResultPanel: {fileID: 728114042}
   yakumanImage: {fileID: 335736690}
