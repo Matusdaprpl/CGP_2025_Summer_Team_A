@@ -122,7 +122,13 @@ public class MahjongManager : MonoBehaviour
         Tile drawnTile = DrawTile();
         if (drawnTile == null) return;
 
+        int beforeCount = playerHand.Count;
         playerHand.Add(drawnTile);
+        if(beforeCount==14)
+            SortHandKeepLast();
+        else
+            SortHand();
+
         MahjongUIManager.instance.UpdateHandUI(playerHand);
     }
 
@@ -136,7 +142,13 @@ public class MahjongManager : MonoBehaviour
         Tile drawnTile = DrawTile();
         if (drawnTile != null)
         {
+            int beforeCount = playerHand.Count;
             playerHand.Add(drawnTile);
+            if(beforeCount==14)
+                SortHandKeepLast();
+            else
+                SortHand();
+            
             MahjongUIManager.instance.UpdateHandUI(playerHand);
         }
     }
@@ -247,7 +259,13 @@ public class MahjongManager : MonoBehaviour
         if (playerHand == null) playerHand = new List<Tile>();
         if (playerHand.Count >= 15) return false;
 
+        int beforeCount = playerHand.Count;
         playerHand.Add(tile);
+        if(beforeCount==14)
+            SortHandKeepLast();
+        else
+            SortHand();
+        
         MahjongUIManager.instance.UpdateHandUI(playerHand);
         return true;
     }
@@ -324,13 +342,75 @@ public class MahjongManager : MonoBehaviour
         Debug.Log($"{characterName}がゴールしました！");
 
         // リザルト画面（ゴール）
-        if (ResultPanel2 != null)
+        if (ResultPanel3 != null)
         {
-            ResultPanel2.SetActive(true);
+            ResultPanel3.SetActive(true);
         }
         else
         {
             Debug.LogError("ResultPanel2が設定されていません。");
         }
+    }
+
+    // NPC役満パネル(ResultPanel2)の参照チェック
+    [ContextMenu("Test/Validate ResultPanel2 refs")]
+    public void DebugValidateNpcResultPanel2()
+    {
+        Debug.Log($"[Validate] ResultPanel2: {(ResultPanel2 ? "OK" : "NULL")}, yakumanImage: {(yakumanImage ? "OK" : "NULL")}");
+        if (ResultPanel2)
+        {
+            var canvas = ResultPanel2.GetComponentInParent<Canvas>();
+            Debug.Log($"[Validate] Parent Canvas: {(canvas ? canvas.name : "NONE")}");
+            Debug.Log($"[Validate] ActiveInHierarchy(before): {ResultPanel2.activeInHierarchy}");
+        }
+    }
+
+    // 強制表示（コンテキストメニューから実行可）
+    [ContextMenu("Test/Show NPC ResultPanel2")]
+    public void DebugShowNpcResultPanel2()
+    {
+        // 何かしらのスプライトを仮表示（未設定でもOK）
+        if (yakumanImage != null)
+        {
+            var testSprite = npcKokushiSprite ?? npcDaisangenSprite ?? npcSuuankouSprite ?? npcChuurenSprite;
+            if (testSprite != null)
+            {
+                yakumanImage.sprite = testSprite;
+                yakumanImage.gameObject.SetActive(true);
+            }
+        }
+
+        if (ResultPanel2 != null)
+        {
+            ResultPanel2.SetActive(true);
+            Debug.Log("[Test] ResultPanel2 を強制表示しました。");
+        }
+        else
+        {
+            Debug.LogError("[Test] ResultPanel2 が未アサインです。");
+        }
+    }
+
+#if UNITY_EDITOR
+    // 再生中に F6 で強制表示（エディタのみ）
+    private void Update()
+    {
+        if (UnityEngine.Input.GetKeyDown(KeyCode.F6))
+        {
+            DebugShowNpcResultPanel2();
+        }
+    }
+#endif
+
+    public void SortHandKeepLast()
+    {
+        if (playerHand == null || playerHand.Count <= 1) return;
+        var last = playerHand[playerHand.Count - 1];
+        var rest = playerHand.Take(playerHand.Count - 1)
+                                .OrderBy(t => t.suit)
+                                .ThenBy(t => t.rank)
+                                .ToList();
+        rest.Add(last);
+        playerHand = rest;
     }
 }
