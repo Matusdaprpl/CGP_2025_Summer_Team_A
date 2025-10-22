@@ -49,38 +49,40 @@ public class MahjongUIManager : MonoBehaviour
         return tileSprites;
     }
 
+// MahjongUIManager.cs 内
+
     public void UpdateHandUI(List<Tile> playerHand)
     {
-        // 既存のUIをクリア
+        // 既存のUIオブジェクトを全て削除
         foreach (Transform child in handPanel)
+        {
             Destroy(child.gameObject);
+        }
 
-        // 基本の14枚を並べる
-        int baseCount = Mathf.Min(playerHand.Count, 14);
-        for (int i = 0; i < baseCount; i++)
+        if (playerHand == null) return;
+
+        // 手牌リストをループしてUIを生成
+        for (int i = 0; i < playerHand.Count; i++)
         {
+            // 手牌が15枚あり、これから15枚目 (インデックス14) を表示する直前の場合
+            if (playerHand.Count == 15 && i == 14)
+            {
+                // スペーサーオブジェクトを生成して間に挿入
+                GameObject spacer = new GameObject("TsumoSpacer");
+                spacer.transform.SetParent(handPanel, false);
+                LayoutElement le = spacer.AddComponent<LayoutElement>();
+                le.preferredWidth = tsumoSpacerWidth;
+
+                // プレハブの高さを取得して設定（レイアウトの崩れを防ぐため）
+                var prefabLayout = handTilePrefab.GetComponent<LayoutElement>();
+                if (prefabLayout != null)
+                {
+                    le.preferredHeight = prefabLayout.preferredHeight;
+                }
+            }
+
+            // 牌のUIを生成
             CreateTileUI(playerHand[i], i);
-        }
-
-        // Spacerを追加
-        GameObject spacer = new GameObject("TsumoSpacer");
-        spacer.transform.SetParent(handPanel, false);
-        LayoutElement le = spacer.AddComponent<LayoutElement>();
-        le.preferredWidth = tsumoSpacerWidth;
-        le.preferredHeight = handTilePrefab.GetComponent<LayoutElement>().preferredHeight;
-
-        // ツモスロット（15枚目 or 空白）
-        if (playerHand.Count == 15)
-        {
-            CreateTileUI(playerHand[14], 14);
-        }
-        else
-        {
-            GameObject emptySlot = new GameObject("TsumoSlot");
-            emptySlot.transform.SetParent(handPanel, false);
-            LayoutElement le2 = emptySlot.AddComponent<LayoutElement>();
-            le2.preferredWidth = handTilePrefab.GetComponent<LayoutElement>().preferredWidth;
-            le2.preferredHeight = handTilePrefab.GetComponent<LayoutElement>().preferredHeight;
         }
     }
 
