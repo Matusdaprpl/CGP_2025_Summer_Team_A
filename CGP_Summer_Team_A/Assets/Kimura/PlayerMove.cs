@@ -263,7 +263,6 @@ public class PlayerMove : MonoBehaviour
         if (other.CompareTag("Obstacle") && currentSpeed <= 11f)
             isOnObstacle = true;
         {
-            Debug.Log($"OnTriggerEnter2D called with:{other.gameObject.name},Tag:{other.tag}");
             if(other.CompareTag("Goal"))
             {
                 Debug.Log("ゴール！！");

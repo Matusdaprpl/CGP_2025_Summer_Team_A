@@ -6500,12 +6500,12 @@ MonoBehaviour:
   scoreManager: {fileID: 423721869}
   forceDaisangenHand: 0
   forceSuuankouHand: 0
-  forceKokushiHand: 0
+  forceKokushiHand: 1
   forceDaisushiHand: 0
   forceChinroutouHand: 0
   forceRyuuisoHand: 0
   forceTsuisoHand: 0
-  forceShosushiHand: 1
+  forceShosushiHand: 0
   forceChuurenHand: 0
   ResultPanel: {fileID: 728114042}
   yakumanImage: {fileID: 335736690}
@@ -9294,10 +9294,10 @@ MonoBehaviour:
   minX: 0
   maxX: 2000
   fixedYValues:
-  - -4
-  - -2.4
-  - -0.9
-  - 0.5
+  - -4.8
+  - -3.3
+  - -1.8
+  - -0.3
   minDistance: 5
 --- !u!4 &2118395339
 Transform:
