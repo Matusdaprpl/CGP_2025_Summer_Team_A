@@ -50,7 +50,7 @@ public class NPCmahjong : MonoBehaviour
         Tile tileToDiscard = YakumanEvaluator.ChooseDiscardTile(hand, target);
         hand.Remove(tileToDiscard);
 
-        Vector3 dropPosition = new Vector3(transform.position.x - discardOffset, transform.position.y, transform.position.z);
+        Vector3 dropPosition = new Vector3(transform.position.x - discardOffset, transform.position.y + 0.2f, transform.position.z);
         ItemManager.instance.DropDiscardedTile(tileToDiscard, dropPosition);
 
         Debug.Log($"{gameObject.name}の捨て牌: {tileToDiscard.GetDisplayName()}");

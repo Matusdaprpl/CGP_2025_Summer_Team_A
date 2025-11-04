@@ -4,6 +4,7 @@ using System.Linq;
 using System;
 using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 public enum Suit
 {
@@ -36,7 +37,7 @@ public class MahjongManager : MonoBehaviour
     [Header("リザルト画面設定")]
     public GameObject ResultPanel2;//NPCの役満達成
     public GameObject ResultPanel3;//ゴール達成
-    public Image yakumanImage;
+    public UnityEngine.UI.Image yakumanImage;
 
     [Header("役満スプライト設定 (NPC)")] // 追加
     [SerializeField] private Sprite npcKokushiSprite;
@@ -169,7 +170,7 @@ public class MahjongManager : MonoBehaviour
 
         GameObject player = GameObject.FindWithTag("Player");
         Vector3 dropPosition = player != null
-            ? player.transform.position - player.transform.right * discardOffset
+            ? new Vector3(player.transform.position.x - discardOffset, player.transform.position.y + 0.2f, player.transform.position.z)
             : Vector3.zero;
 
         ItemManager.instance.DropDiscardedTile(discardedTile, dropPosition);

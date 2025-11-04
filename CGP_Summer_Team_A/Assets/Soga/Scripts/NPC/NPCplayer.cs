@@ -22,11 +22,14 @@ public class NPCplayer : MonoBehaviour
     [Tooltip("レーンの移動速度")]
     public float laneMoveSpeed = 5f;
 
-    [Tooltip("レーンのY軸範囲")]
-    public float minLaneY = -2f;
+    [Tooltip("レーンのY座標（4レーン）")]
+    public float[] laneYs = {-5.0f,-3.5f,-2.0f,-0.5f};
 
     [Tooltip("レーンのY軸範囲")]
-    public float maxLaneY = 2f;
+    public float minLaneY = -5f;
+
+    [Tooltip("レーンのY軸範囲")]
+    public float maxLaneY = -0.5f;
 
     [Tooltip("レーンの変更間隔（秒）")]
     public float laneChangeCooldown = 2.0f;
@@ -152,11 +155,18 @@ public class NPCplayer : MonoBehaviour
         }
         if (targetItem != null && timeSinceLastLaneChange >= laneChangeCooldown)
         {
-            float targetY = targetItem.position.y;
+            float targetY = targetItem.position.y - 0.2f;
+            targetY = Mathf.Clamp(targetY, minLaneY, maxLaneY);
+            
+            // laneYsの最も近い値にスナップ
+            float closestLaneY = laneYs.OrderBy(y => Mathf.Abs(y - targetY)).First();
             Vector3 currentPosition = transform.position;
 
-            float newY = Mathf.MoveTowards(currentPosition.y, targetY, laneMoveSpeed * Time.deltaTime);
+            float newY = Mathf.MoveTowards(currentPosition.y, closestLaneY, laneMoveSpeed * Time.deltaTime);
             transform.position = new Vector3(currentPosition.x, newY, currentPosition.z);
+
+            // レーンの変更クールダウンをリセット
+            timeSinceLastLaneChange = 0f;
         }
     }
 
@@ -224,9 +234,16 @@ public class NPCplayer : MonoBehaviour
     private bool isProcessingTile = false;
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (isStopped) return; // ★★★ 停止中はアイテム取得もスキップ ★★★
+        Debug.Log($"{gameObject.name} OnTriggerEnter2D 呼び出し: tag={other.tag}, isStopped={isStopped}, isProcessingTile={isProcessingTile}, handCount={npcMahjong.hand.Count}");
 
-        if (other.CompareTag("Item") && !isProcessingTile && npcMahjong.hand.Count < 15)
+        if (isStopped) 
+        {
+            Debug.Log($"{gameObject.name} は停止中です。アイテム取得をスキップします。");
+            return;
+        }
+
+        // 手牌が14枚以下なら拾う（15枚になっても拾えるように <= 14 に変更）
+        if (other.CompareTag("Item") && !isProcessingTile && npcMahjong.hand.Count <= 14)
         {
             ItemController itemController = other.GetComponent<ItemController>();
             if (itemController != null)
@@ -240,53 +257,89 @@ public class NPCplayer : MonoBehaviour
                         targetItem = null;
                     }
 
+                    Debug.Log($"{gameObject.name} がアイテムを拾いました: {pickedTile.GetDisplayName()}");
                     StartCoroutine(ProcessTileExchange(pickedTile));
                 }
+                else
+                {
+                    Debug.Log($"{gameObject.name} ItemController.GetTile() が null です。");
+                }
+            }
+            else
+            {
+                Debug.Log($"{gameObject.name} ItemController が付いていません。");
             }
         }
+        else
+        {
+            Debug.Log($"{gameObject.name} アイテム取得条件を満たしていません: isProcessingTile={isProcessingTile}, handCount={npcMahjong.hand.Count}");
+        }
     }
-    
+
     private IEnumerator ProcessTileExchange(Tile pickedTile)
     {
         isProcessingTile = true;
-        
-        npcMahjong.AddTileToHand(pickedTile);
-        npcMahjong.PrintHandToConsole("牌を拾った直後");
+        Debug.Log($"{gameObject.name} ProcessTileExchange 開始、isProcessingTile を true に設定");
 
-        string handDescription=string.Join(",", npcMahjong.hand.Select(t=>t.GetDisplayName()));
-        Debug.Log($"{gameObject.name}の拾った牌: {pickedTile.GetDisplayName()}");
-        Debug.Log($"{gameObject.name}の手牌: {handDescription}");
-
-        if (YakumanEvaluator.IsYakumanComplete(npcMahjong.hand, TargetYakuman))
+        try
         {
-            Debug.Log($"{gameObject.name}は役満 {TargetYakuman} を完成させました！");
-            MahjongManager.instance?.OnNpcWin(gameObject.name, TargetYakuman, npcMahjong.hand);
-            isProcessingTile = false;
-            yield break; // ← 捨て処理には進まない
+            npcMahjong.AddTileToHand(pickedTile);
+            npcMahjong.PrintHandToConsole("牌を拾った直後");
 
+            string handDescription = string.Join(",", npcMahjong.hand.Select(t => t.GetDisplayName()));
+            Debug.Log($"{gameObject.name}の拾った牌: {pickedTile.GetDisplayName()}");
+            Debug.Log($"{gameObject.name}の手牌: {handDescription}");
+
+            if (YakumanEvaluator.IsYakumanComplete(npcMahjong.hand, TargetYakuman))
+            {
+                Debug.Log($"{gameObject.name}は役満 {TargetYakuman} を完成させました！");
+                MahjongManager.instance?.OnNpcWin(gameObject.name, TargetYakuman, npcMahjong.hand);
+                isProcessingTile = false;
+                Debug.Log($"{gameObject.name} ProcessTileExchange 終了（役満完成）、isProcessingTile を false に設定");
+                yield break;
+            }
+
+            yield return new WaitForSeconds(1.0f);
+
+            // 捨てる前にY座標をlaneYsの最も近い値に即座にスナップ
+            float currentY = transform.position.y;
+            float closestLaneY = laneYs.OrderBy(y => Mathf.Abs(y - currentY)).First();
+            transform.position = new Vector3(transform.position.x, closestLaneY, transform.position.z);
+            Debug.Log($"{gameObject.name} Y座標をスナップ: {currentY} -> {closestLaneY}");
+
+            bool isOnLane = laneYs.Any(laneY => Mathf.Approximately(transform.position.y, laneY));
+            Debug.Log($"{gameObject.name} isOnLane: {isOnLane}, currentY: {transform.position.y}, laneYs: {string.Join(",", laneYs)}");
+
+            if (isOnLane)
+            {
+                npcMahjong.DiscardTile();
+                npcMahjong.PrintHandToConsole("捨て牌後");
+                Debug.Log($"{gameObject.name} 牌を捨てました");
+            }
+            else
+            {
+                Debug.Log($"{gameObject.name} はレーン上にいないため、捨てられません");
+            }
         }
-
-        yield return new WaitForSeconds(1.0f);
-        
-        npcMahjong.DiscardTile();
-        npcMahjong.PrintHandToConsole("捨て牌後");
-        
-        isProcessingTile = false;
+        finally
+        {
+            isProcessingTile = false;
+            Debug.Log($"{gameObject.name} ProcessTileExchange 終了、isProcessingTile を false に設定");
+        }
     }
 
-    // ★★★ GameManager2から呼ばれる停止メソッド ★★★
     public void StopMovement()
     {
-        isStopped = true; // フラグを立ててUpdate/FixedUpdateを停止
+        isStopped = true; 
         
         if (rb != null)
         {
             rb.linearVelocity = Vector2.zero; // Rigidbodyの速度を強制的にゼロにする (重要!)
             rb.angularVelocity = 0f;
-            Debug.Log($"{gameObject.name} のRigidbody速度をリセットしました。");
+            //Debug.Log($"{gameObject.name} のRigidbody速度をリセットしました。");
         }
         
         this.enabled = false; // スクリプト自体も無効化 (二重の停止措置)
-        Debug.Log($"{gameObject.name} の動きを完全に停止しました。");
+        //Debug.Log($"{gameObject.name} の動きを完全に停止しました。");
     }
 }
