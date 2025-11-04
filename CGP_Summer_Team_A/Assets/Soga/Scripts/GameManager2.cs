@@ -13,9 +13,9 @@ public class GameManager2 : MonoBehaviour
 
     // ★★★ ゲーム終了管理用の既存フィールド ★★★
     [Header("01. ゲームコアと終了管理")]
-    public PlayerMove playerMove;
-    public AudioSource raceBGM;
-    public AudioSource countdownSE;
+    public PlayerMove playerMove;    
+    public AudioSource raceBGM;      
+    public AudioSource countdownSE;  
     
     [Tooltip("HierarchyのNPCオブジェクトにアタッチされているNPCplayerスクリプトをすべてここに設定します。")]
     public NPCplayer[] npcMoveScripts; 
@@ -37,9 +37,8 @@ public class GameManager2 : MonoBehaviour
     [Header("03. リザルト画面設定")]
     public GameObject ResultPanel; // 役満勝利時に表示するパネル
     public Image yakumanImage;
-    public GameObject ResultPanel3; 
+    public GameObject ResultPanel3; // (流局/NPCゴール用と仮定)
     public Image goalImage; 
-    
 
     [Header("04. シーン遷移とリザルトボタン (要Inspector設定)")]
     // ★★★ Title Scene Nameはここにあります ★★★
