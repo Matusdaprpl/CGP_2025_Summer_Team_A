@@ -257,13 +257,13 @@ public class NPCplayer : MonoBehaviour
                         targetItem = null;
                     }
 
-                    Debug.Log($"{gameObject.name} がアイテムを拾いました: {pickedTile.GetDisplayName()}");
+                    //Debug.Log($"{gameObject.name} がアイテムを拾いました: {pickedTile.GetDisplayName()}");
                     StartCoroutine(ProcessTileExchange(pickedTile));
                 }
-                else
-                {
-                    Debug.Log($"{gameObject.name} ItemController.GetTile() が null です。");
-                }
+                //else
+                //{
+                //    Debug.Log($"{gameObject.name} ItemController.GetTile() が null です。");
+                //}
             }
             else
             {
@@ -279,7 +279,7 @@ public class NPCplayer : MonoBehaviour
     private IEnumerator ProcessTileExchange(Tile pickedTile)
     {
         isProcessingTile = true;
-        Debug.Log($"{gameObject.name} ProcessTileExchange 開始、isProcessingTile を true に設定");
+        //Debug.Log($"{gameObject.name} ProcessTileExchange 開始、isProcessingTile を true に設定");
 
         try
         {
@@ -295,7 +295,7 @@ public class NPCplayer : MonoBehaviour
                 Debug.Log($"{gameObject.name}は役満 {TargetYakuman} を完成させました！");
                 MahjongManager.instance?.OnNpcWin(gameObject.name, TargetYakuman, npcMahjong.hand);
                 isProcessingTile = false;
-                Debug.Log($"{gameObject.name} ProcessTileExchange 終了（役満完成）、isProcessingTile を false に設定");
+                //Debug.Log($"{gameObject.name} ProcessTileExchange 終了（役満完成）、isProcessingTile を false に設定");
                 yield break;
             }
 
@@ -305,10 +305,10 @@ public class NPCplayer : MonoBehaviour
             float currentY = transform.position.y;
             float closestLaneY = laneYs.OrderBy(y => Mathf.Abs(y - currentY)).First();
             transform.position = new Vector3(transform.position.x, closestLaneY, transform.position.z);
-            Debug.Log($"{gameObject.name} Y座標をスナップ: {currentY} -> {closestLaneY}");
+            //Debug.Log($"{gameObject.name} Y座標をスナップ: {currentY} -> {closestLaneY}");
 
             bool isOnLane = laneYs.Any(laneY => Mathf.Approximately(transform.position.y, laneY));
-            Debug.Log($"{gameObject.name} isOnLane: {isOnLane}, currentY: {transform.position.y}, laneYs: {string.Join(",", laneYs)}");
+            //Debug.Log($"{gameObject.name} isOnLane: {isOnLane}, currentY: {transform.position.y}, laneYs: {string.Join(",", laneYs)}");
 
             if (isOnLane)
             {
@@ -316,10 +316,10 @@ public class NPCplayer : MonoBehaviour
                 npcMahjong.PrintHandToConsole("捨て牌後");
                 Debug.Log($"{gameObject.name} 牌を捨てました");
             }
-            else
-            {
-                Debug.Log($"{gameObject.name} はレーン上にいないため、捨てられません");
-            }
+            //else
+            //{
+            //    Debug.Log($"{gameObject.name} はレーン上にいないため、捨てられません");
+            //}
         }
         finally
         {
