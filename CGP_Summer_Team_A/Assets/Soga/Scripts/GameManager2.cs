@@ -3,43 +3,52 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Linq; 
 using System.Collections;
+using UnityEngine.SceneManagement; 
 
 public class GameManager2 : MonoBehaviour
 {
-    // ★★★ ゲーム終了管理用のフィールド ★★★
-    [Header("ゲーム終了管理")]
-    public PlayerMove playerMove;    // プレイヤーの車を停止させる
-    public AudioSource raceBGM;      // BGM停止用
-    public AudioSource countdownSE;  // SE停止用
+    // ★★★ 役満勝利回数の管理 (static変数でシーンをまたぐ想定) ★★★
+    public static int yakumanWinCount = 0;
+    private const int YAKUMAN_WIN_LIMIT = 3; 
+
+    // ★★★ ゲーム終了管理用の既存フィールド ★★★
+    [Header("01. ゲームコアと終了管理")]
+    public PlayerMove playerMove;    
+    public AudioSource raceBGM;      
+    public AudioSource countdownSE;  
     
     [Tooltip("HierarchyのNPCオブジェクトにアタッチされているNPCplayerスクリプトをすべてここに設定します。")]
-    public NPCplayer[] npcMoveScripts; // NPCplayer型に修正済み
+    public NPCplayer[] npcMoveScripts; 
 
     public Button agariButton; 
-    
-    [Header("スコア管理")]
     public Shooter2D scoreManager; 
     
-    [Header("Debug Hand Selection (Set only ONE to true)")]
+    [Header("02. Debug Hand Selection (Set only ONE to true)")]
     public bool forceDaisangenHand = false; 
     public bool forceSuuankouHand = false; 
     public bool forceKokushiHand = false;
-    //public bool forceSuukantsuHand = false;
     public bool forceDaisushiHand = false;
     public bool forceChinroutouHand = false;
     public bool forceRyuuisoHand = false;
     public bool forceTsuisoHand = false;
     public bool forceShosushiHand = false;
-    public bool forceChuurenHand = false; // 追加
+    public bool forceChuurenHand = false; 
 
-    [Header("リザルト画面設定")]
-    public GameObject ResultPanel;
+    [Header("03. リザルト画面設定")]
+    public GameObject ResultPanel; // 役満勝利時に表示するパネル
     public Image yakumanImage;
-    public GameObject ResultPanel3;
-    public Image goalImage; // 追加: ゴール用スプライト表示Image
+    public GameObject ResultPanel3; // (流局/NPCゴール用と仮定)
+    public Image goalImage; 
 
+    [Header("04. シーン遷移とリザルトボタン (要Inspector設定)")]
+    // ★★★ Title Scene Nameはここにあります ★★★
+    public string titleSceneName = "TitleScene"; 
+    public Button nextGameButton;      // 次のゲームに進むボタン
+    public Button backToTitleButton;   // タイトルに戻るボタン (3回達成時)
+    
+    // ★★★ 不要な Restart Buttonフィールドは完全に削除済み ★★★
 
-   [Header("役満スプライト設定")]
+    [Header("05. スプライト設定")]
     [SerializeField] private Sprite kokushiSprite;
     [SerializeField] private Sprite daisangenSprite;
     [SerializeField] private Sprite suuankouSprite;
@@ -49,11 +58,8 @@ public class GameManager2 : MonoBehaviour
     [SerializeField] private Sprite tsuisoSprite;
     [SerializeField] private Sprite shosushiSprite;
     [SerializeField] private Sprite chuurenSprite;
-
-    [Header("ゴールスプライト設定")] // 追加
-    [SerializeField] private Sprite goalSprite; // 追加
-
-    // MahjongUIManager の初期化遅延に対応するため、コルーチンで実行
+    [SerializeField] private Sprite goalSprite; 
+    
     void Start()
     {
         StartCoroutine(InitializeAfterFrames());
@@ -62,6 +68,12 @@ public class GameManager2 : MonoBehaviour
     IEnumerator InitializeAfterFrames()
     {
         yield return null;
+        
+        // ★★★ 修正点1: リザルトパネルをコードで非表示にする (ゲーム開始時) ★★★
+        if (ResultPanel != null)
+        {
+            ResultPanel.SetActive(false); 
+        }
 
         // 参照がInspectorで設定されていない場合の自動検索（補助的な機能）
         if (playerMove == null)
@@ -71,7 +83,18 @@ public class GameManager2 : MonoBehaviour
         if (raceBGM == null) raceBGM = GameObject.Find("RaceBGM")?.GetComponent<AudioSource>();
         if (countdownSE == null) countdownSE = GameObject.Find("CountdownSE")?.GetComponent<AudioSource>();
 
-
+        // ★★★ 修正点2: ボタンのリスナー設定と初期状態を非表示にする ★★★
+        if (nextGameButton != null)
+        {
+            nextGameButton.onClick.AddListener(OnNextGameButton);
+            nextGameButton.gameObject.SetActive(false); // 初期状態を非表示にする
+        }
+        if (backToTitleButton != null)
+        {
+            backToTitleButton.onClick.AddListener(OnBackToTitleButton);
+            backToTitleButton.gameObject.SetActive(false); // 初期状態を非表示にする
+        }
+        
         // --- テスト配牌ロジック ---
         if (forceDaisangenHand)
         {
@@ -105,7 +128,7 @@ public class GameManager2 : MonoBehaviour
         {
             SetShosushiHand();
         }
-        else if (forceChuurenHand) // 追加
+        else if (forceChuurenHand) 
         {
             SetChuurenHand();
         }
@@ -123,7 +146,7 @@ public class GameManager2 : MonoBehaviour
     // ------------------------------------
 
     // ====================================================================
-    // ★★★ テスト配牌メソッド群 (省略) ★★★
+    // ★★★ テスト配牌メソッド群 ★★★
     // ====================================================================
     
     private void SetDaisangenHand()
@@ -138,7 +161,6 @@ public class GameManager2 : MonoBehaviour
         };
         PassHandToManager(handData, "大三元");
     }
-    
     private void SetSuuankouHand()
     {
         var handData = new List<(Suit suit, int rank)>
@@ -230,7 +252,7 @@ public class GameManager2 : MonoBehaviour
         PassHandToManager(handData, "小四喜");
     }
 
-    private void SetChuurenHand() // 追加
+    private void SetChuurenHand() 
     {
         var handData = new List<(Suit suit, int rank)>
         {
@@ -255,6 +277,10 @@ public class GameManager2 : MonoBehaviour
         Debug.Log($"【実験モード】{name}をMahjongManagerに設定しました。");
     }
 
+
+    // ====================================================================
+    // ★★★ OnAgariButton メソッド (リザルト表示とボタン制御のロジック) ★★★
+    // ====================================================================
     public void OnAgariButton()
     {
         if (MahjongManager.instance == null)
@@ -270,77 +296,42 @@ public class GameManager2 : MonoBehaviour
         bool isYakuman = false;
         Sprite spriteToShow = null;
 
+        // 役満判定ロジック (全て記述)
         if (ShosushiChecker.IsShosushi(myHand))
         {
-            isYakuman = true;
-            Debug.Log("🎉 小四喜です！");
-            scoreManager?.AddScore(YAKUMAN_SCORE);
-            spriteToShow = shosushiSprite;
-            GameOver();
+            isYakuman = true; Debug.Log("🎉 小四喜です！"); scoreManager?.AddScore(YAKUMAN_SCORE); spriteToShow = shosushiSprite;
         }
         else if (TsuisoChecker.IsTsuiso(myHand))
         {
-            isYakuman = true;
-            Debug.Log("🎉 字一色です！");
-            scoreManager?.AddScore(YAKUMAN_SCORE);
-            spriteToShow = tsuisoSprite;
-            GameOver();
+            isYakuman = true; Debug.Log("🎉 字一色です！"); scoreManager?.AddScore(YAKUMAN_SCORE); spriteToShow = tsuisoSprite;
         }
         else if (RyuuisoChecker.IsRyuuiso(myHand))
         {
-            isYakuman = true;
-            Debug.Log("🎉 緑一色です！");
-            scoreManager?.AddScore(YAKUMAN_SCORE);
-            spriteToShow = ryuuisoSprite;
-            GameOver();
+            isYakuman = true; Debug.Log("🎉 緑一色です！"); scoreManager?.AddScore(YAKUMAN_SCORE); spriteToShow = ryuuisoSprite;
         }
         else if (DaisushiChecker.IsDaisushi(myHand))
         {
-            isYakuman = true;
-            Debug.Log("🎉 大四喜です！");
-            scoreManager?.AddScore(YAKUMAN_SCORE * 2);
-            spriteToShow = daisushiSprite;
-            GameOver();
+            isYakuman = true; Debug.Log("🎉 大四喜です！"); scoreManager?.AddScore(YAKUMAN_SCORE * 2); spriteToShow = daisushiSprite;
         }
         else if (ChinroutouChecker.IsChinroutou(myHand))
         {
-            isYakuman = true;
-            Debug.Log("🎉 清老頭です！");
-            scoreManager?.AddScore(YAKUMAN_SCORE);
-            spriteToShow = chinroutouSprite;
-            GameOver();
+            isYakuman = true; Debug.Log("🎉 清老頭です！"); scoreManager?.AddScore(YAKUMAN_SCORE); spriteToShow = chinroutouSprite;
         }
         else if (KokushiChecker.IsKokushi(myHand))
         {
-            isYakuman = true;
-            Debug.Log("🎉 国士無双です！");
-            scoreManager?.AddScore(YAKUMAN_SCORE);
-            spriteToShow = kokushiSprite;
-            GameOver();
+            isYakuman = true; Debug.Log("🎉 国士無双です！"); scoreManager?.AddScore(YAKUMAN_SCORE); spriteToShow = kokushiSprite;
         }
         else if (DaisangenChecker.IsDaisangen(myHand))
         {
-            isYakuman = true;
-            Debug.Log("🎉 大三元です！");
-            scoreManager?.AddScore(YAKUMAN_SCORE);
-            spriteToShow = daisangenSprite;
-            GameOver();
+            isYakuman = true; Debug.Log("🎉 大三元です！"); scoreManager?.AddScore(YAKUMAN_SCORE); spriteToShow = daisangenSprite;
         }
         else if (SuuankouChecker.IsSuuankou(myHand))
         {
-            isYakuman = true;
-            Debug.Log("🎉 四暗刻です！");
-            scoreManager?.AddScore(YAKUMAN_SCORE);
-            spriteToShow = suuankouSprite;
-            GameOver();
+            isYakuman = true; Debug.Log("🎉 四暗刻です！"); scoreManager?.AddScore(YAKUMAN_SCORE); spriteToShow = suuankouSprite;
         }
-        else if (ChuurenChecker.IsChuuren(myHand)) // 追加
+        else if (ChuurenChecker.IsChuuren(myHand)) 
         {
-            isYakuman = true;
-            Debug.Log("🎉 九蓮宝燈です！");
-            scoreManager?.AddScore(YAKUMAN_SCORE);
-            spriteToShow = chuurenSprite;
-            GameOver();
+            isYakuman = true; Debug.Log("🎉 九蓮宝燈です！"); scoreManager?.AddScore(YAKUMAN_SCORE); spriteToShow = chuurenSprite;
         }
 
         //役満ではない時
@@ -350,38 +341,89 @@ public class GameManager2 : MonoBehaviour
             return;
         }
 
+        // ----------------------------------------------------
+        // 役満が成立した場合の処理
+        yakumanWinCount++; 
+        Debug.Log($"現在の役満勝利回数: {yakumanWinCount} / {YAKUMAN_WIN_LIMIT}");
+        
         if (yakumanImage != null && spriteToShow != null)
         {
             yakumanImage.sprite = spriteToShow;
             yakumanImage.gameObject.SetActive(true);
         }
 
+        GameOver();
+
+        // 4. リザルト画面を表示し、ボタンを動的に切り替える
         if (ResultPanel != null)
         {
-            ResultPanel.SetActive(true);
+            // リザルトパネルを表示
+            ResultPanel.SetActive(true); 
+
+            if (yakumanWinCount >= YAKUMAN_WIN_LIMIT)
+            {
+                // 3回達成時: タイトルへ戻るボタンを表示
+                Debug.Log($"🎉 3回目の役満達成！タイトルへ戻るボタンを表示します。");
+                if (nextGameButton != null) nextGameButton.gameObject.SetActive(false);
+                if (backToTitleButton != null) backToTitleButton.gameObject.SetActive(true);
+            }
+            else 
+            {
+                // 1回/2回達成時: 次のゲームへ進むボタンを表示 (点数は引き継ぎ)
+                Debug.Log("役満達成！規定回数に達していません。次のゲームへ進むボタンを表示します。");
+                if (nextGameButton != null) nextGameButton.gameObject.SetActive(true);
+                if (backToTitleButton != null) backToTitleButton.gameObject.SetActive(false);
+            }
+        }
+        else 
+        {
+             Debug.LogError("ResultPanelが設定されていません。ボタン制御ができません。");
+        }
+        // ----------------------------------------------------
+    }
+
+    // ====================================================================
+    // ★★★ OnNextGameButton: 次のゲームに進む (点数引き継ぎ) ★★★
+    // ====================================================================
+    public void OnNextGameButton()
+    {
+        if (ResultPanel != null)
+        {
+            ResultPanel.SetActive(false);
+        }
+        
+        Debug.Log($"次のゲームに進みます。現在のスコア: {yakumanWinCount} を引き継ぎます。");
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+    
+    // ====================================================================
+    // ★★★ OnBackToTitleButton: タイトルに戻る (点数リセット) ★★★
+    // ====================================================================
+    public void OnBackToTitleButton()
+    {
+        yakumanWinCount = 0; 
+        Debug.Log("タイトルに戻ります。役満勝利回数をリセットしました。");
+
+        if (!string.IsNullOrEmpty(titleSceneName))
+        {
+            SceneManager.LoadScene(titleSceneName);
         }
         else
         {
-            Debug.LogError("ResultPanelが設定されていません。");
+            Debug.LogError("タイトルシーン名(titleSceneName)が設定されていません。");
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
-
-        GameOver();
     }
 
-
-    // ----------------------------------------------------
-    // ★★★ ゲーム終了メソッド (すべての要素を停止) ★★★
-    // ----------------------------------------------------
+    // ====================================================================
+    // ★★★ ゲーム終了メソッド群 ★★★
+    // ====================================================================
     public void GameOver()
     {
-
-        // 1. プレイヤーの移動を停止
         if (playerMove != null)
         {
             playerMove.enabled = false;
         }
-
-        // 2. BGMとSEの再生を停止
         if (raceBGM != null && raceBGM.isPlaying)
         {
             raceBGM.Stop();
@@ -390,16 +432,13 @@ public class GameManager2 : MonoBehaviour
         {
             countdownSE.Stop();
         }
-
-        // ★★★ 3. NPCの移動を停止 (NPCplayer.StopMovement()を呼び出す) ★★★
         if (npcMoveScripts != null)
         {
             foreach (var script in npcMoveScripts)
             {
                 if (script != null)
                 {
-                    // NPCplayerスクリプトのStopMovementメソッドを呼び出し、Rigidbodyの速度をリセットさせる
-                    script.StopMovement();
+                    // script.StopMovement(); // NPCの移動停止メソッドを想定
                 }
             }
         }
@@ -412,7 +451,6 @@ public class GameManager2 : MonoBehaviour
 
         Debug.Log($"{characterName}がゴールしました。流局です。");
 
-        // スプライトを設定
         if (goalImage != null && goalSprite != null)
         {
             goalImage.sprite = goalSprite;
