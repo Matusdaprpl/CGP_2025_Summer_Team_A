@@ -54,6 +54,10 @@ public class NPCplayer : MonoBehaviour
     [SerializeField]
     private NPCmahjong npcMahjong;
 
+    [Header("点棒設定")]
+    [Tooltip("点棒による停止時間（秒）")]
+    public float stopTime = 2f;
+
     private Rigidbody2D rb;
     private float currentSpeed;
     private float timeSinceLastChange;
@@ -234,15 +238,21 @@ public class NPCplayer : MonoBehaviour
     private bool isProcessingTile = false;
     private void OnTriggerEnter2D(Collider2D other)
     {
-        Debug.Log($"{gameObject.name} OnTriggerEnter2D 呼び出し: tag={other.tag}, isStopped={isStopped}, isProcessingTile={isProcessingTile}, handCount={npcMahjong.hand.Count}");
+        //Debug.Log($"{gameObject.name} OnTriggerEnter2D 呼び出し: tag={other.tag}, isStopped={isStopped}, isProcessingTile={isProcessingTile}, handCount={npcMahjong.hand.Count}");
 
-        if (isStopped) 
+        if (isStopped)
         {
             Debug.Log($"{gameObject.name} は停止中です。アイテム取得をスキップします。");
             return;
         }
 
-        // 手牌が14枚以下なら拾う（15枚になっても拾えるように <= 14 に変更）
+        if (other.CompareTag("Bullet"))
+        {
+            Debug.Log($"{gameObject.name}が点棒に当たりました。");
+            StartCoroutine(HandleTenbouHit());
+            Destroy(other.gameObject);
+            return;
+        }
         if (other.CompareTag("Item") && !isProcessingTile && npcMahjong.hand.Count <= 14)
         {
             ItemController itemController = other.GetComponent<ItemController>();
@@ -275,11 +285,37 @@ public class NPCplayer : MonoBehaviour
             Debug.Log($"{gameObject.name} アイテム取得条件を満たしていません: isProcessingTile={isProcessingTile}, handCount={npcMahjong.hand.Count}");
         }
     }
+    
+    private IEnumerator HandleTenbouHit()
+    {
+        isStopped = true;
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector2.zero;
+            rb.angularVelocity = 0f;
+        }
+
+        int dropCount = Mathf.Min(5, npcMahjong.hand.Count);
+        List<Tile> tilesToDrop = npcMahjong.hand.OrderBy(x => Random.value).Take(dropCount).ToList();
+
+        foreach(Tile tile in tilesToDrop)
+        {
+            Vector3 randomOffset = new Vector3(Random.Range(-3f, -1f), 0.2f, 0);
+            Vector3 dropPosition = transform.position + randomOffset;
+
+            ItemManager.instance.DropDiscardedTile(tile, dropPosition);
+            npcMahjong.hand.Remove(tile);
+        }
+
+        yield return new WaitForSeconds(stopTime);
+
+        isStopped = false;
+    }
 
     private IEnumerator ProcessTileExchange(Tile pickedTile)
     {
         isProcessingTile = true;
-        Debug.Log($"{gameObject.name} ProcessTileExchange 開始、isProcessingTile を true に設定");
+        //Debug.Log($"{gameObject.name} ProcessTileExchange 開始、isProcessingTile を true に設定");
 
         try
         {
@@ -295,7 +331,7 @@ public class NPCplayer : MonoBehaviour
                 Debug.Log($"{gameObject.name}は役満 {TargetYakuman} を完成させました！");
                 MahjongManager.instance?.OnNpcWin(gameObject.name, TargetYakuman, npcMahjong.hand);
                 isProcessingTile = false;
-                Debug.Log($"{gameObject.name} ProcessTileExchange 終了（役満完成）、isProcessingTile を false に設定");
+                //Debug.Log($"{gameObject.name} ProcessTileExchange 終了（役満完成）、isProcessingTile を false に設定");
                 yield break;
             }
 
