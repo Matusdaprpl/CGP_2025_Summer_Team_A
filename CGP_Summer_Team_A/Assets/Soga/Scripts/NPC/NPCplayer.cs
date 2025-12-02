@@ -4,6 +4,7 @@ using TMPro;
 using System.Collections.Generic;
 using System.Collections;
 using System.Linq;
+using NUnit.Framework;
 
 public class NPCplayer : MonoBehaviour
 {
@@ -23,7 +24,7 @@ public class NPCplayer : MonoBehaviour
     public float laneMoveSpeed = 5f;
 
     [Tooltip("レーンのY座標（4レーン）")]
-    public float[] laneYs = {-5.0f,-3.5f,-2.0f,-0.5f};
+    public float[] laneYs = { -5.0f, -3.5f, -2.0f, -0.5f };
 
     [Tooltip("レーンのY軸範囲")]
     public float minLaneY = -5f;
@@ -58,6 +59,19 @@ public class NPCplayer : MonoBehaviour
     [Tooltip("点棒による停止時間（秒）")]
     public float stopTime = 2f;
 
+    [Header("点棒発射設定")]
+    [Tooltip("点棒のプレハブ")]
+    public GameObject bulletPrefab;
+
+    [Tooltip("射出ポイント")]
+    public Transform firePoint;
+
+    [Tooltip("弾の速度")]
+    public float bulletSpeed = 10f;
+
+    [Tooltip("発射コスト")]
+    public int fireCost = 1000;
+
     private Rigidbody2D rb;
     private float currentSpeed;
     private float timeSinceLastChange;
@@ -67,9 +81,9 @@ public class NPCplayer : MonoBehaviour
     private float timeSinceLastItemSearch;
     private Yakuman targetYakuman;
     public Yakuman TargetYakuman => targetYakuman;
-
-    // ★★★ 停止フラグを追加 ★★★
-    private bool isStopped = false; 
+    private Transform playerTransform;
+    private bool hasFired = false;
+    private bool isStopped = false;
 
     void Awake()
     {
@@ -82,6 +96,12 @@ public class NPCplayer : MonoBehaviour
 
     void Start()
     {
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+        {
+            playerTransform = player.transform;
+        }
+
         var yakumanValues = System.Enum.GetValues(typeof(Yakuman));
 
         targetYakuman = (Yakuman)yakumanValues.GetValue(Random.Range(1, yakumanValues.Length));
@@ -100,8 +120,23 @@ public class NPCplayer : MonoBehaviour
 
     void Update()
     {
-        // ★★★ 停止フラグのチェックを追加 ★★★
-        if (isStopped) return; 
+        if (isStopped) return;
+
+        if(playerTransform!= null)
+        {
+            if(IsNpcCompletelyOffScreen())
+            {
+                hasFired = false;
+            }
+            else if (!hasFired && CanShootPlayer())
+            {
+                if(CanShootPlayer())
+                {
+                    Shoot();
+                    hasFired = true;
+                }
+            }
+        }
 
         if (isCountdownActive)
         {
@@ -130,8 +165,8 @@ public class NPCplayer : MonoBehaviour
 
     void FixedUpdate()
     {
-        // ★★★ 停止フラグのチェックを追加 ★★★
-        if (isStopped) return; 
+        
+        if (isStopped) return;
 
         if (!isCountdownActive && rb != null)
         {
@@ -161,7 +196,7 @@ public class NPCplayer : MonoBehaviour
         {
             float targetY = targetItem.position.y - 0.2f;
             targetY = Mathf.Clamp(targetY, minLaneY, maxLaneY);
-            
+
             // laneYsの最も近い値にスナップ
             float closestLaneY = laneYs.OrderBy(y => Mathf.Abs(y - targetY)).First();
             Vector3 currentPosition = transform.position;
@@ -176,7 +211,7 @@ public class NPCplayer : MonoBehaviour
 
     private void FindClosestItem()
     {
-        Collider2D[] itemsInRange = Physics2D.OverlapCircleAll(transform.position, itemDetectionRadius, LayerMask.GetMask("Default")); 
+        Collider2D[] itemsInRange = Physics2D.OverlapCircleAll(transform.position, itemDetectionRadius, LayerMask.GetMask("Default"));
 
         float bestTargetDistance = float.MaxValue;
         Transform bestTarget = null;
@@ -282,10 +317,10 @@ public class NPCplayer : MonoBehaviour
         }
         else
         {
-            Debug.Log($"{gameObject.name} アイテム取得条件を満たしていません: isProcessingTile={isProcessingTile}, handCount={npcMahjong.hand.Count}");
+            //Debug.Log($"{gameObject.name} アイテム取得条件を満たしていません: isProcessingTile={isProcessingTile}, handCount={npcMahjong.hand.Count}");
         }
     }
-    
+
     private IEnumerator HandleTenbouHit()
     {
         isStopped = true;
@@ -298,7 +333,7 @@ public class NPCplayer : MonoBehaviour
         int dropCount = Mathf.Min(5, npcMahjong.hand.Count);
         List<Tile> tilesToDrop = npcMahjong.hand.OrderBy(x => Random.value).Take(dropCount).ToList();
 
-        foreach(Tile tile in tilesToDrop)
+        foreach (Tile tile in tilesToDrop)
         {
             Vector3 randomOffset = new Vector3(Random.Range(-3f, -1f), 0.2f, 0);
             Vector3 dropPosition = transform.position + randomOffset;
@@ -360,22 +395,88 @@ public class NPCplayer : MonoBehaviour
         finally
         {
             isProcessingTile = false;
-            Debug.Log($"{gameObject.name} ProcessTileExchange 終了、isProcessingTile を false に設定");
+            //Debug.Log($"{gameObject.name} ProcessTileExchange 終了、isProcessingTile を false に設定");
         }
     }
 
     public void StopMovement()
     {
-        isStopped = true; 
-        
+        isStopped = true;
+
         if (rb != null)
         {
             rb.linearVelocity = Vector2.zero; // Rigidbodyの速度を強制的にゼロにする (重要!)
             rb.angularVelocity = 0f;
             //Debug.Log($"{gameObject.name} のRigidbody速度をリセットしました。");
         }
-        
+
         this.enabled = false; // スクリプト自体も無効化 (二重の停止措置)
         //Debug.Log($"{gameObject.name} の動きを完全に停止しました。");
+    }
+    
+    private bool IsNpcOnScreen()
+    {
+        Vector3 viewportPoint = Camera.main.WorldToViewportPoint(transform.position);
+
+        return viewportPoint.x >= 0 && viewportPoint.x <= 1 &&
+               viewportPoint.y >= 0 && viewportPoint.y <= 1 &&
+               viewportPoint.z > 0;
+    }
+
+    private bool CanShootPlayer()
+    {
+        bool isNpcVisible = IsNpcOnScreen();
+
+        bool isInFront = playerTransform.position.x > transform.position.x;
+
+        Vector3 playerViewportPoint = Camera.main.WorldToViewportPoint(playerTransform.position);
+        float margin = 0.1f;
+        bool isPlayerOnScreen = playerViewportPoint.x >= margin && playerViewportPoint.x <= 1 - margin &&
+                                playerViewportPoint.y >= margin && playerViewportPoint.y <= 1 - margin &&
+                                playerViewportPoint.z > 0;
+
+        float npcLaneY = laneYs.OrderBy(y => Mathf.Abs(y - transform.position.y)).First();
+        float playerLaneY = laneYs.OrderBy(y => Mathf.Abs(y - playerTransform.position.y)).First();
+        bool isSameLane = Mathf.Approximately(npcLaneY, playerLaneY);
+
+        return isNpcVisible && isInFront && isPlayerOnScreen && isSameLane;
+    }
+    private void Shoot()
+    {
+        if (bulletPrefab == null || firePoint == null)
+        {
+            Debug.LogError("点棒のプレハブまたは射出ポイントが設定されていません。");
+            return;
+        }
+
+        GameObject bullet = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
+        Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
+        Collider2D bulletCollider = bullet.GetComponent<Collider2D>();
+        Collider2D npcCollider = GetComponent<Collider2D>();
+
+        if (rb != null)
+        {
+            rb.linearVelocity = new Vector2(firePoint.right.x, firePoint.right.y) * bulletSpeed;
+        }
+
+        // NPCと点棒の衝突を無効化
+        if (bulletCollider != null && npcCollider != null)
+        {
+            Physics2D.IgnoreCollision(bulletCollider, npcCollider);
+        }
+
+        Debug.Log($"{gameObject.name} が点棒を発射しました");
+
+        Destroy(bullet, 3f);
+    }
+
+    private bool IsNpcCompletelyOffScreen()
+    {
+        Vector3 viewportPoint = Camera.main.WorldToViewportPoint(transform.position);
+
+        bool isOff = viewportPoint.x < -0.2f || viewportPoint.x > 1.2f ||
+                     viewportPoint.y < -0.2f || viewportPoint.y > 1.2f;
+                     
+        return isOff;
     }
 }
