@@ -84,6 +84,7 @@ public class NPCplayer : MonoBehaviour
     private Transform playerTransform;
     private bool hasFired = false;
     private bool isStopped = false;
+    private float currentTargetLaneY;
 
     void Awake()
     {
@@ -110,6 +111,9 @@ public class NPCplayer : MonoBehaviour
         UpdateSpeed();
         timeSinceLastChange = 0f;
         timeSinceLastLaneChange = 0f;
+        currentTargetLaneY = transform.position.y;
+        currentTargetLaneY = laneYs.OrderBy(y => Mathf.Abs(y- currentTargetLaneY)).First();
+
         remainingCountdownTime = countdownTime;
         if (countdownText != null)
         {
@@ -192,6 +196,33 @@ public class NPCplayer : MonoBehaviour
             FindClosestItem();
             timeSinceLastItemSearch = 0f;
         }
+
+        Vector3 currentPos = transform.position;
+        if (!Mathf.Approximately(currentPos.y, currentTargetLaneY))
+        {
+            float newY = Mathf.MoveTowards(currentPos.y, currentTargetLaneY, laneMoveSpeed * Time.deltaTime);
+            transform.position = new Vector3(currentPos.x, newY, currentPos.z);
+        }
+
+        timeSinceLastLaneChange += Time.deltaTime;
+
+        if (timeSinceLastLaneChange >= laneChangeCooldown && targetItem != null)
+        {
+            float itemTargetY = targetItem.position.y - 0.2f;
+            itemTargetY = Mathf.Clamp(itemTargetY, minLaneY, maxLaneY);
+
+            float nextLaneY = laneYs.OrderBy(y => Mathf.Abs(y - itemTargetY)).First();
+
+            if (Mathf.Abs(currentTargetLaneY - nextLaneY) > 0.01f)
+            {
+                currentTargetLaneY = nextLaneY;
+
+                timeSinceLastLaneChange = 0f;
+                
+                //Debug.Log($"{gameObject.name}: レーン変更を開始 -> {currentTargetLaneY}");
+            }
+        }
+
         if (targetItem != null && timeSinceLastLaneChange >= laneChangeCooldown)
         {
             float targetY = targetItem.position.y - 0.2f;
@@ -277,7 +308,7 @@ public class NPCplayer : MonoBehaviour
 
         if (isStopped)
         {
-            Debug.Log($"{gameObject.name} は停止中です。アイテム取得をスキップします。");
+            //Debug.Log($"{gameObject.name} は停止中です。アイテム取得をスキップします。");
             return;
         }
 
@@ -376,10 +407,11 @@ public class NPCplayer : MonoBehaviour
             float currentY = transform.position.y;
             float closestLaneY = laneYs.OrderBy(y => Mathf.Abs(y - currentY)).First();
             transform.position = new Vector3(transform.position.x, closestLaneY, transform.position.z);
+            currentTargetLaneY = closestLaneY;           
             Debug.Log($"{gameObject.name} Y座標をスナップ: {currentY} -> {closestLaneY}");
 
             bool isOnLane = laneYs.Any(laneY => Mathf.Approximately(transform.position.y, laneY));
-            Debug.Log($"{gameObject.name} isOnLane: {isOnLane}, currentY: {transform.position.y}, laneYs: {string.Join(",", laneYs)}");
+            //Debug.Log($"{gameObject.name} isOnLane: {isOnLane}, currentY: {transform.position.y}, laneYs: {string.Join(",", laneYs)}");
 
             if (isOnLane)
             {
