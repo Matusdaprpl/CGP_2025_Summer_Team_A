@@ -91,5 +91,12 @@ public class LaneMove : MonoBehaviour
         }
     }
 
-    
+    public float GetTargetY()
+    {
+        if (lanePositions != null && currentLane >= 0 && currentLane < lanePositions.Length)
+        {
+            return lanePositions[currentLane];
+        }
+        return transform.position.y;
+    }
 }
