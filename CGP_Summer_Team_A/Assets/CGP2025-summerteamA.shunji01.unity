@@ -7414,7 +7414,7 @@ MonoBehaviour:
   - {fileID: 93837152}
   agariButton: {fileID: 190110715}
   scoreManager: {fileID: 423721869}
-  forceDaisangenHand: 0
+  forceDaisangenHand: 1
   forceSuuankouHand: 0
   forceKokushiHand: 0
   forceDaisushiHand: 0
