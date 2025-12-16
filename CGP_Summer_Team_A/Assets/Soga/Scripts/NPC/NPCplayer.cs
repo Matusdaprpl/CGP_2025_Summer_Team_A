@@ -450,6 +450,13 @@ public class NPCplayer : MonoBehaviour
         }
 
         GameObject bullet = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
+
+        Bullet2DController bc = bullet.GetComponent<Bullet2DController>();
+        if(bc != null)
+        {
+            bc.shooter = Bullet2DController.ShooterType.NPC;
+        }
+
         Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
         Collider2D bulletCollider = bullet.GetComponent<Collider2D>();
         Collider2D npcCollider = GetComponent<Collider2D>();

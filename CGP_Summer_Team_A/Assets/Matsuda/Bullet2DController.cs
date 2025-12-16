@@ -3,6 +3,9 @@ using UnityEngine;
 public class Bullet2DController : MonoBehaviour
 {
     public float rotationspeed=360f; 
+
+    public enum ShooterType { Player, NPC }
+    public ShooterType shooter = ShooterType.Player;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
