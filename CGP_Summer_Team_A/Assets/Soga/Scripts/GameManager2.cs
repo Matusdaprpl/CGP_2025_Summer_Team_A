@@ -13,9 +13,9 @@ public class GameManager2 : MonoBehaviour
 
     // ★★★ ゲーム終了管理用の既存フィールド ★★★
     [Header("01. ゲームコアと終了管理")]
-    public PlayerMove playerMove;    
-    public AudioSource raceBGM;      
-    public AudioSource countdownSE;  
+    public PlayerMove playerMove;
+    public AudioSource raceBGM;
+    public AudioSource countdownSE;
     
     [Tooltip("HierarchyのNPCオブジェクトにアタッチされているNPCplayerスクリプトをすべてここに設定します。")]
     public NPCplayer[] npcMoveScripts; 

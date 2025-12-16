@@ -1,5 +1,8 @@
 using UnityEngine;
 using TMPro;
+using System.Collections; // IEnumerator用に必要
+using System.Collections.Generic; // List用に必要
+using System.Linq; // OrderBy用に必要
 
 public class PlayerMove : MonoBehaviour
 {
@@ -37,6 +40,10 @@ public class PlayerMove : MonoBehaviour
     [Header("光る設定")]
     public ParticleSystem boostParticles;
     private bool hasplayed = false;
+
+    [Header("被弾設定")]
+    public float stopTime = 2f;
+    private bool isStopped = false;
 
     private float targetSpeed;
     private float currentSpeed;
@@ -94,6 +101,7 @@ public class PlayerMove : MonoBehaviour
 
     void Update()
     {
+        if(isStopped) return;
         // --- カウントダウン ---
         if (isCountdownActive)
         {
@@ -260,23 +268,94 @@ public class PlayerMove : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Obstacle") && currentSpeed <= 11f)
-            isOnObstacle = true;
+       ProcessHit(other.gameObject,other.tag);
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+       ProcessHit(collision.gameObject,collision.gameObject.tag);
+    }
+
+    private void ProcessHit(GameObject hitObject, string tag)
+    {        
+        if (tag == "Bullet")
         {
-            if(other.CompareTag("Goal"))
+            Bullet2DController bullet = hitObject.GetComponent<Bullet2DController>();
+            if (bullet != null && bullet.shooter == Bullet2DController.ShooterType.Player)
             {
-                Debug.Log("ゴール！！");
-                var gameManager2 = FindFirstObjectByType<GameManager2>(); // 追加: GameManager2を取得
-                if (gameManager2 != null)
-                {
-                    gameManager2.OnGoal("Player");
-                }
-                else
-                {
-                    Debug.LogError("GameManager2が見つかりません。");
-                }
+                return;
+            }
+
+            Debug.Log("プレイヤーが点棒に当たりました");
+            StartCoroutine(HandleBulletHit());
+            Destroy(hitObject);
+            return;
+        }
+
+        if (tag == "Obstacle" && !isOnObstacle)
+        {
+            isOnObstacle = true;
+        }
+
+        if(tag == "Goal")
+        {
+            Debug.Log("ゴール");
+            var gameManager2 = FindFirstObjectByType<GameManager2>();
+            if (gameManager2 != null)
+            {
+                gameManager2.OnGoal("Player");
             }
         }
+    }
+    
+    private IEnumerator HandleBulletHit()
+    {
+        isStopped = true;
+        currentSpeed = 0f;
+        targetSpeed = 0f;
+
+        var rb = GetComponent<Rigidbody2D>();
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector2.zero;
+            rb.angularVelocity = 0f;
+        }
+
+        // 手牌をドロップする処理
+        if (MahjongManager.instance != null && MahjongManager.instance.playerHand != null && MahjongManager.instance.playerHand.Count > 0)
+        {
+            var handList = MahjongManager.instance.playerHand;
+            int dropCount = Mathf.Min(5, handList.Count);
+            // ランダムに選ぶ
+            List<Tile> tilesToDrop = handList.OrderBy(x => Random.value).Take(dropCount).ToList();
+
+            foreach (var tile in tilesToDrop)
+            {
+                Vector3 randomOffset = new Vector3(Random.Range(-3f,-1f),0.2f,0f);
+                Vector3 dropPosition = transform.position + randomOffset;
+
+                if (ItemManager.instance != null)
+                {
+                    ItemManager.instance.DropDiscardedTile(tile, dropPosition);
+                }
+
+                handList.Remove(tile);
+            }
+
+            if(MahjongUIManager.instance != null)
+            {
+                MahjongUIManager.instance.UpdateHandUI(handList);
+            }
+        }
+        else
+        {
+            Debug.Log("プレイヤーの手牌が空です。");
+        }
+
+        // 停止時間待機
+        yield return new WaitForSeconds(stopTime);
+
+        isStopped = false;
     }
 
     private void OnTriggerExit2D(Collider2D other)
