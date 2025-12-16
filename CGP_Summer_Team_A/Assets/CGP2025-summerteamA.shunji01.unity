@@ -1517,6 +1517,7 @@ MonoBehaviour:
   boostDuration: 3
   boostSpeed: 20
   boostParticles: {fileID: 0}
+  stopTime: 2
   playerRenderer: {fileID: 0}
   colorChangeSpeed: 1
 --- !u!114 &423721865
@@ -7415,7 +7416,7 @@ MonoBehaviour:
   scoreManager: {fileID: 423721869}
   forceDaisangenHand: 0
   forceSuuankouHand: 0
-  forceKokushiHand: 1
+  forceKokushiHand: 0
   forceDaisushiHand: 0
   forceChinroutouHand: 0
   forceRyuuisoHand: 0

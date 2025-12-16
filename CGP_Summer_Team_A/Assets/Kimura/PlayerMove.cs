@@ -321,6 +321,23 @@ public class PlayerMove : MonoBehaviour
             rb.angularVelocity = 0f;
         }
 
+        // レーン移動完了待ち
+        LaneMove laneMove = GetComponent<LaneMove>();
+        if (laneMove != null)
+        {
+            float waitTimer = 0f;
+            while (waitTimer < 2f) // 最大2秒待機
+            {
+                float targetY = laneMove.GetTargetY();
+                if (Mathf.Abs(transform.position.y - targetY) < 0.1f)
+                {
+                    break;
+                }
+                waitTimer += Time.deltaTime;
+                yield return null;
+            }
+        }
+
         // 手牌をドロップする処理
         if (MahjongManager.instance != null && MahjongManager.instance.playerHand != null && MahjongManager.instance.playerHand.Count > 0)
         {
