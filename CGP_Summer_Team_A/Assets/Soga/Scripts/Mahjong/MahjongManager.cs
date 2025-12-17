@@ -325,13 +325,13 @@ public class MahjongManager : MonoBehaviour
         if (gameManager2 != null)
         {
             gameManager2.GameOver();
+            gameManager2.OnNpcWinResult(); // ★★★ ボタン表示制御を呼び出す ★★★
         }
 
         var playerMove = FindFirstObjectByType<PlayerMove>();
         if (playerMove != null)
         {
             playerMove.enabled = false;
-
         }
     }
 

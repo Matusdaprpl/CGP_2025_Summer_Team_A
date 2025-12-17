@@ -7,9 +7,8 @@ using UnityEngine.SceneManagement;
 
 public class GameManager2 : MonoBehaviour
 {
-    // ★★★ 役満勝利回数の管理 (static変数でシーンをまたぐ想定) ★★★
-    public static int yakumanWinCount = 0;
-    private const int YAKUMAN_WIN_LIMIT = 3; 
+    public static int raceCount = 0;
+    private const int RACE_LIMIT = 4; 
 
     // ★★★ ゲーム終了管理用の既存フィールド ★★★
     [Header("01. ゲームコアと終了管理")]
@@ -25,7 +24,7 @@ public class GameManager2 : MonoBehaviour
     
     [Header("02. Debug Hand Selection (Set only ONE to true)")]
     public bool forceDaisangenHand = false; 
-    public bool forceSuuankouHand = false; 
+    public bool forceSuuankouHand = false;
     public bool forceKokushiHand = false;
     public bool forceDaisushiHand = false;
     public bool forceChinroutouHand = false;
@@ -43,8 +42,12 @@ public class GameManager2 : MonoBehaviour
     [Header("04. シーン遷移とリザルトボタン (要Inspector設定)")]
     // ★★★ Title Scene Nameはここにあります ★★★
     public string titleSceneName = "TitleScene"; 
-    public Button nextGameButton;      // 次のゲームに進むボタン
-    public Button backToTitleButton;   // タイトルに戻るボタン (3回達成時)
+    public Button nextGameButton;      // 次のゲームに進むボタン (Player勝利用)
+    public Button backToTitleButton;   // タイトルに戻るボタン (4レース達成時)
+    
+    // ★★★ NPC勝利・流局用ボタンを追加 ★★★
+    public Button nextGameButton2;     // 次のゲームに進むボタン (NPC勝利・流局用)
+    public Button backToTitleButton2;  // タイトルに戻るボタン (NPC勝利・流局用 4レース達成時)
     
     // ★★★ 不要な Restart Buttonフィールドは完全に削除済み ★★★
 
@@ -68,8 +71,10 @@ public class GameManager2 : MonoBehaviour
     IEnumerator InitializeAfterFrames()
     {
         yield return null;
+
+        raceCount++;
+        Debug.Log($"現在のレース: {raceCount} / {RACE_LIMIT}");
         
-        // ★★★ 修正点1: リザルトパネルをコードで非表示にする (ゲーム開始時) ★★★
         if (ResultPanel != null)
         {
             ResultPanel.SetActive(false); 
@@ -84,6 +89,7 @@ public class GameManager2 : MonoBehaviour
         if (countdownSE == null) countdownSE = GameObject.Find("CountdownSE")?.GetComponent<AudioSource>();
 
         // ★★★ 修正点2: ボタンのリスナー設定と初期状態を非表示にする ★★★
+        // ★★★ Player勝利用ボタンのリスナー設定 ★★★
         if (nextGameButton != null)
         {
             nextGameButton.onClick.AddListener(OnNextGameButton);
@@ -93,6 +99,18 @@ public class GameManager2 : MonoBehaviour
         {
             backToTitleButton.onClick.AddListener(OnBackToTitleButton);
             backToTitleButton.gameObject.SetActive(false); // 初期状態を非表示にする
+        }
+
+        // ★★★ NPC勝利・流局用ボタンのリスナー設定 ★★★
+        if (nextGameButton2 != null)
+        {
+            nextGameButton2.onClick.AddListener(OnNextGameButton);
+            nextGameButton2.gameObject.SetActive(false); // 初期状態を非表示にする
+        }
+        if (backToTitleButton2 != null)
+        {
+            backToTitleButton2.onClick.AddListener(OnBackToTitleButton);
+            backToTitleButton2.gameObject.SetActive(false); // 初期状態を非表示にする
         }
         
         // --- テスト配牌ロジック ---
@@ -341,10 +359,7 @@ public class GameManager2 : MonoBehaviour
             return;
         }
 
-        // ----------------------------------------------------
-        // 役満が成立した場合の処理
-        yakumanWinCount++; 
-        Debug.Log($"現在の役満勝利回数: {yakumanWinCount} / {YAKUMAN_WIN_LIMIT}");
+        Debug.Log($"現在のレース: {raceCount} / {RACE_LIMIT}");
         
         if (yakumanImage != null && spriteToShow != null)
         {
@@ -360,17 +375,16 @@ public class GameManager2 : MonoBehaviour
             // リザルトパネルを表示
             ResultPanel.SetActive(true); 
 
-            if (yakumanWinCount >= YAKUMAN_WIN_LIMIT)
+            if (raceCount >= RACE_LIMIT)
             {
-                // 3回達成時: タイトルへ戻るボタンを表示
-                Debug.Log($"🎉 3回目の役満達成！タイトルへ戻るボタンを表示します。");
+                //タイトルへ戻るボタンを表示
+                Debug.Log($"4レース終了。タイトルへ戻るボタンを表示します。");
                 if (nextGameButton != null) nextGameButton.gameObject.SetActive(false);
                 if (backToTitleButton != null) backToTitleButton.gameObject.SetActive(true);
             }
             else 
             {
-                // 1回/2回達成時: 次のゲームへ進むボタンを表示 (点数は引き継ぎ)
-                Debug.Log("役満達成！規定回数に達していません。次のゲームへ進むボタンを表示します。");
+                Debug.Log("次のゲームへ進むボタンを表示します。");
                 if (nextGameButton != null) nextGameButton.gameObject.SetActive(true);
                 if (backToTitleButton != null) backToTitleButton.gameObject.SetActive(false);
             }
@@ -392,7 +406,7 @@ public class GameManager2 : MonoBehaviour
             ResultPanel.SetActive(false);
         }
         
-        Debug.Log($"次のゲームに進みます。現在のスコア: {yakumanWinCount} を引き継ぎます。");
+        Debug.Log($"次のゲームに進みます。現在のレース: {raceCount}");
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
     
@@ -401,8 +415,9 @@ public class GameManager2 : MonoBehaviour
     // ====================================================================
     public void OnBackToTitleButton()
     {
-        yakumanWinCount = 0; 
-        Debug.Log("タイトルに戻ります。役満勝利回数をリセットしました。");
+        raceCount = 0; 
+        Shooter2D.score = 10000;
+        Debug.Log("タイトルに戻ります。レースカウントをリセットしました。");
 
         if (!string.IsNullOrEmpty(titleSceneName))
         {
@@ -424,6 +439,18 @@ public class GameManager2 : MonoBehaviour
         {
             playerMove.enabled = false;
         }
+
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+        {
+           Rigidbody2D rb = player.GetComponent<Rigidbody2D>();
+           if(rb != null)
+            {
+                rb.linearVelocity = Vector2.zero;
+                rb.angularVelocity = 0f;
+            }
+        }
+
         if (raceBGM != null && raceBGM.isPlaying)
         {
             raceBGM.Stop();
@@ -432,15 +459,77 @@ public class GameManager2 : MonoBehaviour
         {
             countdownSE.Stop();
         }
-        if (npcMoveScripts != null)
+        if (npcMoveScripts != null && npcMoveScripts.Length > 0)
         {
             foreach (var script in npcMoveScripts)
             {
                 if (script != null)
                 {
-                    // script.StopMovement(); // NPCの移動停止メソッドを想定
+                    script.StopMovement();
                 }
             }
+        }
+        else
+        {
+            Debug.LogWarning("NPCの移動スクリプトが設定されていません。");
+        }
+
+        // 結果中の射撃を無効化（PlayerのShooter2D）
+        if (scoreManager != null)
+        {
+            scoreManager.enabled = false;
+        }
+
+        // 既に飛んでいる弾を掃除
+        foreach (var bullet in GameObject.FindGameObjectsWithTag("Bullet"))
+        {
+            Destroy(bullet);
+        }
+    }
+
+    // ====================================================================
+    // ★★★ NPC勝利時のリザルト処理 (MahjongManager.OnNpcWinから呼ばれる) ★★★
+    // ====================================================================
+    public void OnNpcWinResult()
+    {
+        Debug.Log($"NPC勝利。現在のレース: {raceCount} / {RACE_LIMIT}");
+
+        if (raceCount >= RACE_LIMIT)
+        {
+            // タイトルへ戻るボタンを表示
+            Debug.Log($"{RACE_LIMIT}レース終了。タイトルへ戻るボタンを表示します。");
+            if (nextGameButton2 != null) nextGameButton2.gameObject.SetActive(false);
+            if (backToTitleButton2 != null) backToTitleButton2.gameObject.SetActive(true);
+        }
+        else 
+        {
+            // 次のゲームへ進むボタンを表示
+            Debug.Log("次のゲームへ進むボタンを表示します。");
+            if (nextGameButton2 != null) nextGameButton2.gameObject.SetActive(true);
+            if (backToTitleButton2 != null) backToTitleButton2.gameObject.SetActive(false);
+        }
+    }
+
+    // ====================================================================
+    // ★★★ 流局時のリザルト処理 (GameManager2.OnGoalから呼ばれる) ★★★
+    // ====================================================================
+    public void OnGoalResult()
+    {
+        Debug.Log($"流局。現在のレース: {raceCount} / {RACE_LIMIT}");
+
+        if (raceCount >= RACE_LIMIT)
+        {
+            // タイトルへ戻るボタンを表示
+            Debug.Log($"{RACE_LIMIT}レース終了。タイトルへ戻るボタンを表示します。");
+            if (nextGameButton2 != null) nextGameButton2.gameObject.SetActive(false);
+            if (backToTitleButton2 != null) backToTitleButton2.gameObject.SetActive(true);
+        }
+        else 
+        {
+            // 次のゲームへ進むボタンを表示
+            Debug.Log("次のゲームへ進むボタンを表示します。");
+            if (nextGameButton2 != null) nextGameButton2.gameObject.SetActive(true);
+            if (backToTitleButton2 != null) backToTitleButton2.gameObject.SetActive(false);
         }
     }
 
@@ -467,5 +556,6 @@ public class GameManager2 : MonoBehaviour
         }
 
         GameOver();
+        OnGoalResult(); // ★★★ ボタン表示制御を呼び出す ★★★
     }
 }

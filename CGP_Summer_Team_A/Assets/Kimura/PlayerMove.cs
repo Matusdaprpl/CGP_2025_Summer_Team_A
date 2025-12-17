@@ -70,6 +70,7 @@ public class PlayerMove : MonoBehaviour
     };
     private int currentColorIndex = 0;
     private float colorLerpT = 0f;
+    
 
     void Start()
     {
