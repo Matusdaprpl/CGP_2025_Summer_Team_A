@@ -15,7 +15,7 @@ public class Shooter2D : MonoBehaviour
     [Header("弾の速度")]
     public float bulletSpeed = 10f;
     [Header("スコア")]
-    public int score = 10000;
+    public static int score = 10000;
     public int fireCost = 1000;
     
     // Start is called once before the first execution of Update after the MonoBehaviour created
