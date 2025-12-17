@@ -6,13 +6,13 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/SampleScene.unity
+    path: Assets/1 Scenes/SampleScene.unity
     guid: 8c9cfa26abfee488c85f1582747f6a02
   - enabled: 1
-    path: Assets/CGP2025-summerteamA.shunji01.unity
+    path: Assets/1 Scenes/CGP2025-summerteamA.shunji01.unity
     guid: 08eac79b7420a484e8d47dee9789f2da
   - enabled: 1
-    path: Assets/Scenes/Title.unity
+    path: Assets/1 Scenes/Title.unity
     guid: a15adfcc5004f4d4298f8e978b32db7e
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
