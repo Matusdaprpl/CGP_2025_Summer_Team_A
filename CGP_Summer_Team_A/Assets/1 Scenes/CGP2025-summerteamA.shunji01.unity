@@ -559,7 +559,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetYakuman: 0
-  npcPlayer: {fileID: 0}
+  npcPlayer: {fileID: 93837152}
   discardOffset: 2
 --- !u!61 &93837158
 BoxCollider2D:
@@ -2093,7 +2093,6 @@ GameObject:
   m_Component:
   - component: {fileID: 548840249}
   - component: {fileID: 548840248}
-  - component: {fileID: 548840250}
   m_Layer: 0
   m_Name: BackgroundManager
   m_TagString: Untagged
@@ -2131,18 +2130,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &548840250
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 548840247}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f69fadb044a86a94d9a511a14e0547cd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &557273567
 GameObject:
   m_ObjectHideFlags: 0
@@ -8193,7 +8180,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetYakuman: 0
-  npcPlayer: {fileID: 0}
+  npcPlayer: {fileID: 911804197}
   discardOffset: 2
 --- !u!61 &911804203
 BoxCollider2D:
@@ -10030,7 +10017,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetYakuman: 0
-  npcPlayer: {fileID: 0}
+  npcPlayer: {fileID: 1983959246}
   discardOffset: 2
 --- !u!114 &1983959246
 MonoBehaviour:
