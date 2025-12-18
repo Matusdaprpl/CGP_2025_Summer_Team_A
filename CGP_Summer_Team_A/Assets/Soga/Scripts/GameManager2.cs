@@ -32,7 +32,7 @@ public class GameManager2 : MonoBehaviour
     public bool forceTsuisoHand = false;
     public bool forceShosushiHand = false;
     public bool forceChuurenHand = false; 
-
+    
     [Header("03. リザルト画面設定")]
     public GameObject ResultPanel; // 役満勝利時に表示するパネル
     public Image yakumanImage;
