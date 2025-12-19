@@ -8,9 +8,10 @@ public class LaneMove : MonoBehaviour
     public int laneCount = 4;        // レーン数（4等分）
     public float moveSpeed = 5f;     // スムーズ移動の速度
 
-    private int currentLane = 2;     // 現在のレーン番号（0〜laneCount-1）
+    private int currentLane = 1;     // 現在のレーン番号（0〜laneCount-1）
     private float[] lanePositions;   // レーンごとのY座標
     private bool isOnObstacle = false; // Obstacleに当たっているかどうか
+    private PlayerMove playerMove;
 
     void Start()
     {
@@ -32,10 +33,7 @@ public class LaneMove : MonoBehaviour
         lanePositions[0] = (topY + bottomY) / 2f;
         }
 
-
-    // 初期位置を中央レーンにセット
-    // (laneCount - 1) / 2 にすることで、偶数でも下のレーンが選ばれ、より直感的な中央になる
-        int currentLane = (laneCount - 1) / 2;
+        currentLane = (laneCount - 1) / 2;
 
     // currentLaneが配列の範囲内にあることを念のため確認
         if (currentLane >= 0 && currentLane < laneCount)
@@ -46,12 +44,20 @@ public class LaneMove : MonoBehaviour
             transform.position.z
             );
         }
+
+        playerMove = GetComponent<PlayerMove>();
     }
 
     void Update()
     {
-        // Obstacle中はレーン変更を禁止
-        if (!isOnObstacle)
+        // カウントダウン中・Obstacle中はレーン変更を禁止
+        bool canChangeLane = !isOnObstacle;
+        if (playerMove != null && playerMove.IsCountdownActive)
+        {
+            canChangeLane = false;
+        }
+
+        if (canChangeLane)
         {
             // 上キー or W → 上のレーンへ
             if ((Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.W)) && currentLane < laneCount - 1)
@@ -68,8 +74,6 @@ public class LaneMove : MonoBehaviour
 
         // ターゲット座標を計算（常にレーン中央）
         Vector3 targetPos = new Vector3(transform.position.x, lanePositions[currentLane], transform.position.z);
-
-        // 補間でゆっくり移動（Obstacle中も有効 → 外側に押し出されても中央に戻る）
         transform.position = Vector3.Lerp(transform.position, targetPos, Time.deltaTime * moveSpeed);
     }
 
