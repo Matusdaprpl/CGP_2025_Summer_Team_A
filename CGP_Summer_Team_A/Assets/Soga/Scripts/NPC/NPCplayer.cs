@@ -86,6 +86,9 @@ public class NPCplayer : MonoBehaviour
     private bool isStopped = false;
     private float currentTargetLaneY;
 
+    private float obstacleMaxSpeed = 2f;
+    private bool isOnObstacle = false;
+
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -169,13 +172,15 @@ public class NPCplayer : MonoBehaviour
 
     void FixedUpdate()
     {
-        
         if (isStopped) return;
 
         if (!isCountdownActive && rb != null)
         {
-            // ここで速度を設定している
-            rb.linearVelocity = new Vector2(currentSpeed, 0);
+            // 障害物上では速度を制限
+            float maxSpeedLimit = isOnObstacle ? obstacleMaxSpeed : maxSpeed;
+            float limitedSpeed = Mathf.Min(currentSpeed, maxSpeedLimit);
+            
+            rb.linearVelocity = new Vector2(limitedSpeed, 0);
         }
 
         timeSinceLastChange += Time.fixedDeltaTime;
@@ -319,6 +324,12 @@ public class NPCplayer : MonoBehaviour
             Destroy(other.gameObject);
             return;
         }
+
+        if(other.CompareTag("Obstacle"))
+        {
+            isOnObstacle = true;
+            return;
+        }
         if (other.CompareTag("Item") && !isProcessingTile && npcMahjong.hand.Count <= 14)
         {
             ItemController itemController = other.GetComponent<ItemController>();
@@ -349,6 +360,14 @@ public class NPCplayer : MonoBehaviour
         else
         {
             //Debug.Log($"{gameObject.name} アイテム取得条件を満たしていません: isProcessingTile={isProcessingTile}, handCount={npcMahjong.hand.Count}");
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D other)
+    {
+        if (other.CompareTag("Obstacle"))
+        {
+            isOnObstacle = false;
         }
     }
 
@@ -429,6 +448,20 @@ public class NPCplayer : MonoBehaviour
             isProcessingTile = false;
             //Debug.Log($"{gameObject.name} ProcessTileExchange 終了、isProcessingTile を false に設定");
         }
+    }
+
+    private IEnumerator HandleObstacleHit()
+    {
+        isStopped = true;
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector2.zero;
+            rb.angularVelocity = 0f;
+        }
+
+        yield return new WaitForSeconds(stopTime);
+
+        isStopped = false;
     }
 
     public void StopMovement()
