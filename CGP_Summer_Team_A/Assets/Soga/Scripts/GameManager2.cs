@@ -3,7 +3,9 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Linq; 
 using System.Collections;
-using UnityEngine.SceneManagement; 
+using UnityEngine.SceneManagement;
+using Unity.VisualScripting;
+using TMPro;
 
 public class GameManager2 : MonoBehaviour
 {
@@ -22,7 +24,7 @@ public class GameManager2 : MonoBehaviour
     public Button agariButton; 
     public Shooter2D scoreManager; 
     
-    [Header("02. Debug Hand Selection (Set only ONE to true)")]
+    [Header("テスト用配牌")]
     public bool forceDaisangenHand = false; 
     public bool forceSuuankouHand = false;
     public bool forceKokushiHand = false;
@@ -33,7 +35,7 @@ public class GameManager2 : MonoBehaviour
     public bool forceShosushiHand = false;
     public bool forceChuurenHand = false; 
     
-    [Header("03. リザルト画面設定")]
+    [Header("リザルト画面設定")]
     public GameObject ResultPanel; // 役満勝利時に表示するパネル
     public Image yakumanImage;
     public GameObject ResultPanel3; // (流局/NPCゴール用と仮定)
@@ -61,8 +63,17 @@ public class GameManager2 : MonoBehaviour
     [SerializeField] private Sprite tsuisoSprite;
     [SerializeField] private Sprite shosushiSprite;
     [SerializeField] private Sprite chuurenSprite;
-    [SerializeField] private Sprite goalSprite; 
-    
+    [SerializeField] private Sprite goalSprite;
+
+    [Header("レース情報UI")]
+    public TMP_Text raceCountTMP;
+    private bool raceCountHidden = false;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+    static void InitializeRaceCount()
+    {
+        raceCount = 0;
+    }
     void Start()
     {
         StartCoroutine(InitializeAfterFrames());
@@ -74,6 +85,7 @@ public class GameManager2 : MonoBehaviour
 
         raceCount++;
         Debug.Log($"現在のレース: {raceCount} / {RACE_LIMIT}");
+        UpdateRaceCountUI(); 
         
         if (ResultPanel != null)
         {
@@ -88,7 +100,6 @@ public class GameManager2 : MonoBehaviour
         if (raceBGM == null) raceBGM = GameObject.Find("RaceBGM")?.GetComponent<AudioSource>();
         if (countdownSE == null) countdownSE = GameObject.Find("CountdownSE")?.GetComponent<AudioSource>();
 
-        // ★★★ 修正点2: ボタンのリスナー設定と初期状態を非表示にする ★★★
         // ★★★ Player勝利用ボタンのリスナー設定 ★★★
         if (nextGameButton != null)
         {
@@ -160,6 +171,8 @@ public class GameManager2 : MonoBehaviour
         {
             Debug.LogError("和了ボタンが設定されていません。");
         }
+
+        StartCoroutine(WaitCountdownAndHideRaceCount());
     }
     // ------------------------------------
 
@@ -557,5 +570,44 @@ public class GameManager2 : MonoBehaviour
 
         GameOver();
         OnGoalResult(); // ★★★ ボタン表示制御を呼び出す ★★★
+    }
+
+    private void UpdateRaceCountUI()
+    {
+        if (raceCountTMP != null)
+        {
+            raceCountTMP.text = $"レース: {raceCount} / {RACE_LIMIT}";
+            raceCountTMP.gameObject.SetActive(true);
+        }
+        else
+        {
+            Debug.LogWarning("raceCountのTextが設定されていません。");
+        }
+    }
+
+    private void HideRaceCountUI()
+    {
+        if (raceCountHidden) return;
+        raceCountHidden = true;
+        if (raceCountTMP != null)
+        {
+            raceCountTMP.gameObject.SetActive(false);
+        }
+    }
+
+    private IEnumerator WaitCountdownAndHideRaceCount()
+    {
+        while (playerMove == null)
+        {
+            yield return null;
+            playerMove = FindFirstObjectByType<PlayerMove>();
+        }
+
+        while (playerMove != null && playerMove.IsCountdownActive)
+        {
+            yield return null;
+        }
+
+        HideRaceCountUI();
     }
 }
