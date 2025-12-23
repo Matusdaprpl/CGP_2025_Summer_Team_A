@@ -69,10 +69,15 @@ public class GameManager2 : MonoBehaviour
     public TMP_Text raceCountTMP;
     private bool raceCountHidden = false;
 
+    [Header("ランキング用データ")]
+    public static int playerFinalScore = 10000;
+    public static List<(string name, int score)> npcFinalScores = new List<(string name, int score)>();
+
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     static void InitializeRaceCount()
     {
         raceCount = 0;
+        Shooter2D.score = 10000;
     }
     void Start()
     {
@@ -428,19 +433,24 @@ public class GameManager2 : MonoBehaviour
     // ====================================================================
     public void OnBackToTitleButton()
     {
-        raceCount = 0; 
-        Shooter2D.score = 10000;
-        Debug.Log("タイトルに戻ります。レースカウントをリセットしました。");
+        playerFinalScore = Shooter2D.score;
 
-        if (!string.IsNullOrEmpty(titleSceneName))
+        npcFinalScores.Clear();
+        if (npcMoveScripts != null)
         {
-            SceneManager.LoadScene(titleSceneName);
+            foreach (var npc in npcMoveScripts)
+            {
+                if (npc != null)
+                {
+                    int actualScore = npc.score();
+                    npcFinalScores.Add((npc.gameObject.name, actualScore));
+                }
+            }
         }
-        else
-        {
-            Debug.LogError("タイトルシーン名(titleSceneName)が設定されていません。");
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-        }
+        
+        Debug.Log($"ランキングへ移行します。Player最終スコア: {playerFinalScore}");
+
+        SceneManager.LoadScene("Ranking");
     }
 
     // ====================================================================
@@ -506,6 +516,20 @@ public class GameManager2 : MonoBehaviour
     public void OnNpcWinResult()
     {
         Debug.Log($"NPC勝利。現在のレース: {raceCount} / {RACE_LIMIT}");
+        
+        // NPC勝利時にスコア加算
+        if (npcMoveScripts != null)
+        {
+            foreach (var npc in npcMoveScripts)
+            {
+                if (npc != null && npc.gameObject.activeInHierarchy)
+                {
+                    // 役満スコアを加算
+                    npc.AddScore(32000);
+                    break; // 最初の勝利したNPCにのみ加算
+                }
+            }
+        }
 
         if (raceCount >= RACE_LIMIT)
         {
@@ -610,4 +634,5 @@ public class GameManager2 : MonoBehaviour
 
         HideRaceCountUI();
     }
+
 }

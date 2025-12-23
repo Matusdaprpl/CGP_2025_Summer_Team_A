@@ -72,6 +72,9 @@ public class NPCplayer : MonoBehaviour
     [Tooltip("発射コスト")]
     public int fireCost = 1000;
 
+    [Header("スコア管理")]
+    private int currentScore = 10000; // NPCの初期スコア
+
     private Rigidbody2D rb;
     private float currentSpeed;
     private float timeSinceLastChange;
@@ -538,6 +541,8 @@ public class NPCplayer : MonoBehaviour
         }
 
         Debug.Log($"{gameObject.name} が点棒を発射しました");
+        
+        SubtractScore(fireCost);
 
         Destroy(bullet, 3f);
     }
@@ -550,5 +555,22 @@ public class NPCplayer : MonoBehaviour
                      viewportPoint.y < -0.2f || viewportPoint.y > 1.2f;
                      
         return isOff;
+    }
+
+    public int score()
+    {
+        return currentScore;
+    }
+
+    public void AddScore(int amount)
+    {
+        currentScore += amount;
+        Debug.Log($"{gameObject.name}のスコア: {currentScore} (加算: {amount})");
+    }
+
+    public void SubtractScore(int amount)
+    {
+        currentScore -= amount;
+        Debug.Log($"{gameObject.name}のスコア: {currentScore} (減少: {amount})");
     }
 }
