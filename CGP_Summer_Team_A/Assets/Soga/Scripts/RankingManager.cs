@@ -17,10 +17,15 @@ public class RankingManager : MonoBehaviour
     {
         DisplayRanking();
         if (backToTitleButton != null)
-        {
-            backToTitleButton.onClick.AddListener(() => SceneManager.LoadScene(titleSceneName));
-            GameManager2.raceCount = 0;
-            Shooter2D.score = 10000;
+        {backToTitleButton.onClick.AddListener(() => 
+            {
+                GameManager2.ClearNpcPersistentScores();
+                
+                GameManager2.raceCount = 0;
+                Shooter2D.score = 10000;
+                
+                SceneManager.LoadScene(titleSceneName);
+            });
         }
     }
 

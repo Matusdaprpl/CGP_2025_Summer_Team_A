@@ -33,8 +33,6 @@ public static class YakumanEvaluator
                     return ChooseDiscardForKokushi(hand);
                 case Yakuman.Daisangen:
                     return ChooseDiscardForDaisangen(hand);
-                case Yakuman.SuuAnkou:
-                    return ChooseDiscardForSuuankou(hand);
                 case Yakuman.Tsuiso:
                     return ChooseDiscardForTsuuiisou(hand);
                 case Yakuman.Chinroutou:
@@ -67,10 +65,6 @@ public static class YakumanEvaluator
                     // 修正: ドラゴン牌のみ必要。他の牌は不要
                     return requiredHonors.Contains(tileName);
                 }
-
-            case Yakuman.SuuAnkou:
-                // 修正: 四暗刻では全ての牌が重複して必要になるため、4枚未満の牌は必要
-                return hand.Count(t => t.GetDisplayName() == tileName) < 4;
 
             case Yakuman.Tsuiso:
                 // 字牌なら必要
@@ -270,8 +264,6 @@ public static class YakumanEvaluator
                 return KokushiChecker.IsKokushi(hand14);              // 国士無双
             case Yakuman.Daisangen:
                 return DaisangenChecker.IsDaisangen(hand14);          // 大三元
-            case Yakuman.SuuAnkou:
-                return SuuankouChecker.IsSuuankou(hand14);            // 四暗刻
             case Yakuman.Tsuiso:
                 return TsuisoChecker.IsTsuiso(hand14);                // 字一色
             case Yakuman.Chinroutou:
