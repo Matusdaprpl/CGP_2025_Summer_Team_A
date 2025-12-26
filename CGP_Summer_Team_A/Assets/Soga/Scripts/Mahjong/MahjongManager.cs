@@ -42,7 +42,6 @@ public class MahjongManager : MonoBehaviour
     [Header("役満スプライト設定 (NPC)")] // 追加
     [SerializeField] private Sprite npcKokushiSprite;
     [SerializeField] private Sprite npcDaisangenSprite;
-    [SerializeField] private Sprite npcSuuankouSprite;
     [SerializeField] private Sprite npcDaisushiSprite;
     [SerializeField] private Sprite npcChinroutouSprite;
     [SerializeField] private Sprite npcRyuuisoSprite;
@@ -291,12 +290,23 @@ public class MahjongManager : MonoBehaviour
 
         Debug.Log($"{npcName}が{yakuman}で上がりました！");
 
+        //勝利したNPCにスコアを加算
+        GameObject npcObject = GameObject.Find(npcName);
+        if (npcObject != null)
+        {
+            NPCplayer npcPlayer = npcObject.GetComponent<NPCplayer>();
+            if (npcPlayer != null)
+            {
+                npcPlayer.AddScore(32000); // 役満の点数を加算
+                Debug.Log($"{npcName}に32000点を加算。現在のスコア: {npcPlayer.score()}");
+            }
+        }
+
         Sprite spriteToShow = null;
         switch (yakuman)
         {
             case Yakuman.KokushiMusou: spriteToShow = npcKokushiSprite; break;
             case Yakuman.Daisangen: spriteToShow = npcDaisangenSprite; break;
-            case Yakuman.SuuAnkou: spriteToShow = npcSuuankouSprite; break;
             case Yakuman.Daisuushii: spriteToShow = npcDaisushiSprite; break;
             case Yakuman.Chinroutou: spriteToShow = npcChinroutouSprite; break;
             case Yakuman.Ryuuiisou: spriteToShow = npcRyuuisoSprite; break;
@@ -373,7 +383,7 @@ public class MahjongManager : MonoBehaviour
         // 何かしらのスプライトを仮表示（未設定でもOK）
         if (yakumanImage != null)
         {
-            var testSprite = npcKokushiSprite ?? npcDaisangenSprite ?? npcSuuankouSprite ?? npcChuurenSprite;
+            var testSprite = npcKokushiSprite ?? npcDaisangenSprite ?? npcChuurenSprite;
             if (testSprite != null)
             {
                 yakumanImage.sprite = testSprite;

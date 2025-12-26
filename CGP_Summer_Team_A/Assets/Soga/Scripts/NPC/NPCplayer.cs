@@ -566,11 +566,18 @@ public class NPCplayer : MonoBehaviour
     {
         currentScore += amount;
         Debug.Log($"{gameObject.name}のスコア: {currentScore} (加算: {amount})");
+        GameManager2.SetNpcScore(gameObject.name, currentScore);
     }
 
     public void SubtractScore(int amount)
     {
         currentScore -= amount;
         Debug.Log($"{gameObject.name}のスコア: {currentScore} (減少: {amount})");
+        GameManager2.SetNpcScore(gameObject.name, currentScore);
+    }
+
+    public void SetScore(int amount)
+    {
+        currentScore = amount;
     }
 }

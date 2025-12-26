@@ -12,7 +12,6 @@ public class GameManager2 : MonoBehaviour
     public static int raceCount = 0;
     private const int RACE_LIMIT = 4; 
 
-    // ★★★ ゲーム終了管理用の既存フィールド ★★★
     [Header("01. ゲームコアと終了管理")]
     public PlayerMove playerMove;
     public AudioSource raceBGM;
@@ -26,7 +25,6 @@ public class GameManager2 : MonoBehaviour
     
     [Header("テスト用配牌")]
     public bool forceDaisangenHand = false; 
-    public bool forceSuuankouHand = false;
     public bool forceKokushiHand = false;
     public bool forceDaisushiHand = false;
     public bool forceChinroutouHand = false;
@@ -42,21 +40,16 @@ public class GameManager2 : MonoBehaviour
     public Image goalImage; 
 
     [Header("04. シーン遷移とリザルトボタン (要Inspector設定)")]
-    // ★★★ Title Scene Nameはここにあります ★★★
     public string titleSceneName = "TitleScene"; 
-    public Button nextGameButton;      // 次のゲームに進むボタン (Player勝利用)
-    public Button backToTitleButton;   // タイトルに戻るボタン (4レース達成時)
+    public Button nextGameButton;
+    public Button backToTitleButton;
     
-    // ★★★ NPC勝利・流局用ボタンを追加 ★★★
-    public Button nextGameButton2;     // 次のゲームに進むボタン (NPC勝利・流局用)
-    public Button backToTitleButton2;  // タイトルに戻るボタン (NPC勝利・流局用 4レース達成時)
+    public Button nextGameButton2;     
+    public Button backToTitleButton2;  
     
-    // ★★★ 不要な Restart Buttonフィールドは完全に削除済み ★★★
-
     [Header("05. スプライト設定")]
     [SerializeField] private Sprite kokushiSprite;
     [SerializeField] private Sprite daisangenSprite;
-    [SerializeField] private Sprite suuankouSprite;
     [SerializeField] private Sprite daisushiSprite;
     [SerializeField] private Sprite chinroutouSprite;
     [SerializeField] private Sprite ryuuisoSprite;
@@ -75,11 +68,14 @@ public class GameManager2 : MonoBehaviour
     public static int playerFinalScore = 10000;
     public static List<(string name, int score)> npcFinalScores = new List<(string name, int score)>();
 
+    public static Dictionary<string, int> npcPersistentScores = new Dictionary<string, int>();
+
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     static void InitializeRaceCount()
     {
         raceCount = 0;
         Shooter2D.score = 10000;
+        npcPersistentScores.Clear();
     }
     void Start()
     {
@@ -99,7 +95,6 @@ public class GameManager2 : MonoBehaviour
             ResultPanel.SetActive(false); 
         }
 
-        // 参照がInspectorで設定されていない場合の自動検索（補助的な機能）
         if (playerMove == null)
         {
             playerMove = FindFirstObjectByType<PlayerMove>();
@@ -107,7 +102,6 @@ public class GameManager2 : MonoBehaviour
         if (raceBGM == null) raceBGM = GameObject.Find("RaceBGM")?.GetComponent<AudioSource>();
         if (countdownSE == null) countdownSE = GameObject.Find("CountdownSE")?.GetComponent<AudioSource>();
 
-        // ★★★ Player勝利用ボタンのリスナー設定 ★★★
         if (nextGameButton != null)
         {
             nextGameButton.onClick.AddListener(OnNextGameButton);
@@ -131,14 +125,13 @@ public class GameManager2 : MonoBehaviour
             backToTitleButton2.gameObject.SetActive(false); // 初期状態を非表示にする
         }
         
+        // レース間で保持したNPCスコアを復元
+        RestoreNpcScoresToNpcs();
+        
         // --- テスト配牌ロジック ---
         if (forceDaisangenHand)
         {
             SetDaisangenHand();
-        }
-        else if (forceSuuankouHand)
-        {
-            SetSuuankouHand();
         }
         else if (forceKokushiHand)
         {
@@ -199,18 +192,6 @@ public class GameManager2 : MonoBehaviour
             (Suit.Souzu, 7), (Suit.Souzu, 7)
         };
         PassHandToManager(handData, "大三元");
-    }
-    private void SetSuuankouHand()
-    {
-        var handData = new List<(Suit suit, int rank)>
-        {
-            (Suit.Manzu, 1), (Suit.Manzu, 1), (Suit.Manzu, 1), 
-            (Suit.Pinzu, 5), (Suit.Pinzu, 5), (Suit.Pinzu, 5), 
-            (Suit.Souzu, 9), (Suit.Souzu, 9), (Suit.Souzu, 9), 
-            (Suit.Honor, 2), (Suit.Honor, 2), (Suit.Honor, 2),
-            (Suit.Honor, 3), (Suit.Honor, 3)
-        };
-        PassHandToManager(handData, "四暗刻");
     }
 
     private void SetKokushiHand()
@@ -334,11 +315,11 @@ public class GameManager2 : MonoBehaviour
         const int SINGLE_YAKUMAN_SCORE = 32000;
         var myHand = new List<Tile>(MahjongManager.instance.playerHand);
 
-        // --- 役満判定とゲーム終了 ---
         int yakumanMultiplier  = 0;
         Sprite spriteToShow = null;
+        bool isDaisushi = false;
 
-        // 役満判定ロジック (全て記述)
+        // 役満判定ロジック
         if (TsuisoChecker.IsTsuiso(myHand))
         {
             yakumanMultiplier += 1; Debug.Log("🎉 字一色です！");  spriteToShow = tsuisoSprite;
@@ -359,10 +340,7 @@ public class GameManager2 : MonoBehaviour
         {
             yakumanMultiplier += 1; Debug.Log("🎉 大三元です！");  spriteToShow = daisangenSprite;
         }
-        if (SuuankouChecker.IsSuuankou(myHand))
-        {
-            yakumanMultiplier += 1; Debug.Log("🎉 四暗刻です！");  spriteToShow = suuankouSprite;
-        }
+        
         if (ChuurenChecker.IsChuuren(myHand)) 
         {
             yakumanMultiplier += 1; Debug.Log("🎉 九蓮宝燈です！");  spriteToShow = chuurenSprite;
@@ -370,6 +348,7 @@ public class GameManager2 : MonoBehaviour
         if (DaisushiChecker.IsDaisushi(myHand))
         {
             yakumanMultiplier += 2; Debug.Log("🎉 大四喜です！");  spriteToShow = daisushiSprite;
+            isDaisushi = true;
         }
         else if (ShosushiChecker.IsShosushi(myHand))
         {
@@ -382,18 +361,21 @@ public class GameManager2 : MonoBehaviour
             return;
         }
 
-        if(yakumanMultiplier ==2)
+        if (!isDaisushi)
         {
-            if(doubleYakumanSprite != null)
+            if (yakumanMultiplier >= 3)
             {
-                spriteToShow = doubleYakumanSprite;
+                if (tripleYakumanSprite != null)
+                {
+                    spriteToShow = tripleYakumanSprite;
+                }
             }
-        }
-        else if(yakumanMultiplier >=3)
-        {
-            if(tripleYakumanSprite != null)
+            else if (yakumanMultiplier == 2)
             {
-                spriteToShow = tripleYakumanSprite;
+                if (doubleYakumanSprite != null)
+                {
+                    spriteToShow = doubleYakumanSprite;
+                }
             }
         }
 
@@ -439,48 +421,30 @@ public class GameManager2 : MonoBehaviour
         // ----------------------------------------------------
     }
 
-    // ====================================================================
-    // ★★★ OnNextGameButton: 次のゲームに進む (点数引き継ぎ) ★★★
-    // ====================================================================
+    //次のゲームに進む (点数引き継ぎ) ★★★
     public void OnNextGameButton()
     {
         if (ResultPanel != null)
         {
             ResultPanel.SetActive(false);
         }
-        
+        // 次レース開始前にNPCスコアを保存
+        SaveNpcScoresAcrossRaces();
+
         Debug.Log($"次のゲームに進みます。現在のレース: {raceCount}");
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
-    
-    // ====================================================================
-    // ★★★ OnBackToTitleButton: タイトルに戻る (点数リセット) ★★★
-    // ====================================================================
-    public void OnBackToTitleButton()
+    public void OnBackToTitleButton()  //ランキングに移行するように変更
     {
-        playerFinalScore = Shooter2D.score;
-
-        npcFinalScores.Clear();
-        if (npcMoveScripts != null)
-        {
-            foreach (var npc in npcMoveScripts)
-            {
-                if (npc != null)
-                {
-                    int actualScore = npc.score();
-                    npcFinalScores.Add((npc.gameObject.name, actualScore));
-                }
-            }
-        }
+        // 最新のスコアを収集
+        CollectFinalScores();
         
         Debug.Log($"ランキングへ移行します。Player最終スコア: {playerFinalScore}");
 
         SceneManager.LoadScene("Ranking");
     }
-
-    // ====================================================================
-    // ★★★ ゲーム終了メソッド群 ★★★
-    // ====================================================================
+    
+    //ゲーム終了メソッド群
     public void GameOver()
     {
         if (playerMove != null)
@@ -535,26 +499,9 @@ public class GameManager2 : MonoBehaviour
         }
     }
 
-    // ====================================================================
-    // ★★★ NPC勝利時のリザルト処理 (MahjongManager.OnNpcWinから呼ばれる) ★★★
-    // ====================================================================
     public void OnNpcWinResult()
     {
         Debug.Log($"NPC勝利。現在のレース: {raceCount} / {RACE_LIMIT}");
-        
-        // NPC勝利時にスコア加算
-        if (npcMoveScripts != null)
-        {
-            foreach (var npc in npcMoveScripts)
-            {
-                if (npc != null && npc.gameObject.activeInHierarchy)
-                {
-                    // 役満スコアを加算
-                    npc.AddScore(32000);
-                    break; // 最初の勝利したNPCにのみ加算
-                }
-            }
-        }
 
         if (raceCount >= RACE_LIMIT)
         {
@@ -572,9 +519,6 @@ public class GameManager2 : MonoBehaviour
         }
     }
 
-    // ====================================================================
-    // ★★★ 流局時のリザルト処理 (GameManager2.OnGoalから呼ばれる) ★★★
-    // ====================================================================
     public void OnGoalResult()
     {
         Debug.Log($"流局。現在のレース: {raceCount} / {RACE_LIMIT}");
@@ -618,7 +562,7 @@ public class GameManager2 : MonoBehaviour
         }
 
         GameOver();
-        OnGoalResult(); // ★★★ ボタン表示制御を呼び出す ★★★
+        OnGoalResult(); 
     }
 
     private void UpdateRaceCountUI()
@@ -658,6 +602,78 @@ public class GameManager2 : MonoBehaviour
         }
 
         HideRaceCountUI();
+    }
+
+    public static void SetNpcScore(string name, int score)
+    {
+        if (npcPersistentScores.ContainsKey(name))
+        {
+            npcPersistentScores[name] = score;
+        }
+        else
+        {
+            npcPersistentScores.Add(name, score);
+        }
+        // Debug.Log($"GameManager: NPCスコア更新 {name} = {score}");
+    }
+    private void SaveNpcScoresAcrossRaces()
+    {
+        if (npcMoveScripts == null) return;
+        foreach (var npc in npcMoveScripts)
+        {
+            if (npc == null) continue;
+            string name = npc.gameObject.name;
+            int score = npc.score();
+            SetNpcScore(name, score);        
+        }
+    }
+
+    private void RestoreNpcScoresToNpcs()
+    {
+        if (npcMoveScripts == null) return;
+        foreach (var npc in npcMoveScripts)
+        {
+            if (npc == null) continue;
+            string name = npc.gameObject.name;
+            if (npcPersistentScores.TryGetValue(name, out int saved))
+            {
+                npc.SetScore(saved);
+            }
+            else
+            {
+                npc.SetScore(10000); 
+                SetNpcScore(name, 10000);
+            }
+        }
+    }
+
+    public static void ClearNpcPersistentScores()
+    {
+        npcPersistentScores.Clear();
+        Debug.Log("NPCスコア永続辞書をクリアしました。");
+    }
+
+    private void CollectFinalScores()
+    {
+        // Playerのスコア
+        playerFinalScore = Shooter2D.score;
+
+        // NPCのスコア
+        npcFinalScores.Clear();
+        if (npcMoveScripts != null)
+        {
+            foreach (var npc in npcMoveScripts)
+            {
+                if (npc != null)
+                {
+                    int actualScore = npc.score();
+                    npcFinalScores.Add((npc.gameObject.name, actualScore));
+                    Debug.Log($"NPCスコア: {npc.gameObject.name} = {actualScore}点");
+                }
+            }
+        }
+        
+        Debug.Log($"最終スコア - Player: {playerFinalScore}点");
     }
 
 }
