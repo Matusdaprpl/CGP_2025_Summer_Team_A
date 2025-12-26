@@ -7316,7 +7316,7 @@ MonoBehaviour:
   npcChinroutouSprite: {fileID: -4654979177607775274, guid: 754fccf8e466f1e42af450a6fad74e55, type: 3}
   npcRyuuisoSprite: {fileID: 3234798631025879855, guid: 16db2698f9e63ec4b8f9410982be3f0d, type: 3}
   npcTsuisoSprite: {fileID: -2206183387210774967, guid: 40d0941168b1a054cbea8d57aa1012f9, type: 3}
-  npcShosushiSprite: {fileID: 4270423836112061805, guid: be87b3ff1830fa44e92e827f16bf85a8, type: 3}
+  npcShosushiSprite: {fileID: -8532050911287868223, guid: 33b5b59d559383742ad01257f89a2da4, type: 3}
   npcChuurenSprite: {fileID: -6730560384432055838, guid: 2eef17d4b9811024f9e353f70d2afeac, type: 3}
   roundOver: 0
   discardOffset: 2
@@ -7356,14 +7356,14 @@ MonoBehaviour:
   - {fileID: 93837152}
   agariButton: {fileID: 190110715}
   scoreManager: {fileID: 423721869}
-  forceDaisangenHand: 1
+  forceDaisangenHand: 0
   forceSuuankouHand: 0
   forceKokushiHand: 0
   forceDaisushiHand: 0
   forceChinroutouHand: 0
   forceRyuuisoHand: 0
   forceTsuisoHand: 0
-  forceShosushiHand: 0
+  forceShosushiHand: 1
   forceChuurenHand: 0
   ResultPanel: {fileID: 728114042}
   yakumanImage: {fileID: 335736690}
@@ -7384,6 +7384,8 @@ MonoBehaviour:
   shosushiSprite: {fileID: -8532050911287868223, guid: 33b5b59d559383742ad01257f89a2da4, type: 3}
   chuurenSprite: {fileID: -5934855215270247213, guid: 0abb0a48ae5d88644a9d3dbceb6d38c7, type: 3}
   goalSprite: {fileID: -8307759106210265128, guid: 97bff67bcf6979a44a5297aee5b671fd, type: 3}
+  doubleYakumanSprite: {fileID: 1156913649789814674, guid: 2a9e71d2c9a77a040af427b83decaeef, type: 3}
+  tripleYakumanSprite: {fileID: -4231872275540741342, guid: e576b80a094bea74ca9cc7f29d5128fb, type: 3}
   raceCountTMP: {fileID: 1142206159}
 --- !u!114 &668795119
 MonoBehaviour:

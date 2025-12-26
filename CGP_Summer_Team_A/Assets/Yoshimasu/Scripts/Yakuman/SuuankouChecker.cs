@@ -10,12 +10,12 @@ public static class SuuankouChecker
 
         // 1. 牌の種類と枚数をカウント
         var counts = hand.GroupBy(t => new { t.suit, t.rank })
-                         .ToDictionary(g => g.Key, g => g.Count());
+                         .ToDictionary(g => g.Key, g => g.Count());
 
         int countTriplets = 0; // 3枚組の数 (刻子)
         int countQuads = 0;    // 4枚組の数 (槓子)
-        int countPairs = 0;    // 2枚組の数 (雀頭)
-        int otherCount = 0;    // 1枚組など
+        int countPairs = 0;    // 2枚組の数 (雀頭)
+        int otherCount = 0;    // 1枚組など
 
         // 2. 構成をチェック
         foreach (var count in counts.Values)
