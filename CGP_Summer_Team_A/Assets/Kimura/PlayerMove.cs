@@ -2,7 +2,8 @@ using UnityEngine;
 using TMPro;
 using System.Collections; // IEnumerator用に必要
 using System.Collections.Generic; // List用に必要
-using System.Linq; // OrderBy用に必要
+using System.Linq;
+using UnityEngine.Rendering; // OrderBy用に必要
 
 public class PlayerMove : MonoBehaviour
 {
@@ -56,6 +57,12 @@ public class PlayerMove : MonoBehaviour
     private float obstacleMaxSpeed = 2f;
     private float obstacleSmooth = 20f;
 
+    [Header("ゴール距離UI")]
+    public TMP_Text goalDistanceText;
+    public Transform goalTransform;
+    public float worldUnitsToMeters = 1f; // ワールド単位をメートルに変換
+    private bool goalReached = false;
+
     [Header("色変化設定")]
     public SpriteRenderer playerRenderer;  // PlayerのSpriteRenderer
     public float colorChangeSpeed = 1f;    // 基本色変化速度
@@ -98,10 +105,18 @@ public class PlayerMove : MonoBehaviour
 
         if (playerRenderer == null)
             playerRenderer = GetComponent<SpriteRenderer>();
+
+        if (goalDistanceText != null)
+            goalDistanceText.gameObject.SetActive(false);
     }
 
     void Update()
     {
+        if (!isCountdownActive)
+        {
+            UpdateGoalDistanceUI();
+        }
+
         if(isStopped) return;
         // --- カウントダウン ---
         if (isCountdownActive)
@@ -123,6 +138,11 @@ public class PlayerMove : MonoBehaviour
                 {
                     countdownText.text = "Go!";
                     Invoke("HideCountdownText", 1f);
+                }
+
+                if (goalDistanceText != null)
+                {
+                    goalDistanceText.gameObject.SetActive(true);
                 }
                 if (raceBGM != null) raceBGM.Play();
             }
@@ -277,6 +297,27 @@ public class PlayerMove : MonoBehaviour
        ProcessHit(collision.gameObject,collision.gameObject.tag);
     }
 
+    void UpdateGoalDistanceUI()
+    {
+        if(goalDistanceText==null||goalReached)return;
+
+        if(goalTransform == null)
+        {
+            var goalObj = GameObject.FindGameObjectWithTag("Goal");
+            if(goalObj != null)goalTransform =goalObj.transform;
+        }
+
+        if(goalTransform == null)
+        {
+            goalDistanceText.text ="流局まで: -- m";
+            return;
+        }
+
+        float dx = goalTransform.position.x-transform.position.x;
+        float meters = Mathf.Max(0f,dx * worldUnitsToMeters);
+        goalDistanceText.text =$"流局まで: {meters:F0} m";
+    }
+
     private void ProcessHit(GameObject hitObject, string tag)
     {        
         if (tag == "Bullet")
@@ -301,6 +342,13 @@ public class PlayerMove : MonoBehaviour
         if(tag == "Goal")
         {
             Debug.Log("ゴール");
+
+            goalReached = true;
+            if(goalDistanceText != null)
+            {
+                goalDistanceText.gameObject.SetActive(false);
+            }
+
             var gameManager2 = FindFirstObjectByType<GameManager2>();
             if (gameManager2 != null)
             {
