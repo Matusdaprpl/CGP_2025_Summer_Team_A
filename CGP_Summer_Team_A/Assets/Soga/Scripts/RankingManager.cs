@@ -51,8 +51,16 @@ public class RankingManager : MonoBehaviour
             nText.text = sorted[i].name;
             sText.text = $"{sorted[i].score}点";
 
-            // 日本語フォント対策として強制的に色を黒にする
-            rText.color = Color.black;
+            // 順位に応じた色分け
+            Color rankColor = i switch
+            {
+                0 => new Color(1f, 0.84f, 0f),      // 金色
+                1 => new Color(0.75f, 0.75f, 0.75f), // 銀色
+                2 => new Color(0.8f, 0.5f, 0.2f),    // 銅色
+                _ => Color.white
+            };
+
+            rText.color = rankColor;
             nText.color = Color.black;
             sText.color = Color.blue;
         }

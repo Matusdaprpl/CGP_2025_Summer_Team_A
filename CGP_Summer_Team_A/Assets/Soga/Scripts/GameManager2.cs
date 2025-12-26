@@ -64,6 +64,8 @@ public class GameManager2 : MonoBehaviour
     [SerializeField] private Sprite shosushiSprite;
     [SerializeField] private Sprite chuurenSprite;
     [SerializeField] private Sprite goalSprite;
+    [SerializeField] private Sprite doubleYakumanSprite;
+    [SerializeField] private Sprite tripleYakumanSprite;
 
     [Header("レース情報UI")]
     public TMP_Text raceCountTMP;
@@ -325,57 +327,76 @@ public class GameManager2 : MonoBehaviour
             return;
         }
 
-        const int YAKUMAN_SCORE = 32000;
+        const int SINGLE_YAKUMAN_SCORE = 32000;
         var myHand = new List<Tile>(MahjongManager.instance.playerHand);
 
         // --- 役満判定とゲーム終了 ---
-        bool isYakuman = false;
+        int yakumanMultiplier  = 0;
         Sprite spriteToShow = null;
 
         // 役満判定ロジック (全て記述)
-        if (ShosushiChecker.IsShosushi(myHand))
+        if (TsuisoChecker.IsTsuiso(myHand))
         {
-            isYakuman = true; Debug.Log("🎉 小四喜です！"); scoreManager?.AddScore(YAKUMAN_SCORE); spriteToShow = shosushiSprite;
+            yakumanMultiplier += 1; Debug.Log("🎉 字一色です！");  spriteToShow = tsuisoSprite;
         }
-        else if (TsuisoChecker.IsTsuiso(myHand))
+        if (RyuuisoChecker.IsRyuuiso(myHand))
         {
-            isYakuman = true; Debug.Log("🎉 字一色です！"); scoreManager?.AddScore(YAKUMAN_SCORE); spriteToShow = tsuisoSprite;
+            yakumanMultiplier += 1; Debug.Log("🎉 緑一色です！");  spriteToShow = ryuuisoSprite;
         }
-        else if (RyuuisoChecker.IsRyuuiso(myHand))
+        if (ChinroutouChecker.IsChinroutou(myHand))
         {
-            isYakuman = true; Debug.Log("🎉 緑一色です！"); scoreManager?.AddScore(YAKUMAN_SCORE); spriteToShow = ryuuisoSprite;
+            yakumanMultiplier += 1; Debug.Log("🎉 清老頭です！");  spriteToShow = chinroutouSprite;
         }
-        else if (DaisushiChecker.IsDaisushi(myHand))
+        if (KokushiChecker.IsKokushi(myHand))
         {
-            isYakuman = true; Debug.Log("🎉 大四喜です！"); scoreManager?.AddScore(YAKUMAN_SCORE * 2); spriteToShow = daisushiSprite;
+            yakumanMultiplier += 1; Debug.Log("🎉 国士無双です！");  spriteToShow = kokushiSprite;
         }
-        else if (ChinroutouChecker.IsChinroutou(myHand))
+        if (DaisangenChecker.IsDaisangen(myHand))
         {
-            isYakuman = true; Debug.Log("🎉 清老頭です！"); scoreManager?.AddScore(YAKUMAN_SCORE); spriteToShow = chinroutouSprite;
+            yakumanMultiplier += 1; Debug.Log("🎉 大三元です！");  spriteToShow = daisangenSprite;
         }
-        else if (KokushiChecker.IsKokushi(myHand))
+        if (SuuankouChecker.IsSuuankou(myHand))
         {
-            isYakuman = true; Debug.Log("🎉 国士無双です！"); scoreManager?.AddScore(YAKUMAN_SCORE); spriteToShow = kokushiSprite;
+            yakumanMultiplier += 1; Debug.Log("🎉 四暗刻です！");  spriteToShow = suuankouSprite;
         }
-        else if (DaisangenChecker.IsDaisangen(myHand))
+        if (ChuurenChecker.IsChuuren(myHand)) 
         {
-            isYakuman = true; Debug.Log("🎉 大三元です！"); scoreManager?.AddScore(YAKUMAN_SCORE); spriteToShow = daisangenSprite;
+            yakumanMultiplier += 1; Debug.Log("🎉 九蓮宝燈です！");  spriteToShow = chuurenSprite;
         }
-        else if (SuuankouChecker.IsSuuankou(myHand))
+        if (DaisushiChecker.IsDaisushi(myHand))
         {
-            isYakuman = true; Debug.Log("🎉 四暗刻です！"); scoreManager?.AddScore(YAKUMAN_SCORE); spriteToShow = suuankouSprite;
+            yakumanMultiplier += 2; Debug.Log("🎉 大四喜です！");  spriteToShow = daisushiSprite;
         }
-        else if (ChuurenChecker.IsChuuren(myHand)) 
+        else if (ShosushiChecker.IsShosushi(myHand))
         {
-            isYakuman = true; Debug.Log("🎉 九蓮宝燈です！"); scoreManager?.AddScore(YAKUMAN_SCORE); spriteToShow = chuurenSprite;
+            yakumanMultiplier += 1; Debug.Log("🎉 小四喜です！"); spriteToShow = shosushiSprite;
         }
-
         //役満ではない時
-        if (!isYakuman)
+        if (yakumanMultiplier == 0)
         {
             Debug.Log("役満ではありません。（他の役の判定は未実装です）");
             return;
         }
+
+        if(yakumanMultiplier ==2)
+        {
+            if(doubleYakumanSprite != null)
+            {
+                spriteToShow = doubleYakumanSprite;
+            }
+        }
+        else if(yakumanMultiplier >=3)
+        {
+            if(tripleYakumanSprite != null)
+            {
+                spriteToShow = tripleYakumanSprite;
+            }
+        }
+
+
+        int totalScore = SINGLE_YAKUMAN_SCORE * yakumanMultiplier;
+        Debug.Log($"役満合計: {yakumanMultiplier} 倍 / 合計得点: {totalScore}");
+        scoreManager?.AddScore(totalScore);
 
         Debug.Log($"現在のレース: {raceCount} / {RACE_LIMIT}");
         
