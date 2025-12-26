@@ -194,8 +194,9 @@ public class GameManager2 : MonoBehaviour
             (Suit.Honor, 5), (Suit.Honor, 5), (Suit.Honor, 5), 
             (Suit.Honor, 6), (Suit.Honor, 6), (Suit.Honor, 6), 
             (Suit.Honor, 7), (Suit.Honor, 7), (Suit.Honor, 7), 
-            (Suit.Pinzu, 2), (Suit.Pinzu, 2), (Suit.Pinzu, 2), 
-            (Suit.Pinzu, 4), (Suit.Pinzu, 4) 
+            
+            (Suit.Pinzu, 2), (Suit.Pinzu, 3), (Suit.Pinzu, 4),
+            (Suit.Souzu, 7), (Suit.Souzu, 7)
         };
         PassHandToManager(handData, "大三元");
     }
@@ -203,10 +204,11 @@ public class GameManager2 : MonoBehaviour
     {
         var handData = new List<(Suit suit, int rank)>
         {
-            (Suit.Manzu, 1), (Suit.Manzu, 1), (Suit.Manzu, 1), (Suit.Manzu, 1), 
-            (Suit.Pinzu, 5), (Suit.Pinzu, 5), (Suit.Pinzu, 5), (Suit.Pinzu, 5), 
-            (Suit.Souzu, 9), (Suit.Souzu, 9), (Suit.Souzu, 9), (Suit.Souzu, 9), 
-            (Suit.Honor, 1), (Suit.Honor, 1) 
+            (Suit.Manzu, 1), (Suit.Manzu, 1), (Suit.Manzu, 1), 
+            (Suit.Pinzu, 5), (Suit.Pinzu, 5), (Suit.Pinzu, 5), 
+            (Suit.Souzu, 9), (Suit.Souzu, 9), (Suit.Souzu, 9), 
+            (Suit.Honor, 2), (Suit.Honor, 2), (Suit.Honor, 2),
+            (Suit.Honor, 3), (Suit.Honor, 3)
         };
         PassHandToManager(handData, "四暗刻");
     }
@@ -255,11 +257,11 @@ public class GameManager2 : MonoBehaviour
     {
         var handData = new List<(Suit suit, int rank)>
         {
-            (Suit.Souzu, 2), (Suit.Souzu, 2), (Suit.Souzu, 2), 
-            (Suit.Souzu, 3), (Suit.Souzu, 4), (Suit.Souzu, 5), 
+            (Suit.Souzu, 2), (Suit.Souzu, 3), (Suit.Souzu, 4), 
             (Suit.Souzu, 6), (Suit.Souzu, 6), (Suit.Souzu, 6), 
             (Suit.Souzu, 8), (Suit.Souzu, 8), (Suit.Souzu, 8), 
-            (Suit.Honor, 6), (Suit.Honor, 6) // 發・發
+            (Suit.Honor, 6), (Suit.Honor, 6), (Suit.Honor, 6), 
+            (Suit.Souzu, 4), (Suit.Souzu, 4)
         };
         PassHandToManager(handData, "緑一色");
     }
@@ -268,11 +270,13 @@ public class GameManager2 : MonoBehaviour
     {
         var handData = new List<(Suit suit, int rank)>
         {
-            (Suit.Honor, 1), (Suit.Honor, 1), (Suit.Honor, 1), 
-            (Suit.Honor, 2), (Suit.Honor, 2), (Suit.Honor, 2), 
-            (Suit.Honor, 3), (Suit.Honor, 3), (Suit.Honor, 3), 
-            (Suit.Honor, 4), (Suit.Honor, 4), (Suit.Honor, 4), 
-            (Suit.Honor, 5), (Suit.Honor, 5) // 白
+            (Suit.Honor, 1), (Suit.Honor, 1), // 東
+            (Suit.Honor, 2), (Suit.Honor, 2), // 南
+            (Suit.Honor, 3), (Suit.Honor, 3), // 西
+            (Suit.Honor, 4), (Suit.Honor, 4), // 北
+            (Suit.Honor, 5), (Suit.Honor, 5), // 白
+            (Suit.Honor, 6), (Suit.Honor, 6), // 發
+            (Suit.Honor, 7), (Suit.Honor, 7)  // 中
         };
         PassHandToManager(handData, "字一色");
     }
@@ -298,7 +302,7 @@ public class GameManager2 : MonoBehaviour
             (Suit.Manzu, 2), (Suit.Manzu, 3), (Suit.Manzu, 4), 
             (Suit.Manzu, 5), (Suit.Manzu, 6), (Suit.Manzu, 7), 
             (Suit.Manzu, 8), (Suit.Manzu, 9), (Suit.Manzu, 9), 
-            (Suit.Manzu, 9), (Suit.Pinzu, 1) 
+            (Suit.Manzu, 9), (Suit.Manzu, 1) 
         };
         PassHandToManager(handData, "九蓮宝燈");
     }
