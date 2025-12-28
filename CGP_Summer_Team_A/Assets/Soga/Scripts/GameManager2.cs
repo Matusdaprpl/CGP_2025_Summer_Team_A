@@ -64,6 +64,11 @@ public class GameManager2 : MonoBehaviour
     public TMP_Text raceCountTMP;
     private bool raceCountHidden = false;
 
+    [Header("Player表示")]
+    public TMP_Text playerNameText;
+    private bool playerNameHidden = false;
+
+
     [Header("ランキング用データ")]
     public static int playerFinalScore = 10000;
     public static List<(string name, int score)> npcFinalScores = new List<(string name, int score)>();
@@ -588,6 +593,16 @@ public class GameManager2 : MonoBehaviour
         }
     }
 
+    private void HidePlayerNameUI()
+    {
+        if (playerNameHidden) return;
+        playerNameHidden = true;
+        if (playerNameText != null)
+        {
+            playerNameText.gameObject.SetActive(false);
+        }
+    }
+
     private IEnumerator WaitCountdownAndHideRaceCount()
     {
         while (playerMove == null)
@@ -602,6 +617,7 @@ public class GameManager2 : MonoBehaviour
         }
 
         HideRaceCountUI();
+        HidePlayerNameUI();
     }
 
     public static void SetNpcScore(string name, int score)
