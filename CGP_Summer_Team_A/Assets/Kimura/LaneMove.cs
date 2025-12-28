@@ -50,11 +50,14 @@ public class LaneMove : MonoBehaviour
 
     void Update()
     {
-        // カウントダウン中・Obstacle中はレーン変更を禁止
+        // カウントダウン中・Obstacle中・停止中はレーン変更を禁止
         bool canChangeLane = !isOnObstacle;
-        if (playerMove != null && playerMove.IsCountdownActive)
+        if (playerMove != null)
         {
-            canChangeLane = false;
+            if (playerMove.IsCountdownActive || playerMove.IsStopped)
+            {
+                canChangeLane = false;
+            }
         }
 
         if (canChangeLane)
