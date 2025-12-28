@@ -51,6 +51,7 @@ public class PlayerMove : MonoBehaviour
     private float remainingCountdownTime;
     private bool isCountdownActive = true;
     public bool IsCountdownActive => isCountdownActive;
+    public bool IsStopped => isStopped;
 
     // --- Obstacle関連 ---
     private bool isOnObstacle = false;
