@@ -16,13 +16,15 @@ public class GameManager2 : MonoBehaviour
     public PlayerMove playerMove;
     public AudioSource raceBGM;
     public AudioSource countdownSE;
-    
+
     [Tooltip("HierarchyのNPCオブジェクトにアタッチされているNPCplayerスクリプトをすべてここに設定します。")]
     public NPCplayer[] npcMoveScripts; 
 
     public Button agariButton; 
     public Shooter2D scoreManager; 
-    
+
+    private bool isGameStarted = false; // ★ カウントダウン終了フラグを追加
+
     [Header("テスト用配牌")]
     public bool forceDaisangenHand = false; 
     public bool forceKokushiHand = false;
@@ -170,6 +172,7 @@ public class GameManager2 : MonoBehaviour
         if (agariButton != null)
         {
             agariButton.onClick.AddListener(OnAgariButton);
+            agariButton.interactable = false; // ★ 初期状態では無効化
             Debug.Log("和了ボタンが設定されました。");
         }
         else
@@ -311,6 +314,13 @@ public class GameManager2 : MonoBehaviour
     // ====================================================================
     public void OnAgariButton()
     {
+        // ★ カウントダウン中は処理を行わない
+        if (!isGameStarted)
+        {
+            Debug.Log("カウントダウン中は和了できません。");
+            return;
+        }
+
         if (MahjongManager.instance == null)
         {
             Debug.LogError("MahjongManager.instance が null です。");
@@ -614,6 +624,14 @@ public class GameManager2 : MonoBehaviour
         while (playerMove != null && playerMove.IsCountdownActive)
         {
             yield return null;
+        }
+
+        // ★ カウントダウン終了後に和了ボタンを有効化
+        isGameStarted = true;
+        if (agariButton != null)
+        {
+            agariButton.interactable = true;
+            Debug.Log("カウントダウン終了。和了ボタンを有効化しました。");
         }
 
         HideRaceCountUI();
