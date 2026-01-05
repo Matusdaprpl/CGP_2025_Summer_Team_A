@@ -104,12 +104,16 @@ public class PlayerMove : MonoBehaviour
 
         if (boostParticles != null)
         {
+            // パーティクルをプレイヤーの子にして相対位置を設定
+            boostParticles.transform.SetParent(transform);
+            boostParticles.transform.localPosition = new Vector3(-0.6f, 0.43f, 0f);
+            
             var renderer = boostParticles.GetComponent<ParticleSystemRenderer>();
-            renderer.sortingLayerName = "Default";
-            renderer.sortingOrder = 5;
 
             var main = boostParticles.main;
             main.startColor = Color.yellow;
+
+            boostParticles.Stop();
         }
 
         if (playerRenderer == null)
@@ -123,7 +127,7 @@ public class PlayerMove : MonoBehaviour
             boostSlider.minValue = 0f;
             boostSlider.maxValue = 1f;
             boostSlider.value = 0f;
-            boostSlider.gameObject.SetActive(false); // カウントダウン中は非表示
+            boostSlider.gameObject.SetActive(false);
         }
     }
 
@@ -254,7 +258,6 @@ public class PlayerMove : MonoBehaviour
         // パーティクル制御
         if (boostParticles != null)
         {
-            boostParticles.transform.position = transform.position;
             // チャージ中（チャージ完了前）のみパーティクルを表示
             bool isCharging = !isBoostActive && chargeTime > 0f && chargeTime < requiredChargeTime && currentSpeed >= 15f;
             
