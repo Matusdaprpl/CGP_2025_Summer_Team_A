@@ -1,4 +1,5 @@
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
 using System.Collections; // IEnumerator用に必要
 using System.Collections.Generic; // List用に必要
@@ -17,8 +18,11 @@ public class PlayerMove : MonoBehaviour
     public float baseSpeed = 10f;
 
     [Header("チャージ設定")]
-    public float requiredChargeTime = 2f;
+    public float requiredChargeTime = 7f;
     private float chargeTime = 0f;
+    private bool isChargeFull = false;     // チャージが満タンになったか
+    private float chargeWaitTimer = 0f;   // 満タン後の1秒待機タイマー
+    private const float boostDelayTime = 0.5f;
 
     [Header("カウントダウン設定")]
     public float countdownTime = 3f;
@@ -32,11 +36,15 @@ public class PlayerMove : MonoBehaviour
     private AudioSource audioSource;
 
     [Header("ブースト設定")]
-    public float boostDuration = 3f; // ブースト時間
+    public float boostDuration = 5f; // ブースト時間
     public float boostSpeed = 20f;   // ブースト最大速度
     private bool isBoostAvailable = false;
     private bool isBoostActive = false;
     private float boostTimer = 0f;
+
+    [Header("UI設定（ゲージ）")]
+    public Slider boostSlider; 
+    public Image sliderFillImage;
 
     [Header("光る設定")]
     public ParticleSystem boostParticles;
@@ -109,15 +117,18 @@ public class PlayerMove : MonoBehaviour
 
         if (goalDistanceText != null)
             goalDistanceText.gameObject.SetActive(false);
+
+        if (boostSlider != null)
+        {
+            boostSlider.minValue = 0f;
+            boostSlider.maxValue = 1f;
+            boostSlider.value = 0f;
+            boostSlider.gameObject.SetActive(false); // カウントダウン中は非表示
+        }
     }
 
     void Update()
     {
-        if (!isCountdownActive)
-        {
-            UpdateGoalDistanceUI();
-        }
-
         if(isStopped) return;
         // --- カウントダウン ---
         if (isCountdownActive)
@@ -145,6 +156,12 @@ public class PlayerMove : MonoBehaviour
                 {
                     goalDistanceText.gameObject.SetActive(true);
                 }
+                
+                if (boostSlider != null)
+                {
+                    boostSlider.gameObject.SetActive(true);
+                }
+                
                 if (raceBGM != null) raceBGM.Play();
             }
             return;
@@ -154,18 +171,28 @@ public class PlayerMove : MonoBehaviour
         bool isBackwardKey = Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow);
 
         // --- チャージ処理 ---
-        if (!isBoostActive)
+        if (!isBoostActive && !isBoostAvailable)
         {
-            chargeTime += Time.deltaTime;
-            if (chargeTime >= requiredChargeTime)
-                isBoostAvailable = true;
-        }
-
-        // --- 速度10以上で加速キーを離した場合チャージリセット ---
-        if (currentSpeed > 10f && !isAccelerateKey)
-        {
-            chargeTime = 0f;
-            isBoostAvailable = false;
+            if (!isChargeFull)
+            {
+                if (currentSpeed >= 15f)
+                {
+                    chargeTime += Time.deltaTime;
+                    if (chargeTime >= requiredChargeTime)
+                    {
+                        isChargeFull = true;
+                        chargeWaitTimer = 0f; 
+                    }
+                }
+            }
+            else
+            {
+                chargeWaitTimer += Time.deltaTime;
+                if (chargeWaitTimer >= boostDelayTime)
+                {
+                    isBoostAvailable = true;
+                }
+            }
         }
 
         // --- ブースト開始 ---
@@ -174,6 +201,9 @@ public class PlayerMove : MonoBehaviour
             isBoostActive = true;
             boostTimer = 0f;
             isBoostAvailable = false;
+            isChargeFull = false;
+            chargeWaitTimer = 0f;
+            chargeTime = 0f;
         }
 
         // --- ブースト処理 ---
@@ -191,16 +221,12 @@ public class PlayerMove : MonoBehaviour
                 isBoostActive = false;
                 boostTimer = 0f;
                 targetSpeed = baseSpeed;
+                chargeTime = 0f;
             }
         }
         else
         {
-            // 通常加速
-            bool canAccelerate = true;
-            if (currentSpeed >= 10f && chargeTime < requiredChargeTime)
-                canAccelerate = false;
-
-            if (isAccelerateKey && canAccelerate)
+            if (isAccelerateKey)
                 targetSpeed += accel * Time.deltaTime;
             if (isBackwardKey)
                 targetSpeed -= decel * Time.deltaTime;
@@ -208,13 +234,12 @@ public class PlayerMove : MonoBehaviour
                 targetSpeed = Mathf.MoveTowards(targetSpeed, baseSpeed, smooth * Time.deltaTime);
         }
 
-        // 最大速度制限
         float currentMaxSpeed = isBoostActive ? boostSpeed :
             ((chargeTime >= requiredChargeTime) ? maxSpeedCharged : maxSpeed);
         targetSpeed = Mathf.Clamp(targetSpeed, 0f, currentMaxSpeed);
 
-        // 障害物制限
-        if (isOnObstacle)
+        // 障害物制限(ブースト中は無視)
+        if (isOnObstacle && !isBoostActive)
         {
             targetSpeed = Mathf.Clamp(targetSpeed, 0f, obstacleMaxSpeed);
             currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, obstacleSmooth * Time.deltaTime);
@@ -224,14 +249,16 @@ public class PlayerMove : MonoBehaviour
             currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, smooth * Time.deltaTime);
         }
 
-        // 移動
         transform.Translate(Vector2.right * currentSpeed * Time.deltaTime);
 
         // パーティクル制御
         if (boostParticles != null)
         {
             boostParticles.transform.position = transform.position;
-            if (isBoostAvailable || isBoostActive)
+            // チャージ中（チャージ完了前）のみパーティクルを表示
+            bool isCharging = !isBoostActive && chargeTime > 0f && chargeTime < requiredChargeTime && currentSpeed >= 15f;
+            
+            if (isCharging)
             {
                 if (!boostParticles.isPlaying) boostParticles.Play();
             }
@@ -244,10 +271,10 @@ public class PlayerMove : MonoBehaviour
         // --- 色変化処理 ---
         if (playerRenderer != null)
         {
-            if (currentSpeed > 10f)
+            if (isBoostActive)
             {
-                // 速度10超え → 激しい虹グラデーション
-                colorLerpT += Time.deltaTime * 3f; // 激しめ
+                // ブースト中のみ → 激しい虹グラデーション
+                colorLerpT += Time.deltaTime * 3f;
                 if (colorLerpT >= 1f)
                 {
                     colorLerpT = 0f;
@@ -260,13 +287,6 @@ public class PlayerMove : MonoBehaviour
                     colorLerpT
                 );
             }
-            else if (chargeTime >= requiredChargeTime && currentSpeed <= 10f)
-            {
-                // チャージ溜まって速度10以下 → 赤→黄のゆるめグラデーション
-                colorLerpT += Time.deltaTime * 1f; // ゆるめ
-                if (colorLerpT >= 1f) colorLerpT = 0f;
-                playerRenderer.color = Color.Lerp(Color.red, Color.yellow, colorLerpT);
-            }
             else
             {
                 // 通常色に戻す
@@ -274,6 +294,43 @@ public class PlayerMove : MonoBehaviour
                 colorLerpT = 0f;
                 currentColorIndex = 0;
             }
+        }
+
+        if (!isCountdownActive)
+        {
+            UpdateGoalDistanceUI();
+            UpdateBoostUI(); 
+        }
+    }
+
+    void UpdateBoostUI()
+    {
+        if (boostSlider == null) return;
+
+        if (isBoostActive)
+        {
+            float remainingRatio = 1f - Mathf.Clamp01(boostTimer / boostDuration);
+            boostSlider.value = remainingRatio;
+            
+            if (sliderFillImage != null) sliderFillImage.color = Color.darkOrange; 
+        }
+        else if (isBoostAvailable)
+        {
+            boostSlider.value = 1f;
+            // チャージ完了：ゲージをMAXにする
+            if (sliderFillImage != null) sliderFillImage.color = Color.yellow;
+        }
+        else if (isChargeFull)
+        {
+            boostSlider.value = 1f;
+        }
+        else
+        {
+            // チャージ中：チャージ率をゲージで表現（0から1へ増える）
+            float chargeRatio = Mathf.Clamp01(chargeTime / requiredChargeTime);
+            boostSlider.value = chargeRatio;
+
+            if (sliderFillImage != null) sliderFillImage.color = Color.yellow;
         }
     }
 
