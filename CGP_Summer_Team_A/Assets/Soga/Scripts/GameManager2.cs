@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Linq; 
@@ -23,7 +23,7 @@ public class GameManager2 : MonoBehaviour
     public Button agariButton; 
     public Shooter2D scoreManager; 
 
-    private bool isGameStarted = false; // ★ カウントダウン終了フラグを追加
+    private bool isGameStarted = false;
 
     [Header("テスト用配牌")]
     public bool forceDaisangenHand = false; 
@@ -317,7 +317,7 @@ public class GameManager2 : MonoBehaviour
         // ★ カウントダウン中は処理を行わない
         if (!isGameStarted)
         {
-            Debug.Log("カウントダウン中は和了できません。");
+            //Debug.Log("カウントダウン中は和了できません。");
             return;
         }
 
@@ -626,12 +626,11 @@ public class GameManager2 : MonoBehaviour
             yield return null;
         }
 
-        // ★ カウントダウン終了後に和了ボタンを有効化
         isGameStarted = true;
         if (agariButton != null)
         {
             agariButton.interactable = true;
-            Debug.Log("カウントダウン終了。和了ボタンを有効化しました。");
+            //Debug.Log("カウントダウン終了。和了ボタンを有効化しました。");
         }
 
         HideRaceCountUI();
