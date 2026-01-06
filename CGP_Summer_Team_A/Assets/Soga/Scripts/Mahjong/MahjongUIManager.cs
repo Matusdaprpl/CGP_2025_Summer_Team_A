@@ -53,7 +53,6 @@ public class MahjongUIManager : MonoBehaviour
 
     public void UpdateHandUI(List<Tile> playerHand)
     {
-        // 既存のUIオブジェクトを全て削除
         foreach (Transform child in handPanel)
         {
             Destroy(child.gameObject);
@@ -72,6 +71,7 @@ public class MahjongUIManager : MonoBehaviour
                 spacer.transform.SetParent(handPanel, false);
                 LayoutElement le = spacer.AddComponent<LayoutElement>();
                 le.preferredWidth = tsumoSpacerWidth;
+                le.flexibleWidth = 0f;
 
                 // プレハブの高さを取得して設定（レイアウトの崩れを防ぐため）
                 var prefabLayout = handTilePrefab.GetComponent<LayoutElement>();
