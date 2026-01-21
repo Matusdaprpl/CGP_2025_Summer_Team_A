@@ -7,8 +7,8 @@ public class ItemAdjuster : MonoBehaviour
     [SerializeField] private float adjustInterval = 5f; // 調整間隔（秒）
 
     [Header("生成間隔")]
-    [SerializeField] private float minSpawnInterval = 1.0f;
-    [SerializeField] private float maxSpawnInterval = 3.0f;
+    [SerializeField] private float minSpawnInterval = 0.1f; // より短く
+    [SerializeField] private float maxSpawnInterval = 0.3f; // より短く
 
     private float lastAdjustTime;
     private int itemsToSpawn = 0;
@@ -32,14 +32,9 @@ public class ItemAdjuster : MonoBehaviour
 
     private void AdjustItemsBasedOnCars()
     {
-        // 最も左と最も右の車のX座標を取得
         float leftmostCarX = GetLeftmostCarX();
-        float rightmostCarX = GetRightmostCarX();
-
-        // アイテムを取得
         GameObject[] allItems = GameObject.FindGameObjectsWithTag("Item");
         List<GameObject> itemsToRemove = new List<GameObject>();
-        int removedCount = 0;
 
         foreach (GameObject item in allItems)
         {
@@ -47,9 +42,7 @@ public class ItemAdjuster : MonoBehaviour
             if (itemX < leftmostCarX)
             {
                 itemsToRemove.Add(item);
-                removedCount++;
 
-                // 山に戻す（牌を山に追加）
                 ItemController ic = item.GetComponent<ItemController>();
                 if (ic != null && ic.GetTile() != null)
                 {
@@ -64,22 +57,25 @@ public class ItemAdjuster : MonoBehaviour
             Destroy(item);
         }
 
-        // 生成待ち数を追加（上限チェック）
-        int currentItemCount = GameObject.FindGameObjectsWithTag("Item").Length - itemsToRemove.Count; // 削除後の数
-        int maxToSpawn = ItemSpawner.MaxItemCount - currentItemCount;
-        itemsToSpawn += Mathf.Min(removedCount, maxToSpawn);
+        // 削除した分だけ即座に補充予約（上限なし）
+        itemsToSpawn += itemsToRemove.Count;
+        
+        Debug.Log($"アイテム削除: {itemsToRemove.Count}個 / 補充予約: {itemsToSpawn}個");
     }
 
     private void SpawnOneItem()
     {
         Vector2 newPosition = GetValidSpawnPosition();
-        ItemManager.instance.SpawnItemFromMountain(new Vector3(newPosition.x, newPosition.y, 0));
+        if (newPosition != Vector2.zero)
+        {
+            ItemManager.instance.SpawnItemFromMountain(new Vector3(newPosition.x, newPosition.y, 0));
+        }
     }
 
     private Vector2 GetValidSpawnPosition()
     {
         GameObject[] allItems = GameObject.FindGameObjectsWithTag("Item");
-        float minDistance = 1.0f; // ItemSpawner と同じ
+        float minDistance = 1.0f;
         int attempts = 0;
         const int maxAttempts = 100;
 
@@ -94,12 +90,10 @@ public class ItemAdjuster : MonoBehaviour
                 return Vector2.zero;
             }
 
-            if (IsTooClose(position, allItems, minDistance))
+            if (!IsTooClose(position, allItems, minDistance))
             {
-                continue;
+                return position;
             }
-
-            return position;
         }
         while (true);
     }
@@ -115,6 +109,7 @@ public class ItemAdjuster : MonoBehaviour
         }
         return false;
     }
+
     private float GetLeftmostCarX()
     {
         GameObject player = GameObject.FindWithTag("Player");
@@ -159,16 +154,19 @@ public class ItemAdjuster : MonoBehaviour
     {
         Camera cam = Camera.main;
         if (cam == null) return Vector2.zero;
+        
         Vector3 rightEdgeWorld = cam.ViewportToWorldPoint(new Vector3(1, 0.5f, cam.nearClipPlane));
         float cameraRightX = rightEdgeWorld.x;
 
         float newX = cameraRightX + Random.Range(5f, 15f);
-        ItemSpawner spawner= ItemSpawner.Instance;
+        ItemSpawner spawner = ItemSpawner.Instance;
+        
         if (spawner == null || spawner.FixedYValues == null || spawner.FixedYValues.Length == 0)
         {
             Debug.LogError("ItemSpawner または FixedYValues が見つかりません。");
             return new Vector2(newX, 0);
         }
+        
         float[] fixedYValues = spawner.FixedYValues;
         float newY = fixedYValues[Random.Range(0, fixedYValues.Length)];
         return new Vector2(newX, newY);
