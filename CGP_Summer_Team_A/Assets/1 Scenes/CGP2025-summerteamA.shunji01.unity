@@ -431,7 +431,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   minSpeed: 5
-  maxSpeed: 15
+  maxSpeed: 18
   speedChangeInterval: 3
   laneMoveSpeed: 5
   laneYs:
@@ -7681,6 +7681,7 @@ MonoBehaviour:
   shosushiSprite: {fileID: -8532050911287868223, guid: 33b5b59d559383742ad01257f89a2da4, type: 3}
   chuurenSprite: {fileID: -5934855215270247213, guid: 0abb0a48ae5d88644a9d3dbceb6d38c7, type: 3}
   goalSprite: {fileID: -8307759106210265128, guid: 97bff67bcf6979a44a5297aee5b671fd, type: 3}
+  ryuukyokuSprite: {fileID: -2513577031000059648, guid: e05b2037a490673458e9f121c5c4401a, type: 3}
   doubleYakumanSprite: {fileID: 1156913649789814674, guid: 2a9e71d2c9a77a040af427b83decaeef, type: 3}
   tripleYakumanSprite: {fileID: -4231872275540741342, guid: e576b80a094bea74ca9cc7f29d5128fb, type: 3}
   raceCountTMP: {fileID: 1142206159}
@@ -8549,7 +8550,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   minSpeed: 10
-  maxSpeed: 13
+  maxSpeed: 15
   speedChangeInterval: 3
   laneMoveSpeed: 5
   laneYs:
@@ -11231,7 +11232,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   minSpeed: 8
-  maxSpeed: 10
+  maxSpeed: 17
   speedChangeInterval: 3
   laneMoveSpeed: 5
   laneYs:
@@ -11818,7 +11819,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemCount: 80
   minX: 0
-  maxX: 5000
+  maxX: 3000
   fixedYValues:
   - -4.8
   - -3.3
@@ -11852,9 +11853,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ccbe040511387b5489719515e76871fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  adjustInterval: 5
-  minSpawnInterval: 1
-  maxSpawnInterval: 3
+  adjustInterval: 2
+  minSpawnInterval: 0.3
+  maxSpawnInterval: 0.8
 --- !u!1 &2120084829
 GameObject:
   m_ObjectHideFlags: 0
@@ -11920,8 +11921,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 1000, y: 1000}
+  m_AnchoredPosition: {x: 0, y: 53}
+  m_SizeDelta: {x: 900, y: 850}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2134405838
 MonoBehaviour:
@@ -11970,6 +11971,8 @@ SceneRoots:
   - {fileID: 423721863}
   - {fileID: 668795117}
   - {fileID: 1553428487}
+  - {fileID: 2118395339}
+  - {fileID: 1159338543}
   - {fileID: 2028741177}
   - {fileID: 886838034}
   - {fileID: 2064997988}
@@ -11977,8 +11980,6 @@ SceneRoots:
   - {fileID: 1262357939}
   - {fileID: 744697811}
   - {fileID: 1759939681}
-  - {fileID: 2118395339}
-  - {fileID: 1159338543}
   - {fileID: 1983959249}
   - {fileID: 911804200}
   - {fileID: 93837155}
