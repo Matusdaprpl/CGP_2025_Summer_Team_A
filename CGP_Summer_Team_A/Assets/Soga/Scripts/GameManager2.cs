@@ -16,6 +16,7 @@ public class GameManager2 : MonoBehaviour
     public PlayerMove playerMove;
     public AudioSource raceBGM;
     public AudioSource countdownSE;
+    public AudioSource goalSE;
 
     [Tooltip("HierarchyのNPCオブジェクトにアタッチされているNPCplayerスクリプトをすべてここに設定します。")]
     public NPCplayer[] npcMoveScripts; 
@@ -108,6 +109,7 @@ public class GameManager2 : MonoBehaviour
         }
         if (raceBGM == null) raceBGM = GameObject.Find("RaceBGM")?.GetComponent<AudioSource>();
         if (countdownSE == null) countdownSE = GameObject.Find("CountdownSE")?.GetComponent<AudioSource>();
+        if (goalSE == null) goalSE = GameObject.Find("GoalSE")?.GetComponent<AudioSource>();
 
         if (nextGameButton != null)
         {
@@ -560,6 +562,11 @@ public class GameManager2 : MonoBehaviour
         MahjongManager.instance.roundOver = true;
 
         Debug.Log($"{characterName}がゴールしました。流局です。");
+
+        if (goalSE != null)
+        {
+            goalSE.Play();
+        }
 
         if (goalImage != null && goalSprite != null)
         {
