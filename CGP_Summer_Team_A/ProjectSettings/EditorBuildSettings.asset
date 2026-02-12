@@ -9,11 +9,11 @@ EditorBuildSettings:
     path: Assets/1 Scenes/SampleScene.unity
     guid: 8c9cfa26abfee488c85f1582747f6a02
   - enabled: 1
-    path: Assets/1 Scenes/CGP2025-summerteamA.shunji01.unity
-    guid: 08eac79b7420a484e8d47dee9789f2da
-  - enabled: 1
     path: Assets/1 Scenes/Title.unity
     guid: a15adfcc5004f4d4298f8e978b32db7e
+  - enabled: 1
+    path: Assets/1 Scenes/CGP2025-summerteamA.shunji01.unity
+    guid: 08eac79b7420a484e8d47dee9789f2da
   - enabled: 1
     path: Assets/1 Scenes/Ranking.unity
     guid: 7119685e02cecc44c8a0f554c1816401
