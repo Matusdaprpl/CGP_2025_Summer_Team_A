@@ -4,7 +4,6 @@ using TMPro;
 using System.Collections.Generic;
 using System.Collections;
 using System.Linq;
-using NUnit.Framework;
 
 public class NPCplayer : MonoBehaviour
 {
@@ -14,6 +13,13 @@ public class NPCplayer : MonoBehaviour
 
     [Tooltip("NPCの最高速度")]
     public float maxSpeed = 5f;
+    
+    [Header("接戦調整")]
+    [Tooltip("プレイヤーとの距離に応じて速度を補正するか")]
+    public float rubberBandStrength = 0.3f;
+
+    [Tooltip("接戦補正の最大速度増加量")]
+    public float maxCatchUpSpeedUpBonus = 5.0f;
 
     [Header("挙動判定")]
     [Tooltip("速度を変更する間隔（秒）")]
@@ -69,6 +75,9 @@ public class NPCplayer : MonoBehaviour
     [Tooltip("弾の速度")]
     public float bulletSpeed = 10f;
 
+    [Tooltip("点棒の発射間隔（秒）")]
+    public float fireCooldown = 5f;
+
     [Tooltip("発射コスト")]
     public int fireCost = 1000;
 
@@ -85,7 +94,7 @@ public class NPCplayer : MonoBehaviour
     private Yakuman targetYakuman;
     public Yakuman TargetYakuman => targetYakuman;
     private Transform playerTransform;
-    private bool hasFired = false;
+    private float timeSinceLastFire;
     private bool isStopped = false;
     private float currentTargetLaneY;
 
@@ -103,10 +112,14 @@ public class NPCplayer : MonoBehaviour
 
     void Start()
     {
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player != null)
+        GameObject playerGameObject = GameObject.FindGameObjectWithTag("Player");
+        if (playerGameObject != null)
         {
-            playerTransform = player.transform;
+            playerTransform = playerGameObject.transform;
+        }
+        else
+        {
+            Debug.LogError("Playerタグの付いたゲームオブジェクトが見つかりません。");
         }
 
         var yakumanValues = System.Enum.GetValues(typeof(Yakuman));
@@ -120,6 +133,8 @@ public class NPCplayer : MonoBehaviour
         currentTargetLaneY = transform.position.y;
         currentTargetLaneY = laneYs.OrderBy(y => Mathf.Abs(y- currentTargetLaneY)).First();
 
+        timeSinceLastFire = fireCooldown;
+
         remainingCountdownTime = countdownTime;
         if (countdownText != null)
         {
@@ -132,19 +147,18 @@ public class NPCplayer : MonoBehaviour
     {
         if (isStopped) return;
 
+        timeSinceLastFire += Time.deltaTime;
+
         if(playerTransform!= null)
         {
             if(IsNpcCompletelyOffScreen())
             {
-                hasFired = false;
+                timeSinceLastFire = fireCooldown;
             }
-            else if (!hasFired && CanShootPlayer())
+            else if (CanShootPlayer() && timeSinceLastFire >= fireCooldown)
             {
-                if(CanShootPlayer())
-                {
-                    Shoot();
-                    hasFired = true;
-                }
+                Shoot();
+                timeSinceLastFire = 0f;
             }
         }
 
@@ -181,9 +195,12 @@ public class NPCplayer : MonoBehaviour
         {
             // 障害物上では速度を制限
             float maxSpeedLimit = isOnObstacle ? obstacleMaxSpeed : maxSpeed;
-            float limitedSpeed = Mathf.Min(currentSpeed, maxSpeedLimit);
-            
-            rb.linearVelocity = new Vector2(limitedSpeed, 0);
+            float finalSpeed = currentSpeed;
+            if(isOnObstacle)
+            {
+                finalSpeed = Mathf.Min(currentSpeed, maxSpeedLimit);
+            }   
+            rb.linearVelocity = new Vector2(finalSpeed, 0);
         }
 
         timeSinceLastChange += Time.fixedDeltaTime;
@@ -298,8 +315,20 @@ public class NPCplayer : MonoBehaviour
 
     void UpdateSpeed()
     {
+        if(playerTransform == null)
+        {
         currentSpeed = Random.Range(minSpeed, maxSpeed);
+        return;
+        }
+
+        float baseSpeed = Random.Range(minSpeed, maxSpeed);
+        float distanceToPlayer = playerTransform.position.x - transform.position.x;
+        float speedAdjustment = distanceToPlayer * rubberBandStrength;
+        speedAdjustment = Mathf.Clamp(speedAdjustment, 0, maxCatchUpSpeedUpBonus);
+        currentSpeed = baseSpeed + speedAdjustment;
+        currentSpeed = Mathf.Min(currentSpeed, minSpeed);
     }
+
 
     void HideCountdownText()
     {

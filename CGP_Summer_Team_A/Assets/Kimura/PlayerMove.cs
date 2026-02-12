@@ -33,6 +33,7 @@ public class PlayerMove : MonoBehaviour
     public AudioSource CountdownSE;
     public AudioClip countdownSE;
     public AudioClip itemGetSE;
+    public AudioClip bulletHitSE;
     private AudioSource audioSource;
 
     [Header("ブースト設定")]
@@ -348,6 +349,10 @@ public class PlayerMove : MonoBehaviour
         return currentSpeed;
     }
 
+    [Header("画面揺れ(点棒)")]
+    public float tenbouShakeDuration = 0.2f;
+    public float tenbouShakeMagnitude = 0.15f;
+
     private void OnTriggerEnter2D(Collider2D other)
     {
        ProcessHit(other.gameObject,other.tag);
@@ -389,8 +394,14 @@ public class PlayerMove : MonoBehaviour
                 return;
             }
 
+            if (audioSource != null && bulletHitSE != null)
+            {
+                audioSource.PlayOneShot(bulletHitSE);
+            }
+
             Debug.Log("プレイヤーが点棒に当たりました");
             StartCoroutine(HandleBulletHit());
+            TriggerCameraShake();
             Destroy(hitObject);
             return;
         }
@@ -483,6 +494,25 @@ public class PlayerMove : MonoBehaviour
         yield return new WaitForSeconds(stopTime);
 
         isStopped = false;
+    }
+
+    private void TriggerCameraShake()
+    {
+        CameraMove cameraMove = null;
+        if (Camera.main != null)
+        {
+            cameraMove = Camera.main.GetComponent<CameraMove>();
+        }
+
+        if (cameraMove == null)
+        {
+            cameraMove = FindFirstObjectByType<CameraMove>();
+        }
+
+        if (cameraMove != null)
+        {
+            cameraMove.Shake(tenbouShakeDuration, tenbouShakeMagnitude);
+        }
     }
 
     private void OnTriggerExit2D(Collider2D other)
