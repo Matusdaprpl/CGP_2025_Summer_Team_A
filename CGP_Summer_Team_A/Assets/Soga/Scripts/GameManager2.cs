@@ -17,6 +17,8 @@ public class GameManager2 : MonoBehaviour
     public AudioSource raceBGM;
     public AudioSource countdownSE;
     public AudioSource goalSE;
+    public AudioSource playerYakumanSE;  // プレイヤー役満SE
+    public AudioSource npcYakumanSE;     // NPC役満SE
 
     [Tooltip("HierarchyのNPCオブジェクトにアタッチされているNPCplayerスクリプトをすべてここに設定します。")]
     public NPCplayer[] npcMoveScripts; 
@@ -110,6 +112,8 @@ public class GameManager2 : MonoBehaviour
         if (raceBGM == null) raceBGM = GameObject.Find("RaceBGM")?.GetComponent<AudioSource>();
         if (countdownSE == null) countdownSE = GameObject.Find("CountdownSE")?.GetComponent<AudioSource>();
         if (goalSE == null) goalSE = GameObject.Find("GoalSE")?.GetComponent<AudioSource>();
+        if (playerYakumanSE == null) playerYakumanSE = GameObject.Find("PlayerYakumanSE")?.GetComponent<AudioSource>();
+        if (npcYakumanSE == null) npcYakumanSE = GameObject.Find("NpcYakumanSE")?.GetComponent<AudioSource>();
 
         if (nextGameButton != null)
         {
@@ -401,6 +405,12 @@ public class GameManager2 : MonoBehaviour
         Debug.Log($"役満合計: {yakumanMultiplier} 倍 / 合計得点: {totalScore}");
         scoreManager?.AddScore(totalScore);
 
+        // プレイヤー役満SE再生
+        if (playerYakumanSE != null)
+        {
+            playerYakumanSE.Play();
+        }
+
         Debug.Log($"現在のレース: {raceCount} / {RACE_LIMIT}");
         
         if (yakumanImage != null && spriteToShow != null)
@@ -519,6 +529,12 @@ public class GameManager2 : MonoBehaviour
     public void OnNpcWinResult()
     {
         Debug.Log($"NPC勝利。現在のレース: {raceCount} / {RACE_LIMIT}");
+
+        // NPC役満SE再生
+        if (npcYakumanSE != null)
+        {
+            npcYakumanSE.Play();
+        }
 
         if (raceCount >= RACE_LIMIT)
         {
