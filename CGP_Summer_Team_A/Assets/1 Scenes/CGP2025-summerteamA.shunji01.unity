@@ -8456,7 +8456,7 @@ MonoBehaviour:
   - {fileID: 93837152}
   agariButton: {fileID: 190110715}
   scoreManager: {fileID: 423721869}
-  forceDaisangenHand: 1
+  forceDaisangenHand: 0
   forceKokushiHand: 0
   forceDaisushiHand: 0
   forceChinroutouHand: 0
@@ -11826,7 +11826,7 @@ MonoBehaviour:
   handPanel: {fileID: 442571249}
   mountainCountText: {fileID: 0}
   playerHandCountText: {fileID: 0}
-  tsumoSpacerWidth: 100
+  tsumoSpacerWidth: 390
 --- !u!4 &1553428487
 Transform:
   m_ObjectHideFlags: 0
