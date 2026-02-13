@@ -41,6 +41,7 @@ public class GameManager2 : MonoBehaviour
     [Header("リザルト画面設定")]
     public GameObject ResultPanel; // 役満勝利時に表示するパネル
     public Image yakumanImage;
+    
     public GameObject ResultPanel3; // (流局/NPCゴール用と仮定)
     public Image goalImage; 
 
