@@ -12766,7 +12766,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   minSpeed: 8
-  maxSpeed: 17
+  maxSpeed: 16
   rubberBandStrength: 0.3
   maxCatchUpSpeedUpBonus: 5
   speedChangeInterval: 3
@@ -13360,6 +13360,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   itemCount: 80
+  targetWorldItemCount: 20
+  respawnInterval: 1.5
   minX: 0
   maxX: 3000
   fixedYValues:

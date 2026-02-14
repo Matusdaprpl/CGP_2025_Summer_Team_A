@@ -9,17 +9,17 @@ public class NPCplayer : MonoBehaviour
 {
     [Header("速度設定")]
     [Tooltip("NPCの最低速度")]
-    public float minSpeed = 2f;
+    public float minSpeed = 8f;
 
     [Tooltip("NPCの最高速度")]
-    public float maxSpeed = 5f;
+    public float maxSpeed = 14f;
     
     [Header("接戦調整")]
     [Tooltip("プレイヤーとの距離に応じて速度を補正するか")]
-    public float rubberBandStrength = 0.3f;
+    public float rubberBandStrength = 0.45f;
 
     [Tooltip("接戦補正の最大速度増加量")]
-    public float maxCatchUpSpeedUpBonus = 5.0f;
+    public float maxCatchUpSpeedUpBonus = 7.0f;
 
     [Header("挙動判定")]
     [Tooltip("速度を変更する間隔（秒）")]
@@ -326,7 +326,7 @@ public class NPCplayer : MonoBehaviour
         float speedAdjustment = distanceToPlayer * rubberBandStrength;
         speedAdjustment = Mathf.Clamp(speedAdjustment, 0, maxCatchUpSpeedUpBonus);
         currentSpeed = baseSpeed + speedAdjustment;
-        currentSpeed = Mathf.Min(currentSpeed, minSpeed);
+        currentSpeed = Mathf.Clamp(currentSpeed, minSpeed, maxSpeed + maxCatchUpSpeedUpBonus);
     }
 
 
