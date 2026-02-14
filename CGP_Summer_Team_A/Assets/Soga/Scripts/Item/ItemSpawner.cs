@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -5,6 +6,12 @@ using UnityEngine;
 public class ItemSpawner : MonoBehaviour
 {
     [SerializeField] private int itemCount = 10;
+
+    [Header("維持するアイテム数")]
+    [SerializeField] private int targetWorldItemCount = 20;
+
+    [Header("再配置間隔(秒)")]
+    [SerializeField] private float respawnInterval = 1.5f;
 
     [Header("X座標範囲")]
     [SerializeField] private float minX = -10f;
@@ -43,15 +50,47 @@ public class ItemSpawner : MonoBehaviour
             return;
         }
 
-        List<Vector2> spawnPositions = new List<Vector2>();
+        SpawnInitialItems();
+        StartCoroutine(RespawnLoop());
+    }
+
+    private void SpawnInitialItems()
+    {
+        List<Vector2> spawnPositions = GetExistingItemPositions();
 
         for (int i = 0; i < itemCount; i++)
         {
             Vector2 spawnPosition = GetValidSpawnPosition(spawnPositions);
             if (spawnPosition == Vector2.zero) continue; // 失敗時はスキップ
 
-            ItemManager.instance.SpawnItemFromMountain(new Vector3(spawnPosition.x, spawnPosition.y, 0));
+            ItemManager.instance.SpawnItemFromRecycleOrMountain(new Vector3(spawnPosition.x, spawnPosition.y, 0));
             spawnPositions.Add(spawnPosition);
+        }
+    }
+
+    private System.Collections.IEnumerator RespawnLoop()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(respawnInterval);
+
+            if (ItemManager.instance == null) continue;
+
+            int deficit = targetWorldItemCount - ItemManager.instance.ActiveWorldItemCount;
+            if (deficit <= 0) continue;
+
+            List<Vector2> spawnPositions = GetExistingItemPositions();
+            for (int i = 0; i < deficit; i++)
+            {
+                Vector2 spawnPosition = GetValidSpawnPosition(spawnPositions);
+                if (spawnPosition == Vector2.zero) continue;
+
+                var spawned = ItemManager.instance.SpawnItemFromRecycleOrMountain(new Vector3(spawnPosition.x, spawnPosition.y, 0));
+                if (spawned != null)
+                {
+                    spawnPositions.Add(spawnPosition);
+                }
+            }
         }
     }
 
@@ -91,5 +130,16 @@ public class ItemSpawner : MonoBehaviour
             }
         }
         return false;
+    }
+
+    private List<Vector2> GetExistingItemPositions()
+    {
+        List<Vector2> positions = new List<Vector2>();
+        var items = GameObject.FindGameObjectsWithTag("Item");
+        foreach (var item in items)
+        {
+            positions.Add(item.transform.position);
+        }
+        return positions;
     }
 }
