@@ -21,6 +21,12 @@ public class NPCplayer : MonoBehaviour
     [Tooltip("接戦補正の最大速度増加量")]
     public float maxCatchUpSpeedUpBonus = 7.0f;
 
+    [Tooltip("接戦補正の最大速度減少量")]
+    public float maxSlowDownPenalty = 6.0f;
+
+    [Tooltip("補正に使う距離の上限")]
+    public float maxRubberBandDistance = 25f;
+
     [Header("挙動判定")]
     [Tooltip("速度を変更する間隔（秒）")]
     public float speedChangeInterval = 3f;
@@ -76,7 +82,7 @@ public class NPCplayer : MonoBehaviour
     public float bulletSpeed = 10f;
 
     [Tooltip("点棒の発射間隔（秒）")]
-    public float fireCooldown = 5f;
+    public float fireCooldown = 40f;
 
     [Tooltip("発射コスト")]
     public int fireCost = 1000;
@@ -323,10 +329,11 @@ public class NPCplayer : MonoBehaviour
 
         float baseSpeed = Random.Range(minSpeed, maxSpeed);
         float distanceToPlayer = playerTransform.position.x - transform.position.x;
-        float speedAdjustment = distanceToPlayer * rubberBandStrength;
-        speedAdjustment = Mathf.Clamp(speedAdjustment, 0, maxCatchUpSpeedUpBonus);
+        float clampedDistance = Mathf.Clamp(distanceToPlayer, -maxRubberBandDistance, maxRubberBandDistance);
+        float speedAdjustment = clampedDistance * rubberBandStrength;
+        speedAdjustment = Mathf.Clamp(speedAdjustment, -maxSlowDownPenalty, maxCatchUpSpeedUpBonus);
         currentSpeed = baseSpeed + speedAdjustment;
-        currentSpeed = Mathf.Clamp(currentSpeed, minSpeed, maxSpeed + maxCatchUpSpeedUpBonus);
+        currentSpeed = Mathf.Clamp(currentSpeed, minSpeed - maxSlowDownPenalty, maxSpeed + maxCatchUpSpeedUpBonus);
     }
 
 
@@ -540,6 +547,12 @@ public class NPCplayer : MonoBehaviour
     }
     private void Shoot()
     {
+        if (currentScore < fireCost)
+        {
+            //Debug.Log($"{gameObject.name} はスコア不足のため点棒を発射できません (必要: {fireCost}, 現在: {currentScore})");
+            return;
+        }
+
         if (bulletPrefab == null || firePoint == null)
         {
             Debug.LogError("点棒のプレハブまたは射出ポイントが設定されていません。");
@@ -600,7 +613,7 @@ public class NPCplayer : MonoBehaviour
 
     public void SubtractScore(int amount)
     {
-        currentScore -= amount;
+        currentScore = Mathf.Max(0, currentScore - amount);
         Debug.Log($"{gameObject.name}のスコア: {currentScore} (減少: {amount})");
         GameManager2.SetNpcScore(gameObject.name, currentScore);
     }

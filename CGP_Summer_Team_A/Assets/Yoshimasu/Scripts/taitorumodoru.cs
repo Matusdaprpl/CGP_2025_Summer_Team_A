@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 
 public class taitorumodoru : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    //ランキングに戻るためのスクリプト（元タイトル戻るボタン）
     public void OnClick()
     {
         SceneManager.LoadScene("title");
