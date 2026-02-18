@@ -27,6 +27,7 @@ public class GameManager2 : MonoBehaviour
     public Shooter2D scoreManager; 
 
     private bool isGameStarted = false;
+    private bool hasYakuman = false; // 役満が完成しているかどうか
 
     [Header("テスト用配牌")]
     public bool forceDaisangenHand = false; 
@@ -383,6 +384,9 @@ public class GameManager2 : MonoBehaviour
             return;
         }
 
+        // 複数役満は無効化（1倍として扱う）
+        yakumanMultiplier = 1;
+
         if (!isDaisushi)
         {
             if (yakumanMultiplier >= 3)
@@ -653,12 +657,51 @@ public class GameManager2 : MonoBehaviour
         isGameStarted = true;
         if (agariButton != null)
         {
-            agariButton.interactable = true;
-            //Debug.Log("カウントダウン終了。和了ボタンを有効化しました。");
+            agariButton.interactable = false; 
+            //Debug.Log("カウントダウン終了。役完成まで和了ボタンは無効です。");
         }
 
         HideRaceCountUI();
         HidePlayerNameUI();
+    }
+
+    void Update()
+    {
+        // ゲーム開始後、役満が完成しているかを毎フレーム確認
+        if (isGameStarted && !hasYakuman && MahjongManager.instance != null)
+        {
+            CheckYakumanCompletion();
+        }
+    }
+
+    // 役満が完成しているかを確認し、完成していれば和了ボタンを有効化
+    private void CheckYakumanCompletion()
+    {
+        var myHand = new List<Tile>(MahjongManager.instance.playerHand);
+        bool isYakumanComplete = false;
+
+        // 各種役満の判定
+        if (TsuisoChecker.IsTsuiso(myHand) ||
+            RyuuisoChecker.IsRyuuiso(myHand) ||
+            ChinroutouChecker.IsChinroutou(myHand) ||
+            KokushiChecker.IsKokushi(myHand) ||
+            DaisangenChecker.IsDaisangen(myHand) ||
+            ChuurenChecker.IsChuuren(myHand) ||
+            DaisushiChecker.IsDaisushi(myHand) ||
+            ShosushiChecker.IsShosushi(myHand))
+        {
+            isYakumanComplete = true;
+        }
+
+        if (isYakumanComplete && !hasYakuman)
+        {
+            hasYakuman = true;
+            if (agariButton != null)
+            {
+                agariButton.interactable = true;
+                Debug.Log("役満が完成しました！和了ボタンを有効化しました。");
+            }
+        }
     }
 
     public static void SetNpcScore(string name, int score)

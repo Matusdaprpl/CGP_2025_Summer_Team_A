@@ -20,7 +20,7 @@ public class RuleViewer : MonoBehaviour
 
     public void OpenRule()
     {
-        Debug.Log("ボタンが押されました！");
+        //Debug.Log("ボタンが押されました！");
         
         if (rulePanel == null) return;
         

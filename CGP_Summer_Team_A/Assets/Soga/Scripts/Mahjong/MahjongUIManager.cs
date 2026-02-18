@@ -32,6 +32,41 @@ public class MahjongUIManager : MonoBehaviour
     void Start()
     {
         LoadTileSprites();
+        StartCoroutine(SetHandPanelPositionDelayed());
+    }
+
+    private System.Collections.IEnumerator SetHandPanelPositionDelayed()
+    {
+        // 1フレーム待ってから実行（Canvas等の初期化を待つ）
+        yield return null;
+        
+        if (handPanel != null)
+        {
+            RectTransform rt = handPanel.GetComponent<RectTransform>();
+            if (rt != null)
+            {
+                // 親のLayout Groupの影響を無効化
+                LayoutElement layoutElement = handPanel.GetComponent<LayoutElement>();
+                if (layoutElement == null)
+                {
+                    layoutElement = handPanel.gameObject.AddComponent<LayoutElement>();
+                }
+                layoutElement.ignoreLayout = true;
+                
+                // アンカーを画面左下に設定
+                rt.anchorMin = new Vector2(0f, 0f);
+                rt.anchorMax = new Vector2(0f, 0f);
+                rt.pivot = new Vector2(0f, 0f);
+                
+                // 位置を左下に設定
+                rt.anchoredPosition = new Vector2(0f, 0f);
+                
+                // サイズを明示的に設定
+                rt.sizeDelta = new Vector2(1000f, 150f);
+                
+                Debug.Log("handPanel位置を設定しました: " + rt.anchoredPosition);
+            }
+        }
     }
 
     private void LoadTileSprites()
