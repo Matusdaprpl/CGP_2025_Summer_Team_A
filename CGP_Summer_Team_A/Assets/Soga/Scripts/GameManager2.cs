@@ -426,25 +426,17 @@ public class GameManager2 : MonoBehaviour
 
         GameOver();
 
-        // 4. リザルト画面を表示し、ボタンを動的に切り替える
+        // 4. リザルト画面を表示し、3秒後にランキングシーンに移行
         if (ResultPanel != null)
         {
             // リザルトパネルを表示
-            ResultPanel.SetActive(true); 
-
-            if (raceCount >= RACE_LIMIT)
-            {
-                //タイトルへ戻るボタンを表示
-                Debug.Log($"4レース終了。タイトルへ戻るボタンを表示します。");
-                if (nextGameButton != null) nextGameButton.gameObject.SetActive(false);
-                if (backToTitleButton != null) backToTitleButton.gameObject.SetActive(true);
-            }
-            else 
-            {
-                Debug.Log("次のゲームへ進むボタンを表示します。");
-                if (nextGameButton != null) nextGameButton.gameObject.SetActive(true);
-                if (backToTitleButton != null) backToTitleButton.gameObject.SetActive(false);
-            }
+            ResultPanel.SetActive(true);
+            
+            // NPCスコアを保存してから遷移
+            SaveNpcScoresAcrossRaces();
+            
+            // 3秒後にランキングシーンに移行
+            StartCoroutine(WaitAndTransitionToRanking(3f));
         }
         else 
         {
@@ -460,10 +452,8 @@ public class GameManager2 : MonoBehaviour
         {
             ResultPanel.SetActive(false);
         }
-        // 次レース開始前にNPCスコアを保存
-        SaveNpcScoresAcrossRaces();
 
-        Debug.Log($"次のゲームに進みます。現在のレース: {raceCount}");
+        //Debug.Log($"次のゲームに進みます。現在のレース: {raceCount}");
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
     public void OnBackToTitleButton()  //ランキングに移行するように変更
@@ -471,7 +461,7 @@ public class GameManager2 : MonoBehaviour
         // 最新のスコアを収集
         CollectFinalScores();
         
-        Debug.Log($"ランキングへ移行します。Player最終スコア: {playerFinalScore}");
+        //Debug.Log($"ランキングへ移行します。Player最終スコア: {playerFinalScore}");
 
         SceneManager.LoadScene("Ranking");
     }
@@ -541,40 +531,22 @@ public class GameManager2 : MonoBehaviour
             npcYakumanSE.Play();
         }
 
-        if (raceCount >= RACE_LIMIT)
-        {
-            // タイトルへ戻るボタンを表示
-            Debug.Log($"{RACE_LIMIT}レース終了。タイトルへ戻るボタンを表示します。");
-            if (nextGameButton2 != null) nextGameButton2.gameObject.SetActive(false);
-            if (backToTitleButton2 != null) backToTitleButton2.gameObject.SetActive(true);
-        }
-        else 
-        {
-            // 次のゲームへ進むボタンを表示
-            Debug.Log("次のゲームへ進むボタンを表示します。");
-            if (nextGameButton2 != null) nextGameButton2.gameObject.SetActive(true);
-            if (backToTitleButton2 != null) backToTitleButton2.gameObject.SetActive(false);
-        }
+        // NPCスコアを保存してから遷移
+        SaveNpcScoresAcrossRaces();
+        
+        // 3秒後にランキングシーンに移行
+        StartCoroutine(WaitAndTransitionToRanking(3f));
     }
 
     public void OnGoalResult()
     {
         Debug.Log($"流局。現在のレース: {raceCount} / {RACE_LIMIT}");
 
-        if (raceCount >= RACE_LIMIT)
-        {
-            // タイトルへ戻るボタンを表示
-            Debug.Log($"{RACE_LIMIT}レース終了。タイトルへ戻るボタンを表示します。");
-            if (nextGameButton2 != null) nextGameButton2.gameObject.SetActive(false);
-            if (backToTitleButton2 != null) backToTitleButton2.gameObject.SetActive(true);
-        }
-        else 
-        {
-            // 次のゲームへ進むボタンを表示
-            Debug.Log("次のゲームへ進むボタンを表示します。");
-            if (nextGameButton2 != null) nextGameButton2.gameObject.SetActive(true);
-            if (backToTitleButton2 != null) backToTitleButton2.gameObject.SetActive(false);
-        }
+        // NPCスコアを保存してから遷移
+        SaveNpcScoresAcrossRaces();
+        
+        // 3秒後にランキングシーンに移行
+        StartCoroutine(WaitAndTransitionToRanking(3f));
     }
 
     public void OnGoal(string characterName)
@@ -665,6 +637,19 @@ public class GameManager2 : MonoBehaviour
         HidePlayerNameUI();
     }
 
+    // レース終了後、ランキング画面に遷移するまで待つ
+    private IEnumerator WaitAndTransitionToRanking(float waitTime)
+    {
+        yield return new WaitForSeconds(waitTime);
+
+        // 最新のスコアを収集
+        CollectFinalScores();
+        
+        Debug.Log($"ランキングへ移行します。Player最終スコア: {playerFinalScore}");
+
+        SceneManager.LoadScene("Ranking");
+    }
+
     void Update()
     {
         // ゲーム開始後、役満が完成しているかを毎フレーム確認
@@ -750,7 +735,6 @@ public class GameManager2 : MonoBehaviour
     public static void ClearNpcPersistentScores()
     {
         npcPersistentScores.Clear();
-        Debug.Log("NPCスコア永続辞書をクリアしました。");
     }
 
     private void CollectFinalScores()
