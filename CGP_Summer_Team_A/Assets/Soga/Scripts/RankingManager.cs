@@ -10,22 +10,54 @@ public class RankingManager : MonoBehaviour
     [Header("設定")]
     public Transform rankingContent;
     public GameObject rankingItemPrefab; 
-    public Button backToTitleButton;    
+    public Button nextRaceButton;        // 次のレースへ進むボタン
+    public Button backToTitleButton;    // タイトルへ戻るボタン
     public string titleSceneName = "TitleScene";
+    public string gameSceneName = "CGP2025-summerteamA.shunji01";  // ゲームシーン名
+    
+    private bool isFinalRound = false;  // 最終ラウンドかどうか
 
     void Start()
     {
+        // 最終ラウンドかどうかを判定（4レース終了時）
+        isFinalRound = (GameManager2.raceCount >= 4);
+
         DisplayRanking();
+
+        // 次のレースボタンの設定
+        if (nextRaceButton != null)
+        {
+            if (isFinalRound)
+            {
+                nextRaceButton.gameObject.SetActive(false);
+            }
+            else
+            {
+                nextRaceButton.onClick.AddListener(OnNextRaceButton);
+                nextRaceButton.gameObject.SetActive(true);
+            }
+        }
+
+        // タイトルへ戻るボタンの設定
         if (backToTitleButton != null)
-        {backToTitleButton.onClick.AddListener(() => 
+        {
+            backToTitleButton.onClick.AddListener(() => 
             {
                 GameManager2.ClearNpcPersistentScores();
-                
                 GameManager2.raceCount = 0;
                 Shooter2D.score = 10000;
                 
                 SceneManager.LoadScene(titleSceneName);
             });
+            
+            if (isFinalRound)
+            {
+                backToTitleButton.gameObject.SetActive(true);
+            }
+            else
+            {
+                backToTitleButton.gameObject.SetActive(false);
+            }
         }
     }
 
@@ -69,5 +101,12 @@ public class RankingManager : MonoBehaviour
             nText.color = Color.black;
             sText.color = Color.blue;
         }
+    }
+
+    // 次のレースへ進む
+    private void OnNextRaceButton()
+    {
+        Debug.Log($"レース {GameManager2.raceCount} 終了。次のゲームに進みます。");
+        SceneManager.LoadScene(gameSceneName);
     }
 }

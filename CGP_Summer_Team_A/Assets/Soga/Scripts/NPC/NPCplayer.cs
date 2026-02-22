@@ -163,8 +163,10 @@ public class NPCplayer : MonoBehaviour
             }
             else if (CanShootPlayer() && timeSinceLastFire >= fireCooldown)
             {
-                Shoot();
-                timeSinceLastFire = 0f;
+                if (Shoot())
+                {
+                    timeSinceLastFire = 0f;
+                }
             }
         }
 
@@ -545,18 +547,18 @@ public class NPCplayer : MonoBehaviour
 
         return isNpcVisible && isInFront && isPlayerOnScreen && isSameLane;
     }
-    private void Shoot()
+    private bool Shoot()
     {
         if (currentScore < fireCost)
         {
             //Debug.Log($"{gameObject.name} はスコア不足のため点棒を発射できません (必要: {fireCost}, 現在: {currentScore})");
-            return;
+            return false;
         }
 
         if (bulletPrefab == null || firePoint == null)
         {
             Debug.LogError("点棒のプレハブまたは射出ポイントが設定されていません。");
-            return;
+            return false;
         }
 
         GameObject bullet = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
@@ -587,6 +589,8 @@ public class NPCplayer : MonoBehaviour
         SubtractScore(fireCost);
 
         Destroy(bullet, 3f);
+        
+        return true;
     }
 
     private bool IsNpcCompletelyOffScreen()
