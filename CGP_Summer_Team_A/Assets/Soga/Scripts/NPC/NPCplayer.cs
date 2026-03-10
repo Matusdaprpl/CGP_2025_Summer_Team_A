@@ -88,7 +88,7 @@ public class NPCplayer : MonoBehaviour
     public int fireCost = 1000;
 
     [Header("スコア管理")]
-    private int currentScore = 10000; // NPCの初期スコア
+    private int currentScore = 15000; // NPCの初期スコア
 
     private Rigidbody2D rb;
     private float currentSpeed;
@@ -100,6 +100,7 @@ public class NPCplayer : MonoBehaviour
     private Yakuman targetYakuman;
     public Yakuman TargetYakuman => targetYakuman;
     private Transform playerTransform;
+    private PlayerMove playerMove;
     private float timeSinceLastFire;
     private bool isStopped = false;
     private float currentTargetLaneY;
@@ -122,6 +123,7 @@ public class NPCplayer : MonoBehaviour
         if (playerGameObject != null)
         {
             playerTransform = playerGameObject.transform;
+            playerMove = playerGameObject.GetComponent<PlayerMove>();
         }
         else
         {
@@ -360,6 +362,19 @@ public class NPCplayer : MonoBehaviour
 
         if (other.CompareTag("Bullet"))
         {
+            Bullet2DController bullet = other.GetComponent<Bullet2DController>();
+            if (bullet != null && GameManager2.instance != null)
+            {
+                if (bullet.shooter == Bullet2DController.ShooterType.Player)
+                {
+                    GameManager2.instance.QueueNpcToPlayer(this, bullet.transferPoints);
+                }
+                else if (bullet.shooterNpc != null && bullet.shooterNpc != this)
+                {
+                    GameManager2.instance.QueueNpcToNpc(this, bullet.shooterNpc, bullet.transferPoints);
+                }
+            }
+
             Debug.Log($"{gameObject.name}が点棒に当たりました。");
             StartCoroutine(HandleTenbouHit());
             Destroy(other.gameObject);
@@ -531,6 +546,11 @@ public class NPCplayer : MonoBehaviour
 
     private bool CanShootPlayer()
     {
+        if(playerMove != null && playerMove.IsStopped)
+        {
+            return false;
+        }
+        
         bool isNpcVisible = IsNpcOnScreen();
 
         bool isInFront = playerTransform.position.x > transform.position.x;
@@ -567,6 +587,8 @@ public class NPCplayer : MonoBehaviour
         if(bc != null)
         {
             bc.shooter = Bullet2DController.ShooterType.NPC;
+            bc.shooterNpc = this;
+            bc.transferPoints = fireCost;
         }
 
         Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();

@@ -26,6 +26,8 @@ public class GameManager2 : MonoBehaviour
     public Button agariButton; 
     public Shooter2D scoreManager; 
 
+    public static GameManager2 instance;
+
     private bool isGameStarted = false;
     private bool hasYakuman = false; // 役満が完成しているかどうか
 
@@ -77,7 +79,7 @@ public class GameManager2 : MonoBehaviour
 
 
     [Header("ランキング用データ")]
-    public static int playerFinalScore = 10000;
+    public static int playerFinalScore = 15000;
     public static List<(string name, int score)> npcFinalScores = new List<(string name, int score)>();
 
     public static Dictionary<string, int> npcPersistentScores = new Dictionary<string, int>();
@@ -86,8 +88,13 @@ public class GameManager2 : MonoBehaviour
     static void InitializeRaceCount()
     {
         raceCount = 0;
-        Shooter2D.score = 10000;
+        Shooter2D.score = 15000;
         npcPersistentScores.Clear();
+    }
+
+    void Awake()
+    {
+        instance = this;
     }
     void Start()
     {
@@ -97,6 +104,8 @@ public class GameManager2 : MonoBehaviour
     IEnumerator InitializeAfterFrames()
     {
         yield return null;
+
+        ResetPendingTransfers();
 
         raceCount++;
         Debug.Log($"現在のレース: {raceCount} / {RACE_LIMIT}");
@@ -335,7 +344,7 @@ public class GameManager2 : MonoBehaviour
             return;
         }
 
-        const int SINGLE_YAKUMAN_SCORE = 32000;
+        //const int SINGLE_YAKUMAN_SCORE = 32000;
         var myHand = new List<Tile>(MahjongManager.instance.playerHand);
 
         int yakumanMultiplier  = 0;
@@ -405,10 +414,25 @@ public class GameManager2 : MonoBehaviour
             }
         }
 
+        int baseWinScore = 30000;
+        int baseLoseScore = 10000;
 
-        int totalScore = SINGLE_YAKUMAN_SCORE * yakumanMultiplier;
-        Debug.Log($"役満合計: {yakumanMultiplier} 倍 / 合計得点: {totalScore}");
+        int totalScore = baseWinScore * yakumanMultiplier;
+        int loseScore = baseLoseScore * yakumanMultiplier;
+        //Debug.Log($"役満合計: {yakumanMultiplier} 倍 / 合計得点: {totalScore}");
         scoreManager?.AddScore(totalScore);
+
+        if(npcMoveScripts != null)
+        {
+            foreach (var npc in npcMoveScripts)
+            {
+                if (npc != null)
+                {
+                    int currentNpcScore = npc.score();
+                    npc.SetScore(currentNpcScore -loseScore);
+                }
+            }
+        }
 
         // プレイヤー役満SE再生
         if (playerYakumanSE != null)
@@ -425,6 +449,8 @@ public class GameManager2 : MonoBehaviour
         }
 
         GameOver();
+
+        ApplyPendingTransfersAtRaceEnd();
 
         // 4. リザルト画面を表示し、3秒後にランキングシーンに移行
         if (ResultPanel != null)
@@ -521,9 +547,39 @@ public class GameManager2 : MonoBehaviour
         }
     }
 
-    public void OnNpcWinResult()
+    public void OnNpcWinResult(string winnerNpcName)
     {
         Debug.Log($"NPC勝利。現在のレース: {raceCount} / {RACE_LIMIT}");
+
+        ApplyPendingTransfersAtRaceEnd();
+
+        const int loseScore = 10000;
+        const int winnerGain = 30000;
+
+        Shooter2D.score = Mathf.Max(0, Shooter2D.score - loseScore);
+
+        NPCplayer winnerNpc = null;
+        if (npcMoveScripts != null)
+        {
+            foreach (var npc in npcMoveScripts)
+            {
+                if (npc == null) continue;
+
+                if (npc.gameObject.name == winnerNpcName)
+                {
+                    winnerNpc = npc;
+                }
+                else
+                {
+                    npc.SubtractScore(loseScore);
+                }
+            }
+        }
+
+        if (winnerNpc != null)
+        {
+            winnerNpc.AddScore(winnerGain);
+        }
 
         // NPC役満SE再生
         if (npcYakumanSE != null)
@@ -541,6 +597,8 @@ public class GameManager2 : MonoBehaviour
     public void OnGoalResult()
     {
         Debug.Log($"流局。現在のレース: {raceCount} / {RACE_LIMIT}");
+
+        ApplyPendingTransfersAtRaceEnd();
 
         // NPCスコアを保存してから遷移
         SaveNpcScoresAcrossRaces();
@@ -726,8 +784,8 @@ public class GameManager2 : MonoBehaviour
             }
             else
             {
-                npc.SetScore(10000); 
-                SetNpcScore(name, 10000);
+                npc.SetScore(15000); 
+                SetNpcScore(name, 15000);
             }
         }
     }
@@ -759,5 +817,139 @@ public class GameManager2 : MonoBehaviour
         
         Debug.Log($"最終スコア - Player: {playerFinalScore}点");
     }
+    
+    public int SpendPlayerScore(int amount)
+    {
+        int current = Mathf.Max(0, Shooter2D.score);
+        int acutual = Mathf.Min(Mathf.Max(0,amount),current);
+        Shooter2D.score = current - acutual;
+        return acutual;
+    }
 
+    public void AddPlayerScore(int amount)
+    {
+        Shooter2D.score = Mathf.Max(0,Shooter2D.score + Mathf.Max(0,amount));
+    }
+
+    public int TransferPlayerToNpc(NPCplayer payeeNpc,int requested)
+    {
+        if(payeeNpc == null) return 0;
+        int actual =SpendPlayerScore(requested);
+        payeeNpc.AddScore(actual);
+        return actual;
+    }
+    
+    public int TransferNpcToPlayer(NPCplayer payerNpc, int requested)
+    {
+        if(payerNpc == null)return 0;
+        int actual = Mathf.Min(Mathf.Max(0,requested),Mathf.Max(0,payerNpc.score()));
+        payerNpc.SubtractScore(actual);
+        AddPlayerScore(actual);
+        return actual;
+    }
+    public int TransferNpcToNpc(NPCplayer payerNpc,NPCplayer payeeNpc,int requested)
+    {
+        if(payerNpc ==null||payeeNpc ==null||payerNpc == payeeNpc) return 0;
+        int actual = Mathf.Min(Mathf.Max(0,requested),Mathf.Max(0,payerNpc.score()));
+        payerNpc.SubtractScore(actual);
+        payeeNpc.AddScore(actual);
+        return actual;
+    }
+
+    private int pendingPlayerDelta = 0;
+    private readonly Dictionary<string,int> pendingNpcDelta = new Dictionary<string, int>();
+    private bool raceSettlementApplied = false;
+
+    private void ResetPendingTransfers()
+    {
+        pendingPlayerDelta = 0;
+        pendingNpcDelta.Clear();
+        raceSettlementApplied = false;
+    }
+
+    private int GetPendingNpcDelta(string name)
+    {
+        if(string.IsNullOrEmpty(name))return 0;
+        if(pendingNpcDelta.TryGetValue(name,out int delta))
+        {
+            return delta;
+        }
+        return 0;
+    }
+
+    private void AddPendingNpcDelta(string name,int delta)
+    {
+        if(string.IsNullOrEmpty(name)||delta == 0)return;
+        if(pendingNpcDelta.ContainsKey(name))
+        {
+            pendingNpcDelta[name] += delta;
+        }
+        else
+        {
+            pendingNpcDelta.Add(name, delta);
+        }
+    }
+
+    private int GetNpcAvailableScore(NPCplayer npc)
+    {
+        if (npc == null) return 0;
+        return Mathf.Max(0, npc.score() + GetPendingNpcDelta(npc.gameObject.name));
+    }
+
+    public int QueuePlayerToNpc(NPCplayer payeeNpc,int requested)
+    {
+        if(payeeNpc == null) return 0;
+        int available = Mathf.Max(0,Shooter2D.score + pendingPlayerDelta);
+        int actual = Mathf.Min(Mathf.Max(0,requested),available);
+        pendingPlayerDelta -= actual;
+        AddPendingNpcDelta(payeeNpc.gameObject.name, actual);
+        return actual;
+    }
+
+    public int QueueNpcToPlayer(NPCplayer payerNpc, int requested)
+    {
+        if (payerNpc == null) return 0;
+
+        int actual = Mathf.Min(Mathf.Max(0, requested), GetNpcAvailableScore(payerNpc));
+        AddPendingNpcDelta(payerNpc.gameObject.name, -actual);
+        pendingPlayerDelta += actual;
+        return actual;
+    }
+
+    public int QueueNpcToNpc(NPCplayer payerNpc, NPCplayer payeeNpc, int requested)
+    {
+        if (payerNpc == null || payeeNpc == null || payerNpc == payeeNpc) return 0;
+
+        int actual = Mathf.Min(Mathf.Max(0, requested), GetNpcAvailableScore(payerNpc));
+        AddPendingNpcDelta(payerNpc.gameObject.name, -actual);
+        AddPendingNpcDelta(payeeNpc.gameObject.name, actual);
+        return actual;
+    }
+
+    private void ApplyPendingTransfersAtRaceEnd()
+    {
+        if(raceSettlementApplied)return;
+
+        Shooter2D.score = Mathf.Max(0, Shooter2D.score + pendingPlayerDelta);
+
+        if(pendingNpcDelta.Count > 0 && npcMoveScripts != null)
+        {
+            foreach (var npc in npcMoveScripts)
+            {
+                if (npc == null) continue;
+                string name = npc.gameObject.name;
+                int delta = GetPendingNpcDelta(name);
+                if(delta != 0)
+                {
+                    int nextScore = Mathf.Max(0, npc.score() + delta);
+                    npc.SetScore(nextScore);
+                    SetNpcScore(name, nextScore);
+                }
+            }
+        }
+
+        pendingPlayerDelta = 0;
+        pendingNpcDelta.Clear();
+        raceSettlementApplied = true;
+    }
 }

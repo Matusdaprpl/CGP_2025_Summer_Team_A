@@ -15,7 +15,7 @@ public class Shooter2D : MonoBehaviour
     [Header("弾の速度")]
     public float bulletSpeed = 10f;
     [Header("スコア")]
-    public static int score = 10000;
+    public static int score = 15000;
     public int fireCost = 1000;
     
     // Start is called once before the first execution of Update after the MonoBehaviour created
@@ -59,6 +59,14 @@ public class Shooter2D : MonoBehaviour
         }
 
         GameObject bullet = Instantiate(bulletPrefab,firePoint.position,firePoint.rotation);
+
+        Bullet2DController bc = bullet.GetComponent<Bullet2DController>();
+        if(bc!=null)
+        {
+            bc.shooter =Bullet2DController.ShooterType.Player;
+            bc.shooterPlayer = GetComponent<PlayerMove>();
+            bc.transferPoints = fireCost;
+        }
 
         Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
     
