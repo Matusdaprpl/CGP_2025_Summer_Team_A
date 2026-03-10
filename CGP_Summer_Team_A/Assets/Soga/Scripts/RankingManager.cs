@@ -45,7 +45,7 @@ public class RankingManager : MonoBehaviour
             {
                 GameManager2.ClearNpcPersistentScores();
                 GameManager2.raceCount = 0;
-                Shooter2D.score = 10000;
+                Shooter2D.score = 15000;
                 
                 SceneManager.LoadScene(titleSceneName);
             });

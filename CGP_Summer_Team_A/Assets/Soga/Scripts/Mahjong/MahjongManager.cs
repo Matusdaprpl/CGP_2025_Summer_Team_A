@@ -290,18 +290,6 @@ public class MahjongManager : MonoBehaviour
 
         Debug.Log($"{npcName}が{yakuman}で上がりました！");
 
-        //勝利したNPCにスコアを加算
-        GameObject npcObject = GameObject.Find(npcName);
-        if (npcObject != null)
-        {
-            NPCplayer npcPlayer = npcObject.GetComponent<NPCplayer>();
-            if (npcPlayer != null)
-            {
-                npcPlayer.AddScore(32000); // 役満の点数を加算
-                Debug.Log($"{npcName}に32000点を加算。現在のスコア: {npcPlayer.score()}");
-            }
-        }
-
         Sprite spriteToShow = null;
         switch (yakuman)
         {
@@ -335,7 +323,7 @@ public class MahjongManager : MonoBehaviour
         if (gameManager2 != null)
         {
             gameManager2.GameOver();
-            gameManager2.OnNpcWinResult(); // ★★★ ボタン表示制御を呼び出す ★★★
+            gameManager2.OnNpcWinResult(npcName); // ★★★ ボタン表示制御を呼び出す ★★★
         }
 
         var playerMove = FindFirstObjectByType<PlayerMove>();

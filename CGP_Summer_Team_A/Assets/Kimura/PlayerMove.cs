@@ -394,6 +394,11 @@ public class PlayerMove : MonoBehaviour
                 return;
             }
 
+            if(bullet != null &&bullet.shooterNpc != null && GameManager2.instance !=null)
+            {
+                GameManager2.instance.QueuePlayerToNpc(bullet.shooterNpc,bullet.transferPoints);
+            }
+            
             if (audioSource != null && bulletHitSE != null)
             {
                 audioSource.PlayOneShot(bulletHitSE);
