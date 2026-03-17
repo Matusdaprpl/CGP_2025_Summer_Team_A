@@ -557,6 +557,7 @@ public class GameManager2 : MonoBehaviour
         const int winnerGain = 30000;
 
         Shooter2D.score = Mathf.Max(0, Shooter2D.score - loseScore);
+        Debug.Log($"NPC勝利精算: Player -{loseScore}点 (現在 {Shooter2D.score}点)");
 
         NPCplayer winnerNpc = null;
         if (npcMoveScripts != null)
@@ -572,6 +573,7 @@ public class GameManager2 : MonoBehaviour
                 else
                 {
                     npc.SubtractScore(loseScore);
+                    Debug.Log($"NPC勝利精算: {npc.gameObject.name} -{loseScore}点");
                 }
             }
         }
@@ -579,6 +581,7 @@ public class GameManager2 : MonoBehaviour
         if (winnerNpc != null)
         {
             winnerNpc.AddScore(winnerGain);
+            Debug.Log($"NPC勝利精算: 勝者 {winnerNpc.gameObject.name} +{winnerGain}点");
         }
 
         // NPC役満SE再生
@@ -742,7 +745,7 @@ public class GameManager2 : MonoBehaviour
             if (agariButton != null)
             {
                 agariButton.interactable = true;
-                Debug.Log("役満が完成しました！和了ボタンを有効化しました。");
+                //Debug.Log("役満が完成しました！和了ボタンを有効化しました。");
             }
         }
     }
@@ -903,6 +906,7 @@ public class GameManager2 : MonoBehaviour
         int actual = Mathf.Min(Mathf.Max(0,requested),available);
         pendingPlayerDelta -= actual;
         AddPendingNpcDelta(payeeNpc.gameObject.name, actual);
+        Debug.Log($"[点数移動キュー] Player -> {payeeNpc.gameObject.name} : 要求 {requested} / 反映予定 {actual} (Player差分 {pendingPlayerDelta})");
         return actual;
     }
 
@@ -913,6 +917,7 @@ public class GameManager2 : MonoBehaviour
         int actual = Mathf.Min(Mathf.Max(0, requested), GetNpcAvailableScore(payerNpc));
         AddPendingNpcDelta(payerNpc.gameObject.name, -actual);
         pendingPlayerDelta += actual;
+        Debug.Log($"[点数移動キュー] {payerNpc.gameObject.name} -> Player : 要求 {requested} / 反映予定 {actual} (Player差分 {pendingPlayerDelta})");
         return actual;
     }
 
@@ -923,6 +928,7 @@ public class GameManager2 : MonoBehaviour
         int actual = Mathf.Min(Mathf.Max(0, requested), GetNpcAvailableScore(payerNpc));
         AddPendingNpcDelta(payerNpc.gameObject.name, -actual);
         AddPendingNpcDelta(payeeNpc.gameObject.name, actual);
+        Debug.Log($"[点数移動キュー] {payerNpc.gameObject.name} -> {payeeNpc.gameObject.name} : 要求 {requested} / 反映予定 {actual}");
         return actual;
     }
 
@@ -930,7 +936,10 @@ public class GameManager2 : MonoBehaviour
     {
         if(raceSettlementApplied)return;
 
+        Debug.Log($"[点数移動精算] レース終了時に保留分を適用開始: Player差分 {pendingPlayerDelta}");
+
         Shooter2D.score = Mathf.Max(0, Shooter2D.score + pendingPlayerDelta);
+        Debug.Log($"[点数移動精算] Player反映後: {Shooter2D.score}点");
 
         if(pendingNpcDelta.Count > 0 && npcMoveScripts != null)
         {
@@ -944,6 +953,7 @@ public class GameManager2 : MonoBehaviour
                     int nextScore = Mathf.Max(0, npc.score() + delta);
                     npc.SetScore(nextScore);
                     SetNpcScore(name, nextScore);
+                    Debug.Log($"[点数移動精算] {name}: 差分 {delta:+#;-#;0} / 反映後 {nextScore}点");
                 }
             }
         }
@@ -951,5 +961,6 @@ public class GameManager2 : MonoBehaviour
         pendingPlayerDelta = 0;
         pendingNpcDelta.Clear();
         raceSettlementApplied = true;
+        Debug.Log("[点数移動精算] 保留分の適用完了");
     }
 }
