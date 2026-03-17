@@ -104,7 +104,7 @@ public class MahjongManager : MonoBehaviour
 
         SortHand();
         MahjongUIManager.instance.UpdateHandUI(playerHand);
-        Debug.Log($"【テスト配牌完了】手牌が {playerHand.Count} 枚に設定されました。");
+        //Debug.Log($"【テスト配牌完了】手牌が {playerHand.Count} 枚に設定されました。");
     }
 
     void OnItemGetDrawnAndWaitDiscard()
@@ -337,8 +337,6 @@ public class MahjongManager : MonoBehaviour
     {
         if (roundOver) return;
         roundOver = true;
-
-        Debug.Log($"{characterName}がゴールしました！");
 
         // リザルト画面（ゴール）
         if (ResultPanel3 != null)
