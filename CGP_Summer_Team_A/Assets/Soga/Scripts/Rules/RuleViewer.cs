@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Audio;
 
 public class RuleViewer : MonoBehaviour
 {
@@ -19,6 +20,20 @@ public class RuleViewer : MonoBehaviour
 
     [Header("Button")]
     [SerializeField] private Button audioButton;
+
+    [Header("SE Settings")]
+    [SerializeField] private bool pauseSEOnRuleOpen = true;
+    [SerializeField] private AudioMixer sfxMixer;               // SE用Mixer
+    [SerializeField] private string sfxVolumeParameter = "SFXVolume"; // Exposed Parameter名
+    [SerializeField] private float mutedDb = -80f;
+
+    private float previousSfxDb = 0f;
+    private bool sePauseApplied = false;
+    public bool IsRulePanelOpen => rulePanel != null && rulePanel.activeSelf;
+    public bool IsAnyPanelOpen =>
+        (rulePanel != null && rulePanel.activeSelf) ||
+        (audioPanel != null && audioPanel.activeSelf);
+
 
     void Start()
     {
@@ -52,6 +67,12 @@ public class RuleViewer : MonoBehaviour
         {
             AudioListener.pause = previousAudioListenerPause;
             audioPauseApplied = false;
+        }
+
+        if (sePauseApplied && pauseSEOnRuleOpen && sfxMixer != null)
+        {
+            sfxMixer.SetFloat(sfxVolumeParameter, previousSfxDb);
+            sePauseApplied = false;
         }
     }
 
@@ -119,6 +140,7 @@ public class RuleViewer : MonoBehaviour
         }
 
         RefreshAudioPauseState();
+        RefreshSEPauseState();
     }
 
     private void RefreshAudioPauseState()
@@ -142,6 +164,31 @@ public class RuleViewer : MonoBehaviour
             {
                 AudioListener.pause = previousAudioListenerPause;
                 audioPauseApplied = false;
+            }
+        }
+    }
+
+    private void RefreshSEPauseState()
+    {
+        if (!pauseSEOnRuleOpen || sfxMixer == null) return;
+
+        bool ruleOpen = (rulePanel != null && rulePanel.activeSelf);
+
+        if (ruleOpen)
+        {
+            if (!sePauseApplied)
+            {
+                sfxMixer.GetFloat(sfxVolumeParameter, out previousSfxDb);
+                sfxMixer.SetFloat(sfxVolumeParameter, mutedDb);
+                sePauseApplied = true;
+            }
+        }
+        else
+        {
+            if (sePauseApplied)
+            {
+                sfxMixer.SetFloat(sfxVolumeParameter, previousSfxDb);
+                sePauseApplied = false;
             }
         }
     }

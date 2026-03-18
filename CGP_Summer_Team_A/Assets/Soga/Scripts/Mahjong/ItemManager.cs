@@ -85,6 +85,12 @@ public class ItemManager : MonoBehaviour
         CreateWorldItem(discardedTile, dropPosition, true);
     }
 
+    public void DropItem(Tile tile, Vector3 position)
+    {
+        // 既存の捨て牌ドロップ処理に統一
+        DropDiscardedTile(tile, position);
+    }
+
     public void NotifyItemPickedUp(Tile tile, bool isRecyclable)
     {
         if (activeWorldItemCount > 0)
@@ -155,10 +161,5 @@ public class ItemManager : MonoBehaviour
         }
 
         return true;
-    }
-    public void DropItem(Tile tile, Vector3 position)
-    {
-    // 牌をドロップする処理をここに記述
-    // 例: Instantiate(tilePrefab, position, Quaternion.identity);
     }
 }
