@@ -77,8 +77,7 @@ public class NPCmahjong : MonoBehaviour
 
     private void DropItem()
     {
-        Debug.Log($"がドロップした牌: ");
-        //if (hand.Count == 0) return;
+        if (hand.Count == 0 || hand == null) return;
 
         // ランダムに手牌から1枚選ぶ
         int randomIndex = Random.Range(0, hand.Count);

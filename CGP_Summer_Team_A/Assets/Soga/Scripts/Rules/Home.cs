@@ -5,6 +5,7 @@ using UnityEngine.UI;
 public class Home : MonoBehaviour
 {
     [SerializeField] private Button homeButton;
+    [SerializeField] private string titleSceneName = "TitleScene"; // 統一
 
     void Start()
     {
@@ -21,12 +22,12 @@ public class Home : MonoBehaviour
     private void OnHomeButtonClicked()
     {
         Debug.Log("ホームボタンが押されました。タイトルシーンに遷移します。");
-        
+
         // スコアとレース情報をリセット
         GameManager2.ClearNpcPersistentScores();
         GameManager2.raceCount = 0;
         Shooter2D.score = 15000;
-        
-        SceneManager.LoadScene("Title");
+
+        SceneManager.LoadScene(titleSceneName);
     }
 }

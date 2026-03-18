@@ -363,17 +363,7 @@ public class NPCplayer : MonoBehaviour
         if (other.CompareTag("Bullet"))
         {
             Bullet2DController bullet = other.GetComponent<Bullet2DController>();
-            if (bullet != null && GameManager2.instance != null)
-            {
-                if (bullet.shooter == Bullet2DController.ShooterType.Player)
-                {
-                    GameManager2.instance.QueueNpcToPlayer(this, bullet.transferPoints);
-                }
-                else if (bullet.shooterNpc != null && bullet.shooterNpc != this)
-                {
-                    GameManager2.instance.QueueNpcToNpc(this, bullet.shooterNpc, bullet.transferPoints);
-                }
-            }
+        
 
             Debug.Log($"{gameObject.name}が点棒に当たりました。");
             StartCoroutine(HandleTenbouHit());
@@ -491,8 +481,6 @@ public class NPCplayer : MonoBehaviour
             if (isOnLane)
             {
                 npcMahjong.DiscardTile();
-                npcMahjong.PrintHandToConsole("捨て牌後");
-                Debug.Log($"{gameObject.name} 牌を捨てました");
             }
             else
             {
@@ -546,6 +534,12 @@ public class NPCplayer : MonoBehaviour
 
     private bool CanShootPlayer()
     {
+        // ▼ 追加: GameManager側のロック中は全NPC射撃不可
+        if (GameManager2.instance != null && GameManager2.instance.IsNpcShootLocked)
+        {
+            return false;
+        }
+
         if(playerMove != null && playerMove.IsStopped)
         {
             return false;
@@ -587,8 +581,8 @@ public class NPCplayer : MonoBehaviour
         if(bc != null)
         {
             bc.shooter = Bullet2DController.ShooterType.NPC;
-            bc.shooterNpc = this;
-            bc.transferPoints = fireCost;
+            //bc.shooterNpc = this;
+            //bc.transferPoints = fireCost;
         }
 
         Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
@@ -609,6 +603,10 @@ public class NPCplayer : MonoBehaviour
         Debug.Log($"{gameObject.name} が点棒を発射しました");
         
         SubtractScore(fireCost);
+        if(GameManager2.instance != null)
+        {
+            GameManager2.instance.AddToPot(fireCost);
+        }
 
         Destroy(bullet, 3f);
         
@@ -633,14 +631,14 @@ public class NPCplayer : MonoBehaviour
     public void AddScore(int amount)
     {
         currentScore += amount;
-        Debug.Log($"{gameObject.name}のスコア: {currentScore} (加算: {amount})");
+        //Debug.Log($"{gameObject.name}のスコア: {currentScore} (加算: {amount})");
         GameManager2.SetNpcScore(gameObject.name, currentScore);
     }
 
     public void SubtractScore(int amount)
     {
         currentScore = Mathf.Max(0, currentScore - amount);
-        Debug.Log($"{gameObject.name}のスコア: {currentScore} (減少: {amount})");
+        //Debug.Log($"{gameObject.name}のスコア: {currentScore} (減少: {amount})");
         GameManager2.SetNpcScore(gameObject.name, currentScore);
     }
 

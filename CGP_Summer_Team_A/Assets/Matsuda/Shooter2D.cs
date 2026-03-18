@@ -1,5 +1,6 @@
 using UnityEngine;
 using TMPro;
+using Unity.VisualScripting;
 
 public class Shooter2D : MonoBehaviour
 {
@@ -17,7 +18,9 @@ public class Shooter2D : MonoBehaviour
     [Header("スコア")]
     public static int score = 15000;
     public int fireCost = 1000;
-    
+    [Header("ルール表示")]
+    [SerializeField] private RuleViewer ruleViewer;
+
     // Start is called once before the first execution of Update after the MonoBehaviour created
     void Start()
     {
@@ -31,6 +34,11 @@ public class Shooter2D : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
+            if (ruleViewer != null && ruleViewer.IsAnyPanelOpen)
+            {
+                return;
+            }
+
             if (score >= fireCost)
             {
                 Shoot();
@@ -40,6 +48,7 @@ public class Shooter2D : MonoBehaviour
                 Debug.Log("スコアが足りないので発射できまへん！");
             }
         }
+
         scoreText.text = "SCORE: " + score;
         ResultscoreText.text = "SCORE: " + score;
     }
@@ -61,11 +70,10 @@ public class Shooter2D : MonoBehaviour
         GameObject bullet = Instantiate(bulletPrefab,firePoint.position,firePoint.rotation);
 
         Bullet2DController bc = bullet.GetComponent<Bullet2DController>();
-        if(bc!=null)
+        if (bc != null)
         {
-            bc.shooter =Bullet2DController.ShooterType.Player;
-            bc.shooterPlayer = GetComponent<PlayerMove>();
-            bc.transferPoints = fireCost;
+            bc.shooter = Bullet2DController.ShooterType.Player;
+            // bc.shooterPlayer = GetComponent<PlayerMove>(); // ←削除
         }
 
         Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
@@ -77,21 +85,21 @@ public class Shooter2D : MonoBehaviour
 
         score-=fireCost;
 
-        Debug.Log("点棒を発射！残り点数："+score);
+        if(GameManager2.instance != null)
+        {
+            GameManager2.instance.AddToPot(fireCost);
+        } 
+
+        //Debug.Log("点棒を発射！残り点数："+score);
 
 
         Destroy (bullet,3f);
     }
     
-    // ★★★ 役満判定からのスコア加算機能（追加・修正箇所） ★★★
-    /// <summary>
-    /// スコアを加算し、役満の点数処理を行います。
-    /// </summary>
-    /// <param name="points">加算する点数</param>
+
     public void AddScore(int points)
     {
         score += points;
         Debug.Log($"🎉 役満によりスコアが加算されました！ (+{points}) 現在のスコア: {score}");
     }
-    // ★★★ 役満判定からのスコア加算機能（ここまで） ★★★
 }

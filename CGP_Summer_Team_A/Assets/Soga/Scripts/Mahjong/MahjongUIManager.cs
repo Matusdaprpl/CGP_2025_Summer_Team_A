@@ -63,8 +63,6 @@ public class MahjongUIManager : MonoBehaviour
                 
                 // サイズを明示的に設定
                 rt.sizeDelta = new Vector2(1000f, 150f);
-                
-                Debug.Log("handPanel位置を設定しました: " + rt.anchoredPosition);
             }
         }
     }

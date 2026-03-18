@@ -394,9 +394,9 @@ public class PlayerMove : MonoBehaviour
                 return;
             }
 
-            if(bullet != null &&bullet.shooterNpc != null && GameManager2.instance !=null)
+            if (GameManager2.instance != null)
             {
-                GameManager2.instance.QueuePlayerToNpc(bullet.shooterNpc,bullet.transferPoints);
+                GameManager2.instance.LockNpcShootingAfterPlayerHit();
             }
             
             if (audioSource != null && bulletHitSE != null)

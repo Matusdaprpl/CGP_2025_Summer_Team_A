@@ -48,7 +48,7 @@ public class GameManager2 : MonoBehaviour
     public GameObject ResultPanel3; // (流局/NPCゴール用と仮定)
     public Image goalImage; 
 
-    [Header("04. シーン遷移とリザルトボタン (要Inspector設定)")]
+    [Header("シーン遷移とリザルトボタン (要Inspector設定)")]
     public string titleSceneName = "TitleScene"; 
     public Button nextGameButton;
     public Button backToTitleButton;
@@ -56,7 +56,7 @@ public class GameManager2 : MonoBehaviour
     public Button nextGameButton2;     
     public Button backToTitleButton2;  
     
-    [Header("05. スプライト設定")]
+    [Header("スプライト設定")]
     [SerializeField] private Sprite kokushiSprite;
     [SerializeField] private Sprite daisangenSprite;
     [SerializeField] private Sprite daisushiSprite;
@@ -81,8 +81,16 @@ public class GameManager2 : MonoBehaviour
     [Header("ランキング用データ")]
     public static int playerFinalScore = 15000;
     public static List<(string name, int score)> npcFinalScores = new List<(string name, int score)>();
-
     public static Dictionary<string, int> npcPersistentScores = new Dictionary<string, int>();
+
+    private static int pot = 0; // レース間で引き継がれるポット
+    public static int Pot => pot;
+
+    [Header("NPC点棒射撃抑制")] 
+    [Tooltip("プレイヤー被弾後、NPCの点棒射撃を抑制する時間（秒）")]
+    [SerializeField]private float npcShootLockSecondsAfterPlayerHit = 60f;
+    private float npcShootLockUntil = -1f;
+    public bool IsNpcShootLocked => Time.time < npcShootLockUntil;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     static void InitializeRaceCount()
@@ -90,6 +98,7 @@ public class GameManager2 : MonoBehaviour
         raceCount = 0;
         Shooter2D.score = 15000;
         npcPersistentScores.Clear();
+        pot = 0;
     }
 
     void Awake()
@@ -104,8 +113,6 @@ public class GameManager2 : MonoBehaviour
     IEnumerator InitializeAfterFrames()
     {
         yield return null;
-
-        ResetPendingTransfers();
 
         raceCount++;
         Debug.Log($"現在のレース: {raceCount} / {RACE_LIMIT}");
@@ -419,7 +426,8 @@ public class GameManager2 : MonoBehaviour
 
         int totalScore = baseWinScore * yakumanMultiplier;
         int loseScore = baseLoseScore * yakumanMultiplier;
-        //Debug.Log($"役満合計: {yakumanMultiplier} 倍 / 合計得点: {totalScore}");
+
+        // 勝敗精算
         scoreManager?.AddScore(totalScore);
 
         if(npcMoveScripts != null)
@@ -429,7 +437,7 @@ public class GameManager2 : MonoBehaviour
                 if (npc != null)
                 {
                     int currentNpcScore = npc.score();
-                    npc.SetScore(currentNpcScore -loseScore);
+                    npc.SetScore(currentNpcScore - loseScore);
                 }
             }
         }
@@ -450,7 +458,7 @@ public class GameManager2 : MonoBehaviour
 
         GameOver();
 
-        ApplyPendingTransfersAtRaceEnd();
+        AwardPotToPlayer();
 
         // 4. リザルト画面を表示し、3秒後にランキングシーンに移行
         if (ResultPanel != null)
@@ -551,13 +559,10 @@ public class GameManager2 : MonoBehaviour
     {
         Debug.Log($"NPC勝利。現在のレース: {raceCount} / {RACE_LIMIT}");
 
-        ApplyPendingTransfersAtRaceEnd();
-
         const int loseScore = 10000;
         const int winnerGain = 30000;
 
-        Shooter2D.score = Mathf.Max(0, Shooter2D.score - loseScore);
-        Debug.Log($"NPC勝利精算: Player -{loseScore}点 (現在 {Shooter2D.score}点)");
+        AddPlayerScoreNegative(-loseScore);
 
         NPCplayer winnerNpc = null;
         if (npcMoveScripts != null)
@@ -572,8 +577,8 @@ public class GameManager2 : MonoBehaviour
                 }
                 else
                 {
-                    npc.SubtractScore(loseScore);
-                    Debug.Log($"NPC勝利精算: {npc.gameObject.name} -{loseScore}点");
+                    AddNpcScoreNegative(npc, -loseScore);
+                    //Debug.Log($"NPC勝利精算: {npc.gameObject.name} -{loseScore}点");
                 }
             }
         }
@@ -581,7 +586,8 @@ public class GameManager2 : MonoBehaviour
         if (winnerNpc != null)
         {
             winnerNpc.AddScore(winnerGain);
-            Debug.Log($"NPC勝利精算: 勝者 {winnerNpc.gameObject.name} +{winnerGain}点");
+            AwardPotToNpc(winnerNpc);
+            //Debug.Log($"NPC勝利精算: 勝者 {winnerNpc.gameObject.name} +{winnerGain}点");
         }
 
         // NPC役満SE再生
@@ -597,11 +603,15 @@ public class GameManager2 : MonoBehaviour
         StartCoroutine(WaitAndTransitionToRanking(3f));
     }
 
+    public void LockNpcShootingAfterPlayerHit(float lockduration = -1f)
+    {
+        float lockSeconds = lockduration > 0 ? lockduration : npcShootLockSecondsAfterPlayerHit;
+        npcShootLockUntil = Mathf.Max(npcShootLockUntil, Time.time + lockSeconds);
+    }
+
     public void OnGoalResult()
     {
         Debug.Log($"流局。現在のレース: {raceCount} / {RACE_LIMIT}");
-
-        ApplyPendingTransfersAtRaceEnd();
 
         // NPCスコアを保存してから遷移
         SaveNpcScoresAcrossRaces();
@@ -834,7 +844,20 @@ public class GameManager2 : MonoBehaviour
         Shooter2D.score = Mathf.Max(0,Shooter2D.score + Mathf.Max(0,amount));
     }
 
-    public int TransferPlayerToNpc(NPCplayer payeeNpc,int requested)
+    private void AddPlayerScoreNegative(int amount)
+    {
+        Shooter2D.score += amount; // amountは負の値であることを前提?
+    }
+
+    private void AddNpcScoreNegative(NPCplayer npc,int amount)
+    {
+        if(npc == null)return;
+        int next = npc.score() + amount; // amountは負の値であることを前提?
+        npc.SetScore(next);
+        SetNpcScore(npc.gameObject.name, next);
+    }
+
+    /*public int TransferPlayerToNpc(NPCplayer payeeNpc,int requested)
     {
         if(payeeNpc == null) return 0;
         int actual =SpendPlayerScore(requested);
@@ -857,17 +880,18 @@ public class GameManager2 : MonoBehaviour
         payerNpc.SubtractScore(actual);
         payeeNpc.AddScore(actual);
         return actual;
-    }
+    }*/
 
-    private int pendingPlayerDelta = 0;
+    //private int pendingPlayerDelta = 0;
     private readonly Dictionary<string,int> pendingNpcDelta = new Dictionary<string, int>();
-    private bool raceSettlementApplied = false;
+    //private bool raceSettlementApplied = false;
 
     private void ResetPendingTransfers()
     {
-        pendingPlayerDelta = 0;
+        //pendingPlayerDelta = 0;
         pendingNpcDelta.Clear();
-        raceSettlementApplied = false;
+        //raceSettlementApplied = false;
+        //pot = 0; (流局時にポットを持ち込まない場合はここでリセット)
     }
 
     private int GetPendingNpcDelta(string name)
@@ -899,11 +923,10 @@ public class GameManager2 : MonoBehaviour
         return Mathf.Max(0, npc.score() + GetPendingNpcDelta(npc.gameObject.name));
     }
 
-    public int QueuePlayerToNpc(NPCplayer payeeNpc,int requested)
+    /*public int QueuePlayerToNpc(NPCplayer payeeNpc,int requested)
     {
         if(payeeNpc == null) return 0;
-        int available = Mathf.Max(0,Shooter2D.score + pendingPlayerDelta);
-        int actual = Mathf.Min(Mathf.Max(0,requested),available);
+        int actual = Mathf.Max(0,requested);
         pendingPlayerDelta -= actual;
         AddPendingNpcDelta(payeeNpc.gameObject.name, actual);
         Debug.Log($"[点数移動キュー] Player -> {payeeNpc.gameObject.name} : 要求 {requested} / 反映予定 {actual} (Player差分 {pendingPlayerDelta})");
@@ -914,7 +937,8 @@ public class GameManager2 : MonoBehaviour
     {
         if (payerNpc == null) return 0;
 
-        int actual = Mathf.Min(Mathf.Max(0, requested), GetNpcAvailableScore(payerNpc));
+        int actual = Mathf.Max(0, requested)
+        ;
         AddPendingNpcDelta(payerNpc.gameObject.name, -actual);
         pendingPlayerDelta += actual;
         Debug.Log($"[点数移動キュー] {payerNpc.gameObject.name} -> Player : 要求 {requested} / 反映予定 {actual} (Player差分 {pendingPlayerDelta})");
@@ -925,20 +949,21 @@ public class GameManager2 : MonoBehaviour
     {
         if (payerNpc == null || payeeNpc == null || payerNpc == payeeNpc) return 0;
 
-        int actual = Mathf.Min(Mathf.Max(0, requested), GetNpcAvailableScore(payerNpc));
+        int actual = Mathf.Max(0, requested);
+        
         AddPendingNpcDelta(payerNpc.gameObject.name, -actual);
         AddPendingNpcDelta(payeeNpc.gameObject.name, actual);
         Debug.Log($"[点数移動キュー] {payerNpc.gameObject.name} -> {payeeNpc.gameObject.name} : 要求 {requested} / 反映予定 {actual}");
         return actual;
-    }
+    }*/
 
-    private void ApplyPendingTransfersAtRaceEnd()
+    /*private void ApplyPendingTransfersAtRaceEnd()
     {
         if(raceSettlementApplied)return;
 
         Debug.Log($"[点数移動精算] レース終了時に保留分を適用開始: Player差分 {pendingPlayerDelta}");
 
-        Shooter2D.score = Mathf.Max(0, Shooter2D.score + pendingPlayerDelta);
+        Shooter2D.score = Shooter2D.score + pendingPlayerDelta;
         Debug.Log($"[点数移動精算] Player反映後: {Shooter2D.score}点");
 
         if(pendingNpcDelta.Count > 0 && npcMoveScripts != null)
@@ -950,7 +975,7 @@ public class GameManager2 : MonoBehaviour
                 int delta = GetPendingNpcDelta(name);
                 if(delta != 0)
                 {
-                    int nextScore = Mathf.Max(0, npc.score() + delta);
+                    int nextScore = npc.score() + delta;
                     npc.SetScore(nextScore);
                     SetNpcScore(name, nextScore);
                     Debug.Log($"[点数移動精算] {name}: 差分 {delta:+#;-#;0} / 反映後 {nextScore}点");
@@ -962,5 +987,28 @@ public class GameManager2 : MonoBehaviour
         pendingNpcDelta.Clear();
         raceSettlementApplied = true;
         Debug.Log("[点数移動精算] 保留分の適用完了");
+    }*/
+
+    public void AddToPot(int amount)
+    {
+        if(amount <= 0)return;
+        pot += amount;
+        Debug.Log($"場に出た点棒: {pot}点分");
+    }
+
+    private void AwardPotToPlayer()
+    {
+        if(pot <= 0)return;
+        Shooter2D.score += pot;
+        Debug.Log($"プレイヤーが場の点棒 {pot}点を獲得しました！");
+        pot = 0;
+    }
+
+    private void AwardPotToNpc(NPCplayer winnerNpc)
+    {
+        if(pot <= 0 || winnerNpc == null)return;
+        Debug.Log($"NPC {winnerNpc.gameObject.name} が場の点棒 {pot}点を獲得しました！ ");
+        winnerNpc.AddScore(pot);
+        pot = 0;
     }
 }
