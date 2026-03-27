@@ -1,16 +1,14 @@
 using System;
-using System.Diagnostics;
 using UnityEngine;
 
 public class ItemController : MonoBehaviour
 {
-    // このアイテムが表す確定済みの牌（生成時にセット）
     private Tile tile;
     private MahjongManager manager;
     private SpriteRenderer spriteRenderer;
     private bool isRecyclable;
     private bool hasNotifiedManager;
-
+    //private bool consumed; ←NPCとPlayerで拾った牌を区別するときに使う
     public static event Action<string, int> OnItemPickedUp;
 
     private void Awake()
@@ -18,12 +16,14 @@ public class ItemController : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
-    // MahjongManager.SpawnItemFromMountain から呼ぶ初期化
     public void SetTile(MahjongManager mgr, Tile t, bool recyclable)
     {
         manager = mgr;
         tile = t;
         isRecyclable = recyclable;
+
+        hasNotifiedManager = false;
+        //consumed = false;
 
         // 見た目と名前を固定
         if (spriteRenderer != null && tile != null)
@@ -48,35 +48,47 @@ public class ItemController : MonoBehaviour
                 return;
             }
 
-            manager.AddTileToPlayerHand(tile);
+            bool added = manager.AddTileToPlayerHand(tile);
+            if (!added)
+            {
+                return;
+            }
 
-            NotifyManagerPickedUp();
+            NotifyManagerPickedUp(false);
 
             OnItemPickedUp?.Invoke(tile.suit.ToString(), tile.rank);
             UnityEngine.Debug.Log($"拾った牌:{tile.GetDisplayName()}");
 
-            Destroy(gameObject);
-
+            ItemManager.instance.ReturnTiletoMountain(this);
         }
         else if (other.CompareTag("NPC"))
         {
+            if (tile == null) return;
+
+            NPCmahjong npcMahjong = other.GetComponent<NPCmahjong>();
+            if (npcMahjong == null || npcMahjong.hand == null)
+            {
+                return;
+            }
+
+            if (npcMahjong.hand.Count >= 15)
+            {
+                return;
+            }
+
+            // NPCが牌を拾ったら手牌に加える。
+            npcMahjong.AddTileToHand(tile);
+
+            NotifyManagerPickedUp(false);
             OnItemPickedUp?.Invoke(tile.suit.ToString(), tile.rank);
+            ItemManager.instance?.ReturnTiletoMountain(this);
         }
     }
 
-    private void OnDestroy()
-    {
-        if (!hasNotifiedManager && ItemManager.instance != null)
-        {
-            ItemManager.instance.NotifyItemPickedUp(tile, isRecyclable);
-            hasNotifiedManager = true;
-        }
-    }
-
-    private void NotifyManagerPickedUp()
+    private void NotifyManagerPickedUp(bool recycled)
     {
         if (hasNotifiedManager || ItemManager.instance == null) return;
-        ItemManager.instance.NotifyItemPickedUp(tile, isRecyclable);
+        ItemManager.instance.NotifyItemPickedUp(tile, recycled);
         hasNotifiedManager = true;
     }
 }

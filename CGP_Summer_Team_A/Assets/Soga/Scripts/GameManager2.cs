@@ -66,8 +66,8 @@ public class GameManager2 : MonoBehaviour
     [SerializeField] private Sprite shosushiSprite;
     [SerializeField] private Sprite chuurenSprite;
     [SerializeField] private Sprite goalSprite;
-    [SerializeField] private Sprite doubleYakumanSprite;
-    [SerializeField] private Sprite tripleYakumanSprite;
+    //[SerializeField] private Sprite doubleYakumanSprite;
+    //[SerializeField] private Sprite tripleYakumanSprite;
 
     [Header("レース情報UI")]
     public TMP_Text raceCountTMP;
@@ -400,10 +400,20 @@ public class GameManager2 : MonoBehaviour
             return;
         }
 
-        // 複数役満は無効化（1倍として扱う）
-        yakumanMultiplier = 1;
+        if(isDaisushi==true)
+        {
+            yakumanMultiplier = 2; // 大四喜は倍役満扱い
+             if (daisushiSprite != null)
+                {
+                    spriteToShow = daisushiSprite;;
+                }
+        }
+        else
+        {
+            yakumanMultiplier = 1; // その他の役満は通常の役満扱い
+        }
 
-        if (!isDaisushi)
+        /*if (!isDaisushi)
         {
             if (yakumanMultiplier >= 3)
             {
@@ -420,6 +430,8 @@ public class GameManager2 : MonoBehaviour
                 }
             }
         }
+        */
+        
 
         int baseWinScore = 30000;
         int baseLoseScore = 10000;
@@ -716,7 +728,7 @@ public class GameManager2 : MonoBehaviour
         // 最新のスコアを収集
         CollectFinalScores();
         
-        Debug.Log($"ランキングへ移行します。Player最終スコア: {playerFinalScore}");
+        Debug.Log("ランキングへ移行します。");
 
         SceneManager.LoadScene("Ranking");
     }
@@ -724,7 +736,7 @@ public class GameManager2 : MonoBehaviour
     void Update()
     {
         // ゲーム開始後、役満が完成しているかを毎フレーム確認
-        if (isGameStarted && !hasYakuman && MahjongManager.instance != null)
+        if (isGameStarted && MahjongManager.instance != null)
         {
             CheckYakumanCompletion();
         }
@@ -749,14 +761,11 @@ public class GameManager2 : MonoBehaviour
             isYakumanComplete = true;
         }
 
-        if (isYakumanComplete && !hasYakuman)
+        hasYakuman = isYakumanComplete;
+
+        if (agariButton != null)
         {
-            hasYakuman = true;
-            if (agariButton != null)
-            {
-                agariButton.interactable = true;
-                //Debug.Log("役満が完成しました！和了ボタンを有効化しました。");
-            }
+            agariButton.interactable = isYakumanComplete;
         }
     }
 
@@ -923,6 +932,7 @@ public class GameManager2 : MonoBehaviour
         return Mathf.Max(0, npc.score() + GetPendingNpcDelta(npc.gameObject.name));
     }
 
+    //点数移動についてのキューメソッド群（失敗＆不要）
     /*public int QueuePlayerToNpc(NPCplayer payeeNpc,int requested)
     {
         if(payeeNpc == null) return 0;

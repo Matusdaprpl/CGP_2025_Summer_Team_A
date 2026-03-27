@@ -73,7 +73,6 @@ public class Shooter2D : MonoBehaviour
         if (bc != null)
         {
             bc.shooter = Bullet2DController.ShooterType.Player;
-            // bc.shooterPlayer = GetComponent<PlayerMove>(); // ←削除
         }
 
         Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();

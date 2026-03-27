@@ -1,39 +1,26 @@
-using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class ItemSpawner : MonoBehaviour
 {
+    [Header("初期スポーン設定")]
     [SerializeField] private int itemCount = 10;
 
-    [Header("維持するアイテム数")]
-    [SerializeField] private int targetWorldItemCount = 20;
-
-    [Header("再配置間隔(秒)")]
-    [SerializeField] private float respawnInterval = 1.5f;
-
-    [Header("X座標範囲")]
-    [SerializeField] private float minX = -10f;
-    [SerializeField] private float maxX = 10f;
-
     [Header("Y座標と間隔の設定")]
-    [SerializeField]
-    [Tooltip("アイテムが生成されるY座標の固定値（4つ設定）")]
-    private float[] fixedYValues = new float[] { -4f, -2.5f, -1f, 0f };
-
-    [SerializeField]
-    [Tooltip("アイテム同士が最低でもこれだけ離れる距離")]
-    private float minDistance = 1.0f;
+    [SerializeField] private float[] fixedYValues = new float[] { -4f, -2.5f, -1f, 0f };
+    [SerializeField] private float minDistance = 1.0f;
 
     public static int MaxItemCount => Instance?.itemCount ?? 10;
     public static ItemSpawner Instance;
-
     public float[] FixedYValues => fixedYValues;
+
+    [Header("初期配置")]
+    [SerializeField] private float intialSpawnMinX =0f;
+    [SerializeField] private float initialSpawnMaxX = 20f;
 
     void Awake()
     {
-        Instance = this;   
+        Instance = this;
     }
 
     void Start()
@@ -51,7 +38,6 @@ public class ItemSpawner : MonoBehaviour
         }
 
         SpawnInitialItems();
-        StartCoroutine(RespawnLoop());
     }
 
     private void SpawnInitialItems()
@@ -61,36 +47,10 @@ public class ItemSpawner : MonoBehaviour
         for (int i = 0; i < itemCount; i++)
         {
             Vector2 spawnPosition = GetValidSpawnPosition(spawnPositions);
-            if (spawnPosition == Vector2.zero) continue; // 失敗時はスキップ
+            if (spawnPosition == Vector2.zero) continue;
 
             ItemManager.instance.SpawnItemFromRecycleOrMountain(new Vector3(spawnPosition.x, spawnPosition.y, 0));
             spawnPositions.Add(spawnPosition);
-        }
-    }
-
-    private System.Collections.IEnumerator RespawnLoop()
-    {
-        while (true)
-        {
-            yield return new WaitForSeconds(respawnInterval);
-
-            if (ItemManager.instance == null) continue;
-
-            int deficit = targetWorldItemCount - ItemManager.instance.ActiveWorldItemCount;
-            if (deficit <= 0) continue;
-
-            List<Vector2> spawnPositions = GetExistingItemPositions();
-            for (int i = 0; i < deficit; i++)
-            {
-                Vector2 spawnPosition = GetValidSpawnPosition(spawnPositions);
-                if (spawnPosition == Vector2.zero) continue;
-
-                var spawned = ItemManager.instance.SpawnItemFromRecycleOrMountain(new Vector3(spawnPosition.x, spawnPosition.y, 0));
-                if (spawned != null)
-                {
-                    spawnPositions.Add(spawnPosition);
-                }
-            }
         }
     }
 
@@ -101,7 +61,7 @@ public class ItemSpawner : MonoBehaviour
 
         do
         {
-            float randomX = Random.Range(minX, maxX);
+            float randomX = Random.Range(intialSpawnMinX, initialSpawnMaxX);
             float randomY = fixedYValues[Random.Range(0, fixedYValues.Length)];
             Vector2 position = new Vector2(randomX, randomY);
             attempts++;
@@ -124,10 +84,7 @@ public class ItemSpawner : MonoBehaviour
     {
         foreach (Vector2 existingPos in existingPositions)
         {
-            if (Vector2.Distance(position, existingPos) < minDistance)
-            {
-                return true;
-            }
+            if (Vector2.Distance(position, existingPos) < minDistance) return true;
         }
         return false;
     }
@@ -136,10 +93,7 @@ public class ItemSpawner : MonoBehaviour
     {
         List<Vector2> positions = new List<Vector2>();
         var items = GameObject.FindGameObjectsWithTag("Item");
-        foreach (var item in items)
-        {
-            positions.Add(item.transform.position);
-        }
+        foreach (var item in items) positions.Add(item.transform.position);
         return positions;
     }
 }

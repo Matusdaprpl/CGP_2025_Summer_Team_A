@@ -2483,7 +2483,7 @@ MonoBehaviour:
   boostParticles: {fileID: 0}
   stopTime: 2
   goalDistanceText: {fileID: 1862893826}
-  goalTransform: {fileID: 0}
+  goalTransform: {fileID: 1519230855}
   worldUnitsToMeters: 1
   playerRenderer: {fileID: 0}
   colorChangeSpeed: 1
@@ -9287,10 +9287,9 @@ MonoBehaviour:
   shosushiSprite: {fileID: -8532050911287868223, guid: 33b5b59d559383742ad01257f89a2da4, type: 3}
   chuurenSprite: {fileID: -5934855215270247213, guid: 0abb0a48ae5d88644a9d3dbceb6d38c7, type: 3}
   goalSprite: {fileID: -2513577031000059648, guid: e05b2037a490673458e9f121c5c4401a, type: 3}
-  doubleYakumanSprite: {fileID: 1156913649789814674, guid: 2a9e71d2c9a77a040af427b83decaeef, type: 3}
-  tripleYakumanSprite: {fileID: -4231872275540741342, guid: e576b80a094bea74ca9cc7f29d5128fb, type: 3}
   raceCountTMP: {fileID: 1142206159}
   playerNameText: {fileID: 1482811416}
+  npcShootLockSecondsAfterPlayerHit: 60
 --- !u!114 &668795119
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12181,6 +12180,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   homeButton: {fileID: 1255218135}
+  titleSceneName: Title
 --- !u!1 &1255218133
 GameObject:
   m_ObjectHideFlags: 0
@@ -14360,12 +14360,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1797670371}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0.39192, y: -5.97701, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 2118395339}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1861372516
 GameObject:
@@ -15797,17 +15797,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 37ea0a7c375599347b5d6e21e03410ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  itemCount: 80
-  targetWorldItemCount: 20
-  respawnInterval: 1.5
-  minX: 0
-  maxX: 3000
+  itemCount: 20
   fixedYValues:
   - -4.8
   - -3.3
   - -1.8
   - -0.3
-  minDistance: 5
+  minDistance: 3
+  intialSpawnMinX: 0
+  initialSpawnMaxX: 100
 --- !u!4 &2118395339
 Transform:
   m_ObjectHideFlags: 0
@@ -15820,7 +15818,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1797670373}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &2118395340
@@ -15835,9 +15834,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ccbe040511387b5489719515e76871fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  adjustInterval: 2
-  minSpawnInterval: 0.3
-  maxSpawnInterval: 0.8
+  playerTransform: {fileID: 423721863}
+  pickupDistance: 15
+  spawnDistanceAhead: 40
+  targetWorldItemCount: 20
+  respawnInterval: 1.5
+  minDistance: 3
 --- !u!1 &2119035909
 GameObject:
   m_ObjectHideFlags: 0
@@ -16043,7 +16045,6 @@ SceneRoots:
   - {fileID: 93837155}
   - {fileID: 548840249}
   - {fileID: 36713899}
-  - {fileID: 1797670373}
   - {fileID: 1519230855}
   - {fileID: 2093708930}
   - {fileID: 2079826517}
