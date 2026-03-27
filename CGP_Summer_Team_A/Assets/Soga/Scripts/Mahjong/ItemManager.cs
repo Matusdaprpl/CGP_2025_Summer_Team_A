@@ -12,6 +12,8 @@ public class ItemManager : MonoBehaviour
     private int activeWorldItemCount = 0;
     public int ActiveWorldItemCount => activeWorldItemCount;
 
+    private Queue<ItemController> objectPool = new Queue<ItemController>();
+
     void Awake()
     {
         if (instance == null)
@@ -24,53 +26,113 @@ public class ItemManager : MonoBehaviour
         }
     }
 
-    public ItemController SpawnItemFromMountain(Vector3 pos)
+    private void AddToRecyclePool(Tile tile)
     {
-        Tile tile = MahjongManager.instance.DrawTile();
-        if (tile == null) return null;
+        if (tile == null)
+        {
+            return;
+        }
 
-        ApplyTileSprite(tile);
-        return CreateWorldItem(tile, pos, false);
+        if(!recyclePool.Contains(tile))
+        {
+            recyclePool.Add(tile);
+        }
     }
 
-    public ItemController SpawnItemFromRecycleOrMountain(Vector3 pos)
+    public ItemController SpawnItemFromMountain(Vector3 pos)
     {
-        const int maxAttempts = 50;
-        for (int attempt = 0; attempt < maxAttempts; attempt++)
+        var mm = MahjongManager.instance;
+        if (mm == null || mm.mountain == null || mm.mountain.Count <= 0) return null;
+
+        int attempts = mm.mountain.Count;
+        for (int i = 0; i < attempts; i++)
         {
-            bool fromRecycle = recyclePool.Count > 0;
-            Tile tile = null;
-
-            if (fromRecycle)
-            {
-                tile = recyclePool[0];
-                recyclePool.RemoveAt(0);
-            }
-            else
-            {
-                tile = MahjongManager.instance.DrawTile();
-            }
-
+            Tile tile = mm.DrawTile();
             if (tile == null) return null;
 
             if (!CanSpawnTile(tile))
             {
-                if (fromRecycle)
-                {
-                    recyclePool.Add(tile);
-                }
-                else
-                {
-                    MahjongManager.instance.ReturnTileToMountain(tile);
-                }
+                recyclePool.Add(tile);
                 continue;
             }
 
             ApplyTileSprite(tile);
-            return CreateWorldItem(tile, pos, true);
+            return CreateWorldItem(tile, pos, false);
         }
 
         return null;
+    }
+
+    public ItemController SpawnItemFromRecycleOrMountain(Vector3 pos)
+    {
+        if (!TryTakeRandomSpawnableTile(out Tile tile))
+        {
+            return null;
+        }
+
+        ApplyTileSprite(tile);
+        return CreateWorldItem(tile, pos, true);
+    }
+
+    private bool TryTakeRandomSpawnableTile(out Tile tile)
+    {
+        tile = null;
+        var mm = MahjongManager.instance;
+        if (mm == null || mm.mountain == null) return false;
+
+        int mountainCount = mm.mountain.Count;
+        int recycleCount = recyclePool.Count;
+        if (mountainCount + recycleCount <= 0) return false;
+
+        bool tryMountainFirst = mountainCount > 0;
+        if (TryTakeFromSource(!tryMountainFirst, mm, out tile)) return true;
+        if (TryTakeFromSource(tryMountainFirst, mm, out tile)) return true;
+
+        return false;
+    }
+
+    private bool TryTakeFromSource(bool fromRecycle, MahjongManager mm, out Tile tile)
+    {
+        tile = null;
+
+        if (fromRecycle)
+        {
+            return TryTakeFromList(recyclePool, out tile);
+        }
+        else
+        {
+            return TryTakeFromList(mm.mountain, out tile);
+        }
+    }
+
+    private bool TryTakeFromList(List<Tile> source, out Tile tile)
+    {
+        tile = null;
+        if (source == null || source.Count <= 0) return false;
+
+        int count = source.Count;
+        int startIndex = Random.Range(0, count);
+
+        // ランダム開始位置から1周して、スポーン可能な牌を確実に探す。
+        for (int offset = 0; offset < count; offset++)
+        {
+            int index = (startIndex + offset) % count;
+            Tile candidate = source[index];
+
+            if (candidate == null)
+            {
+                source.RemoveAt(index);
+                return TryTakeFromList(source, out tile);
+            }
+
+            if (!CanSpawnTile(candidate)) continue;
+
+            source.RemoveAt(index);
+            tile = candidate;
+            return true;
+        }
+
+        return false;
     }
 
     public void DropDiscardedTile(Tile discardedTile, Vector3 dropPosition)
@@ -78,6 +140,12 @@ public class ItemManager : MonoBehaviour
         if (discardedTile == null || worldItemPrefab == null)
         {
             Debug.LogError("DropDiscardedTile: discardedTile または worldItemPrefab が null です。");
+            return;
+        }
+
+        if(!CanSpawnTile(discardedTile))
+        {
+            AddToRecyclePool(discardedTile);
             return;
         }
 
@@ -108,8 +176,33 @@ public class ItemManager : MonoBehaviour
     {
         if (worldItemPrefab == null) return null;
 
-        var go = Instantiate(worldItemPrefab, pos, Quaternion.identity);
-        var ic = go.GetComponent<ItemController>();
+        ItemController ic;
+        if(objectPool.Count > 0)
+        {
+            ic = objectPool.Dequeue();
+            // 破棄されていないか確認
+            if (ic == null || ic.gameObject == null)
+            {
+                ic = null;
+            }
+            else
+            {
+                ic.gameObject.SetActive(true);
+                ic.transform.position = pos;
+            }
+        }
+        else
+        {
+            ic = null;
+        }
+
+        // プールから有効なオブジェクトが取得できなかった場合は新規作成
+        if (ic == null)
+        {
+            var go = Instantiate(worldItemPrefab, pos, Quaternion.identity);
+            ic = go.GetComponent<ItemController>();
+        }
+
         if (ic != null)
         {
             ic.SetTile(MahjongManager.instance, tile, isRecyclable);
@@ -161,5 +254,12 @@ public class ItemManager : MonoBehaviour
         }
 
         return true;
+    }
+
+    public void ReturnTiletoMountain(ItemController tile)
+    {
+        if(tile == null) return;
+        tile.gameObject.SetActive(false);
+        objectPool.Enqueue(tile);
     }
 }

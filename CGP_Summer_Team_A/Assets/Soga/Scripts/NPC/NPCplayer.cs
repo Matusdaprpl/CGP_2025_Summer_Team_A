@@ -371,7 +371,7 @@ public class NPCplayer : MonoBehaviour
             return;
         }
 
-        if(other.CompareTag("Obstacle"))
+        if (other.CompareTag("Obstacle"))
         {
             isOnObstacle = true;
             return;
@@ -390,7 +390,7 @@ public class NPCplayer : MonoBehaviour
                         targetItem = null;
                     }
 
-                    Debug.Log($"{gameObject.name} がアイテムを拾いました: {pickedTile.GetDisplayName()}");
+                    //Debug.Log($"{gameObject.name} がアイテムを拾いました: {pickedTile.GetDisplayName()}");
                     StartCoroutine(ProcessTileExchange(pickedTile));
                 }
                 else
@@ -473,7 +473,7 @@ public class NPCplayer : MonoBehaviour
             float closestLaneY = laneYs.OrderBy(y => Mathf.Abs(y - currentY)).First();
             transform.position = new Vector3(transform.position.x, closestLaneY, transform.position.z);
             currentTargetLaneY = closestLaneY;           
-            Debug.Log($"{gameObject.name} Y座標をスナップ: {currentY} -> {closestLaneY}");
+            //Debug.Log($"{gameObject.name} Y座標をスナップ: {currentY} -> {closestLaneY}");
 
             bool isOnLane = laneYs.Any(laneY => Mathf.Approximately(transform.position.y, laneY));
             //Debug.Log($"{gameObject.name} isOnLane: {isOnLane}, currentY: {transform.position.y}, laneYs: {string.Join(",", laneYs)}");

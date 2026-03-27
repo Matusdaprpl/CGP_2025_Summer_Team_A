@@ -1,87 +1,91 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class ItemAdjuster : MonoBehaviour
 {
-    [Header("調整間隔")]
-    [SerializeField] private float adjustInterval = 5f; // 調整間隔（秒）
+    [Header("牌のプレイヤーとの距離設定")]
+    [SerializeField] private Transform playerTransform;
+    [SerializeField] private float pickupDistance = 15f;      // 後方回収ライン
+    [SerializeField] private float spawnDistanceAhead = 30f;   // 前方配置基準
 
-    [Header("生成間隔")]
-    [SerializeField] private float minSpawnInterval = 0.1f; // より短く
-    [SerializeField] private float maxSpawnInterval = 0.3f; // より短く
+    [Header("維持設定")]
+    [SerializeField] private int targetWorldItemCount = 40;   // 画面上に維持したい牌の数
+    [SerializeField] private float respawnInterval = 1.5f;
+    [SerializeField] private float minDistance = 1.0f;
 
-    private float lastAdjustTime;
-    private int itemsToSpawn = 0;
-    private float nextSpawnTime = 0f;
-
-    void Update()
+    private void Start()
     {
-        if (Time.time - lastAdjustTime > adjustInterval)
+        if (playerTransform == null)
         {
-            AdjustItemsBasedOnCars();
-            lastAdjustTime = Time.time;
+            var player = GameObject.FindGameObjectWithTag("Player");
+            if (player != null) playerTransform = player.transform;
         }
 
-        if (itemsToSpawn > 0 && Time.time >= nextSpawnTime)
+        if (playerTransform == null)
         {
-            SpawnOneItem();
-            itemsToSpawn--;
-            nextSpawnTime = Time.time + Random.Range(minSpawnInterval, maxSpawnInterval);
+            Debug.LogError("Playerオブジェクトが見つかりません。");
+            enabled = false;
+            return;
         }
+
+        StartCoroutine(RespawnLoop());
     }
 
-    private void AdjustItemsBasedOnCars()
+    private IEnumerator RespawnLoop()
     {
-        float leftmostCarX = GetLeftmostCarX();
-        GameObject[] allItems = GameObject.FindGameObjectsWithTag("Item");
-        List<GameObject> itemsToRemove = new List<GameObject>();
-
-        foreach (GameObject item in allItems)
+        while (true)
         {
-            float itemX = item.transform.position.x;
-            if (itemX < leftmostCarX)
-            {
-                itemsToRemove.Add(item);
+            yield return new WaitForSeconds(respawnInterval);
 
-                ItemController ic = item.GetComponent<ItemController>();
-                if (ic != null && ic.GetTile() != null)
-                {
-                    MahjongManager.instance.ReturnTileToMountain(ic.GetTile());
-                }
+            if (ItemManager.instance == null || MahjongManager.instance == null) continue;
+
+            var items = GameObject.FindGameObjectsWithTag("Item");
+            foreach (var item in items)
+            {
+                if (!item.activeInHierarchy) continue;
+                if (item.transform.position.x >= playerTransform.position.x - pickupDistance) continue;
+
+                var ic = item.GetComponent<ItemController>();
+                if (ic == null) continue;
+
+                ItemManager.instance.NotifyItemPickedUp(ic.GetTile(), true);
+                ItemManager.instance.ReturnTiletoMountain(ic);
+            }
+
+            int deficit = targetWorldItemCount - ItemManager.instance.ActiveWorldItemCount;
+            if (deficit <= 0) continue;
+
+            for (int i = 0; i < deficit; i++)
+            {
+                Vector2 pos = GetValidSpawnPosition(GetExistingItemPositions());
+                if (pos == Vector2.zero) continue;
+
+                var spawned = ItemManager.instance.SpawnItemFromRecycleOrMountain(new Vector3(pos.x, pos.y, 0f));
+                if (spawned != null) GetExistingItemPositions().Add(pos);
             }
         }
-
-        // 削除実行
-        foreach (GameObject item in itemsToRemove)
-        {
-            Destroy(item);
-        }
-
-        // 削除した分だけ即座に補充予約（上限なし）
-        itemsToSpawn += itemsToRemove.Count;
-        
-        Debug.Log($"アイテム削除: {itemsToRemove.Count}個 / 補充予約: {itemsToSpawn}個");
     }
 
-    private void SpawnOneItem()
+    private Vector2 GetValidSpawnPosition(List<Vector2> existingPositions)
     {
-        Vector2 newPosition = GetValidSpawnPosition();
-        if (newPosition != Vector2.zero)
-        {
-            ItemManager.instance.SpawnItemFromMountain(new Vector3(newPosition.x, newPosition.y, 0));
-        }
-    }
-
-    private Vector2 GetValidSpawnPosition()
-    {
-        GameObject[] allItems = GameObject.FindGameObjectsWithTag("Item");
-        float minDistance = 1.0f;
         int attempts = 0;
         const int maxAttempts = 100;
 
         do
         {
-            Vector2 position = GetNewSpawnPosition(GetRightmostCarX());
+            float baseX = playerTransform.position.x + spawnDistanceAhead;
+            float randomX = Random.Range(baseX - 5f, baseX + 100f);
+
+            float randomY = 0f;
+            var spawner = ItemSpawner.Instance;
+            if (spawner != null && spawner.FixedYValues != null && spawner.FixedYValues.Length > 0)
+            {
+                float[] ys = spawner.FixedYValues;
+                randomY = ys[Random.Range(0, ys.Length)];
+            }
+
+            Vector2 position = new Vector2(randomX, randomY);
             attempts++;
 
             if (attempts > maxAttempts)
@@ -90,7 +94,7 @@ public class ItemAdjuster : MonoBehaviour
                 return Vector2.zero;
             }
 
-            if (!IsTooClose(position, allItems, minDistance))
+            if (!IsTooClose(position, existingPositions))
             {
                 return position;
             }
@@ -98,77 +102,23 @@ public class ItemAdjuster : MonoBehaviour
         while (true);
     }
 
-    private bool IsTooClose(Vector2 position, GameObject[] existingItems, float minDistance)
+    private bool IsTooClose(Vector2 position, List<Vector2> existingPositions)
     {
-        foreach (GameObject item in existingItems)
+        foreach (var p in existingPositions)
         {
-            if (Vector2.Distance(position, item.transform.position) < minDistance)
-            {
-                return true;
-            }
+            if (Vector2.Distance(position, p) < minDistance) return true;
         }
         return false;
     }
 
-    private float GetLeftmostCarX()
+    private List<Vector2> GetExistingItemPositions()
     {
-        GameObject player = GameObject.FindWithTag("Player");
-        GameObject[] npcs = GameObject.FindGameObjectsWithTag("NPC");
-
-        float leftmostX = float.MaxValue;
-
-        if (player != null)
+        var positions = new List<Vector2>();
+        var items = GameObject.FindGameObjectsWithTag("Item");
+        foreach (var item in items)
         {
-            leftmostX = Mathf.Min(leftmostX, player.transform.position.x);
+            if (item.activeInHierarchy) positions.Add(item.transform.position);
         }
-
-        foreach (GameObject npc in npcs)
-        {
-            leftmostX = Mathf.Min(leftmostX, npc.transform.position.x);
-        }
-
-        return leftmostX;
-    }
-
-    private float GetRightmostCarX()
-    {
-        GameObject player = GameObject.FindWithTag("Player");
-        GameObject[] npcs = GameObject.FindGameObjectsWithTag("NPC");
-
-        float rightmostX = float.MinValue;
-
-        if (player != null)
-        {
-            rightmostX = Mathf.Max(rightmostX, player.transform.position.x);
-        }
-
-        foreach (GameObject npc in npcs)
-        {
-            rightmostX = Mathf.Max(rightmostX, npc.transform.position.x);
-        }
-
-        return rightmostX;
-    }
-
-    private Vector2 GetNewSpawnPosition(float rightmostCarX)
-    {
-        Camera cam = Camera.main;
-        if (cam == null) return Vector2.zero;
-        
-        Vector3 rightEdgeWorld = cam.ViewportToWorldPoint(new Vector3(1, 0.5f, cam.nearClipPlane));
-        float cameraRightX = rightEdgeWorld.x;
-
-        float newX = cameraRightX + Random.Range(5f, 15f);
-        ItemSpawner spawner = ItemSpawner.Instance;
-        
-        if (spawner == null || spawner.FixedYValues == null || spawner.FixedYValues.Length == 0)
-        {
-            Debug.LogError("ItemSpawner または FixedYValues が見つかりません。");
-            return new Vector2(newX, 0);
-        }
-        
-        float[] fixedYValues = spawner.FixedYValues;
-        float newY = fixedYValues[Random.Range(0, fixedYValues.Length)];
-        return new Vector2(newX, newY);
+        return positions;
     }
 }
