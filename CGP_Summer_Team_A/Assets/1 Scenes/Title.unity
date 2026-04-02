@@ -282,8 +282,8 @@ MonoBehaviour:
   - {fileID: 572611260}
   - {fileID: 646819942}
   rulePages:
-  - {fileID: -855298285791758126, guid: 358125b147439414b81fd4923eed70fa, type: 3}
-  - {fileID: 6937817954938267909, guid: d32cf68ff92d4fa4fa1c130cc7427276, type: 3}
+  - {fileID: -3164809056393425246, guid: 44c9f91cc130ef04dbff306f9fec17d4, type: 3}
+  - {fileID: -5225540622116197949, guid: adf9c7a99eb80974988ba85e611f2c07, type: 3}
   - {fileID: -6470460504253458178, guid: ee383755e0b63724ebaa3301fd573a83, type: 3}
   - {fileID: -4178046375966092550, guid: a58d6ab62e3111a419d4ca01053c7682, type: 3}
   - {fileID: 4130640169021434097, guid: e6e3886613a1c9947b15f6e2bdb32924, type: 3}
